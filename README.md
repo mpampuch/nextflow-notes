@@ -64,3 +64,43 @@ Biocontainers is a project to create a docker container for every recipe they ha
 Sometimes you'll need to have a container with more than one tool, in this case there is a multi-package container. 
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
+
+## get*() in Groovy
+
+In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
+
+## Important functions for file attributes and paths
+
+The `file()` method returns a Path, so any method defined for Path can also be used in a Nextflow script.
+
+Additionally, the following methods are also defined for Paths in Nextflow:
+
+`exists()`
+Returns true if the file exists.
+
+`getBaseName()`
+Gets the file name without its extension, e.g. `/some/path/file.tar.gz` -> `file.tar`.
+
+`getExtension()`
+Gets the file extension, e.g. `/some/path/file.txt` -> `txt`.
+
+`getName()`
+Gets the file name, e.g. `/some/path/file.txt` -> `file.txt`.
+
+`getSimpleName()`
+Gets the file name without any extension, e.g. `/some/path/file.tar.gz` -> `file`.
+
+`getParent()`
+Gets the file parent path, e.g. `/some/path/file.txt` -> `/some/path`.
+
+`isDirectory()`
+Returns true if the file is a directory.
+
+`isEmpty()`
+Returns true if the file is empty or does not exist.
+
+`isFile()`
+Returns true if it is a regular file (i.e. not a directory).
+
+`isLink()`
+Returns true if the file is a symbolic link.
