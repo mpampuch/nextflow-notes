@@ -55,7 +55,7 @@ The `prepare_genome_samtools(params.genome)` is a  valid call to a process becau
 
 ## Biocontainers
 
-Each program should have its own designated container. Don't create containers with too many things or things your don't need.
+Each program should have its own designated container. Don't create container images with too many things or things your don't need.
 
 Run only one process per container: In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.
 
