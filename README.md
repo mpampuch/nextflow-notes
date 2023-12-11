@@ -52,3 +52,15 @@ workflow {
 ```
 
 The `prepare_genome_samtools(params.genome)` is a  valid call to a process because `params.genome` will be converted from a string into a value channel.
+
+## Biocontainers
+
+Each program should have its own designated container. Don't create containers with too many things or things your don't need.
+
+Run only one process per container: In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.
+
+Biocontainers is a project to create a docker container for every recipe they have in bioconda.
+
+Sometimes you'll need to have a container with more than one tool, in this case there is a multi-package container. 
+
+You can request a multi-package container here: https://biocontainers.pro/multipackage
