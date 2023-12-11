@@ -2,6 +2,10 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
+## Process outputs
+
+When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
+
 ## Value Channels vs Queue Channels
 
 Value channels allow processes to consume elements infinite times.
