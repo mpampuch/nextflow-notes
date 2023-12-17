@@ -65,7 +65,7 @@ Run only one process per container: In almost all cases, you should only run a s
 
 Biocontainers is a project to create a docker container for every recipe they have in bioconda.
 
-Sometimes you'll need to have a container with more than one tool, in this case there is a multi-package container. 
+Sometimes you'll need to have a container with more than one tool, in this case there is a *mulled* container. 
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
 
@@ -142,3 +142,51 @@ process prepare_star_genome_index {
 ```
 
 The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
+
+## Only Use Positional Arguments 
+
+As of December 2023, Nextflow does not allow for keyword arguments. Therefore if you're trying to for example pass in 2 inputs, you look at the process block and the first input will be the first positional argument and the second input will be the second positional argument (and so on and so forth if there are more inputs)
+
+Example
+
+```groovy
+/*
+ * Process 1D: Create a file containing the filtered and recoded set of variants
+ */
+
+process prepare_vcf_file {
+    container 'quay.io/biocontainers/mulled-v2-b9358559e3ae3b9d7d8dbf1f401ae1fcaf757de3:ac05763cf181a5070c2fdb9bb5461f8d08f7b93b-0'
+
+    input:
+    path variantsFile
+    path blacklisted
+
+    output: 
+    tuple path("${variantsFile.baseName}.filtered.recode.vcf.gz"),
+          path("${variantsFile.baseName}.filtered.recode.vcf.gz.tbi")
+
+    script:
+    """
+    vcftools --gzvcf ${variantsFile} -c \
+             --exclude-bed ${blacklisted} \
+             --recode | bgzip -c \
+             > ${variantsFile.baseName}.filtered.recode.vcf.gz
+
+    tabix ${variantsFile.baseName}.filtered.recode.vcf.gz
+    """
+}
+
+workflow {
+    reads_ch = Channel.fromFilePairs(params.reads)
+
+    prepare_genome_samtools(params.genome)
+    prepare_genome_picard(params.genome)
+    prepare_star_genome_index(params.genome)
+    // CORRECT
+    prepare_vcf_file(params.variants, params.blacklist) 
+    // INCORRECT
+    prepare_vcf_file(variantsFile = params.variants, blacklisted = params.blacklist) 
+
+
+}
+```
