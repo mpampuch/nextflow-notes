@@ -2,6 +2,32 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
+## Rerunning Nextflow
+
+When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
+
+```bash
+nextflow run main.nf -resume
+```
+
+In practice, every execution starts from the beginning. However, when using resume, before launching a task, Nextflow uses the unique ID to check if:
+
+- the working directory exists
+- it contains a valid command exit status
+- it contains the expected output files.
+
+The mechanism works by assigning a unique ID to each task. This unique ID is used to create a separate execution directory, called the working directory, where the tasks are executed and the results stored. A task’s unique ID is generated as a 128-bit hash number obtained from a composition of the task’s:
+
+- Inputs values
+- Input files
+- Command line string
+- Container ID
+- Conda environment
+- Environment modules
+- Any executed scripts in the bin directory
+
+##
+
 ## Process outputs
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
@@ -57,6 +83,20 @@ workflow {
 
 The `prepare_genome_samtools(params.genome)` is a  valid call to a process because `params.genome` will be converted from a string into a value channel.
 
+## The Working Directory and the `publishDir` directive
+
+By default, the task work directories are created in the directory from where the pipeline is launched. This is often a scratch storage area that can be cleaned up once the computation is completed. A different location for the execution work directory can be specified using the command line option `-w` 
+
+Example
+
+```bash
+nextflow run <script> -w /some/scratch/dir
+```
+
+Note that if you delete or move the pipeline work directory, this will prevent to use the resume feature in subsequent runs.
+
+Also note that the pipeline work directory is intended to be used as a temporary scratch area. The final workflow outputs are expected to be stored in a different location specified using the `publishDir` directive.
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
@@ -69,7 +109,7 @@ Sometimes you'll need to have a container with more than one tool, in this case 
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
 
-## get*() in Groovy
+## `get*()` in Groovy
 
 In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
 
