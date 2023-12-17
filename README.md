@@ -108,3 +108,37 @@ Returns true if it is a regular file (i.e. not a directory).
 
 `isLink()`
 Returns true if the file is a symbolic link.
+
+## Process Directives
+
+Process directives are optional settings that affect the execution of the process. They are written at the top of a process block.
+
+Example
+
+```groovy
+/*
+ * Process 1C: Create the genome index file for STAR
+ */
+
+process prepare_star_genome_index {
+    container 'quay.io/biocontainers/star:2.7.10b--h6b7c446_1'
+
+    input:
+    path genome
+
+    output:
+    path 'genome_dir' 
+
+    script: 
+    """
+    mkdir -p genome_dir
+
+    STAR --runMode genomeGenerate \
+         --genomeDir genome_dir \
+         --genomeFastaFiles ${genome} \
+         --runThreadN ${task.cpus}
+    """
+}
+```
+
+The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
