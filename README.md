@@ -65,7 +65,17 @@ Example
 ```groovy
 process example_process {
     input:
-    tuple val(tuple_item_1), path(tuple_item_2)
+    tuple val(replicateId), path(reads)
+
+    output:
+    tuple val(replicateId),
+          path('Aligned.sortedByCoord.out.bam'),
+          path('Aligned.sortedByCoord.out.bam.bai')
+
+    script:
+    """
+    ...
+    """
 }
 ```
 
