@@ -252,6 +252,10 @@ Process directives can also be defaults and invisible. For example. The default 
 cpus = 4
 ```
 
+## The `.tag` process directive
+
+Whenever you have multiple samples being processed in a process, it's useful to use the `.tag` process directive.
+
 The `.tag` process directive doesn't change anything in the analysis, but it allows you to associate each process execution with a custom label to make it easier to identify them in the log file or the trace execution report. This is useful if you want to know more information about multiple samples that are being run (which ones passed and which ones failed). 
 
 Example
@@ -332,7 +336,5 @@ workflow {
     prepare_vcf_file(params.variants, params.blacklist) 
     // INCORRECT
     prepare_vcf_file(variantsFile = params.variants, blacklisted = params.blacklist) 
-
-
 }
 ```
