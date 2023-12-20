@@ -32,7 +32,7 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 
 Example
 
-```nextflow
+```groovy
 // main.nf
 params.reads = "${baseDir}/data/reads/ENCSR000COQ1_{1,2}.fastq.gz"
 
@@ -62,7 +62,7 @@ By using `.out`, your are getting the output channel of one process, and you can
 
 Example
 
-```nextflow
+```groovy
 workflow {
     reads_ch = Channel.fromFilePairs(params.reads)
 
@@ -77,7 +77,7 @@ When a process defines multiple output channels, each output can be accessed usi
 
 Outputs can also be accessed by name if the `emit` option is specified
 
-```nextflow
+```groovy
 process example_process {
     output:
     path '*.bam', emit: samples_bam
@@ -99,7 +99,7 @@ Inputs and outputs in nextflow need to a data type assigned before a variable na
 
 Example
 
-```nextflow
+```groovy
 process example_process {
     input:
     tuple val(replicateId), path(reads)
@@ -128,7 +128,7 @@ Processes can only take channels as inputs. That being said, if you pass in a re
 
 Example
 
-```nextflow
+```groovy
 /*
  * Define the default parameters 
  */
@@ -239,7 +239,7 @@ Process directives are optional settings that affect the execution of the proces
 
 Example
 
-```nextflow
+```groovy
 /*
  * Process 1C: Create the genome index file for STAR
  */
@@ -269,7 +269,7 @@ The `container ` process directive tells nextflow that if it is using docker, th
 
 Process directives can also be defaults and invisible. For example. The default number of CPUs to run a task is 1. You can pass this into a process parameter by using `tasks.cpus`. If you want to change this however, you can write at the top of your process block
 
-```nextflow
+```groovy
 cpus = 4
 ```
 
@@ -281,7 +281,7 @@ The `.tag` process directive doesn't change anything in the analysis, but it all
 
 Example
 
-```nextflow
+```groovy
 /*
  * Process 3: GATK Split on N
  */
@@ -320,7 +320,7 @@ As of December 2023, Nextflow does not allow for keyword arguments. Therefore if
 
 Example
 
-```nextflow
+```groovy
 /*
  * Process 1D: Create a file containing the filtered and recoded set of variants
  */
@@ -364,7 +364,7 @@ workflow {
 
 Example
 
-```nextflow
+```groovy
 /*
  * Process 4: GATK Recalibrate
  */
