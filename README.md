@@ -273,7 +273,7 @@ Process directives can also be defaults and invisible. For example. The default 
 cpus = 4
 ```
 
-## The `.tag` process directive
+### The `.tag` process directive
 
 Whenever you have multiple samples being processed in a process, it's useful to use the `.tag` process directive.
 
