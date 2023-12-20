@@ -252,6 +252,43 @@ Process directives can also be defaults and invisible. For example. The default 
 cpus = 4
 ```
 
+The `.tag` process directive doesn't change anything in the analysis, but it allows you to associate each process execution with a custom label to make it easier to identify them in the log file or the trace execution report. This is useful if you want to know more information about multiple samples that are being run (which ones passed and which ones failed). 
+
+Example
+
+```groovy
+/*
+ * Process 3: GATK Split on N
+ */
+
+process rnaseq_gatk_splitNcigar {
+    container 'quay.io/broadinstitute/gotc-prod-gatk:1.0.0-4.1.8.0-1626439571'
+    tag "${replicateId}" 
+
+    input:
+    path genome 
+    path index 
+    path genome_dict 
+    tuple val(replicateId), path(bam), path(bai) 
+
+    output:
+    tuple val(replicateId), path('split.bam'), path('split.bai') 
+
+    script:
+    """
+    java -jar /usr/gitc/GATK35.jar -T SplitNCigarReads \
+                                   -R ${genome} -I ${bam} \
+                                   -o split.bam \
+                                   -rf ReassignOneMappingQuality \
+                                   -RMQF 255 -RMQT 60 \
+                                   -U ALLOW_N_CIGAR_READS \
+                                   --fix_misencoded_quality_scores
+    """
+}
+```
+
+Will give you detials on every replicate ID that is being processed.
+
 ## Only Use Positional Arguments 
 
 As of December 2023, Nextflow does not allow for keyword arguments. Therefore if you're trying to for example pass in 2 inputs, you look at the process block and the first input will be the first positional argument and the second input will be the second positional argument (and so on and so forth if there are more inputs)
