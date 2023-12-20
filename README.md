@@ -26,11 +26,48 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
-##
+## The `.view` Channel Operator
+
+`.view` is a channel operator that consumes every element of a channel and prints it to the screen.
+
+Example
+
+```groovy
+// main.nf
+params.reads = "${baseDir}/data/reads/ENCSR000COQ1_{1,2}.fastq.gz"
+
+workflow {
+    reads_ch = Channel.fromFilePairs(params.reads)
+    reads_ch.view()
+}
+```
+
+```bash
+nextflow run main.nf
+# Outputs
+# [ENCSR000COQ1, [path/to/ENCSR000COQ1_1.fastq.gz, path/to/ENCSR000COQ1_2.fastq.gz]]
+```
+
+You can see in this case it outputs a single channel element created from the `.fromFilePairs` channel operator.
+- The first item is an ID (in this case the replicate ID)
+- The second item is a list with all the items (in this case the path to the reads)
 
 ## Process outputs
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
+
+## Tuples
+
+Inputs and outputs in nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
+
+Example
+
+```groovy
+process example_process {
+    input:
+    tuple val(tuple_item_1), path(tuple_item_2)
+}
+```
 
 ## Value Channels vs Queue Channels
 
