@@ -363,7 +363,6 @@ workflow {
 ## You can run code before you execute a script in the script part of a process
 
 Example
-- Notice how the sampleID is modified with a regular expression before the script is executed
 
 ```groovy
 /*
@@ -388,6 +387,7 @@ process rnaseq_gatk_recalibrate {
           path("${replicateId}.final.uniq.bam.bai")
 
     script:
+    // Notice how the sampleID is modified with a regular expression before the script is executed
     sampleId = replicateId.replaceAll(/[12]$/,'') 
     """
     gatk3 -T BaseRecalibrator \
