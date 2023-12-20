@@ -56,6 +56,22 @@ You can see in this case it outputs a single channel element created from the `.
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
 
+By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
+
+Example
+
+```groovy
+workflow {
+    reads_ch = Channel.fromFilePairs(params.reads)
+
+    prepare_star_genome_index(params.genome)
+
+    rnaseq_mapping_star(params.genome, 
+                        prepare_star_genome_index.out,
+                        reads_ch)
+}
+```
+
 ## Tuples
 
 Inputs and outputs in nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
