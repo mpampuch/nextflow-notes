@@ -230,6 +230,12 @@ process prepare_star_genome_index {
 
 The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
 
+Process directives can also be defaults and invisible. For example. The default number of CPUs to run a task is 1. You can pass this into a process parameter by using `tasks.cpus`. If you want to change this however, you can write at the top of your process block
+
+```groovy
+cpus = 4
+```
+
 ## Only Use Positional Arguments 
 
 As of December 2023, Nextflow does not allow for keyword arguments. Therefore if you're trying to for example pass in 2 inputs, you look at the process block and the first input will be the first positional argument and the second input will be the second positional argument (and so on and so forth if there are more inputs)
