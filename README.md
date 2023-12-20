@@ -56,6 +56,8 @@ You can see in this case it outputs a single channel element created from the `.
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
 
+## The `.out` attribute
+
 By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
 
 Example
@@ -69,6 +71,25 @@ workflow {
     rnaseq_mapping_star(params.genome, 
                         prepare_star_genome_index.out,
                         reads_ch)
+}
+```
+When a process defines multiple output channels, each output can be accessed using the array element operator (`out[0]`, `out[1]`, etc.)
+
+Outputs can also be accessed by name if the `emit` option is specified
+
+```groovy
+process example_process {
+    output:
+    path '*.bam', emit: samples_bam
+
+    '''
+    your_command --here
+    '''
+}
+
+workflow {
+    example_process()
+    example_process.out.samples_bam.view()
 }
 ```
 
@@ -336,5 +357,61 @@ workflow {
     prepare_vcf_file(params.variants, params.blacklist) 
     // INCORRECT
     prepare_vcf_file(variantsFile = params.variants, blacklisted = params.blacklist) 
+}
+```
+
+## You can run code before you execute a script in the script part of a process
+
+Example
+- Notice how the sampleID is modified with a regular expression before the script is executed
+
+```groovy
+/*
+ * Process 4: GATK Recalibrate
+ */
+
+process rnaseq_gatk_recalibrate {
+    container 'quay.io/biocontainers/mulled-v2-aa1d7bddaee5eb6c4cbab18f8a072e3ea7ec3969:f963c36fd770e89d267eeaa27cad95c1c3dbe660-0'
+    tag "${replicateId}"
+
+    input:
+    path genome
+    path index
+    path dict
+    tuple val(replicateId), path(bam), path(bai) 
+    tuple path(prepared_variants_file),
+          path(prepared_variants_file_index) 
+
+    output: 
+    tuple val(sampleId),
+          path("${replicateId}.final.uniq.bam"),
+          path("${replicateId}.final.uniq.bam.bai")
+
+    script:
+    sampleId = replicateId.replaceAll(/[12]$/,'') 
+    """
+    gatk3 -T BaseRecalibrator \
+          --default_platform illumina \
+          -cov ReadGroupCovariate \
+          -cov QualityScoreCovariate \
+          -cov CycleCovariate \
+          -knownSites ${prepared_variants_file} \
+          -cov ContextCovariate \
+          -R ${genome} -I ${bam} \
+          --downsampling_type NONE \
+          -nct ${task.cpus} \
+          -o final.rnaseq.grp
+
+    gatk3 -T PrintReads \
+          -R ${genome} -I ${bam} \
+          -BQSR final.rnaseq.grp \
+          -nct ${task.cpus} \
+          -o final.bam
+
+    (samtools view -H final.bam; samtools view final.bam | \
+    grep -w 'NH:i:1') | samtools view -Sb -  > ${replicateId}.final.uniq.bam
+
+    samtools index ${replicateId}.final.uniq.bam
+    """
 }
 ```
