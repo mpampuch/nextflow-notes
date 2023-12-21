@@ -489,3 +489,65 @@ process rnaseq_gatk_recalibrate {
     """
 }
 ```
+
+## The `return` keyword
+
+You can place the `return` keyword in your workflow block to aburptly stop the run at a certain point. This is really useful if you're troubleshooting and you just want to get the details up to a certain part of your workflow, the rest of it will remain untouched.
+
+Example
+
+```nextflow
+workflow {
+    reads_ch =  Channel.fromFilePairs(params.reads)
+    // The return keyword helps you troubleshoot. 
+    // Here you want to check what the read ares
+    // The return keyword ensures the rest of the workflow doesn't get run
+    reads.view()
+    return 
+
+
+    prepare_genome_samtools(params.genome)
+    prepare_genome_picard(params.genome)
+    prepare_star_genome_index(params.genome)
+    prepare_vcf_file(params.variants, params.blacklist)
+
+    rnaseq_mapping_star(params.genome, prepare_star_genome_index.out, reads_ch)
+
+    rnaseq_gatk_splitNcigar(params.genome,
+                            prepare_genome_samtools.out,
+                            prepare_genome_picard.out,
+                            rnaseq_mapping_star.out)
+
+   rnaseq_gatk_recalibrate(params.genome,
+                           prepare_genome_samtools.out,
+                           prepare_genome_picard.out,
+                           rnaseq_gatk_splitNcigar.out,
+                           prepare_vcf_file.out)
+
+    // New channel to aggregate bam from different replicates into sample level.
+    rnaseq_gatk_recalibrate.out
+        | groupTuple
+        | set { recalibrated_samples }
+
+    rnaseq_call_variants(params.genome,
+                         prepare_genome_samtools.out,
+                         prepare_genome_picard.out,
+                         recalibrated_samples)
+
+    post_process_vcf(rnaseq_call_variants.out,
+                        prepare_vcf_file.out)
+
+    prepare_vcf_for_ase(post_process_vcf.out)
+
+    recalibrated_samples
+        .join(prepare_vcf_for_ase.out.vcf_for_ASE)
+        .map { meta, bams, bais, vcf -> [meta, vcf, bams, bais] }
+        .set { grouped_vcf_bam_bai_ch }
+
+    ASE_knownSNPs(params.genome,
+                  prepare_genome_samtools.out,
+                  prepare_genome_picard.out,
+                  grouped_vcf_bam_bai_ch)
+}
+
+```
