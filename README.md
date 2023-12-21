@@ -549,5 +549,8 @@ workflow {
                   prepare_genome_picard.out,
                   grouped_vcf_bam_bai_ch)
 }
-
 ```
+
+## Getting Syntax Examples using nf-core
+
+When you don't know how a specific nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
