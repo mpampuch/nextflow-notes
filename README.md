@@ -93,6 +93,36 @@ workflow {
 }
 ```
 
+### Outputs with the same filenames
+
+If you have a process that only has a static pathname, for example
+
+```nextflow
+process rnaseq_call_variants {
+    container 'quay.io/broadinstitute/gotc-prod-gatk:1.0.0-4.1.8.0-1626439571'
+    tag "${sampleId}" 
+
+    input:
+    path genome 
+    path index 
+    path dict  
+    tuple val(sampleId), path(bam), path(bai) 
+
+    output:
+    tuple val(sampleId), path('final.vcf') 
+
+    script:
+    """
+    ...
+    """
+```
+
+This won't create a name conflict for every sample that gets processed
+
+This is because nextflow creates a new directory for every task a process performs. So if you're trying to process 10 samples (run 10 tasks from a single process), you're going to have 10 isolated folders.
+
+If you only had the `path` variable defined and not the `tuple` with the `sampleId` then it may have caused an issue but the way it's defined here file conflicts won't be an issue because every sample will get it's own folder.
+ 
 ## Tuples
 
 Inputs and outputs in nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
