@@ -26,6 +26,15 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
+## Creating a configuration file
+When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
+
+When more than one of the above files exists, they are merged, so that the settings in the first override the same settings that may appear in the second, and so on.
+
+The default config file search mechanism can be extended by providing an extra configuration file by using the command line option: `-c <config file>`.
+
+Information on writing these config files can be found here https://training.nextflow.io/basic_training/config/.
+
 ## The `.view` Channel Operator
 
 `.view` is a channel operator that consumes every element of a channel and prints it to the screen.
