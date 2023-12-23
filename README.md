@@ -35,6 +35,18 @@ The default config file search mechanism can be extended by providing an extra c
 
 Information on writing these config files can be found here https://training.nextflow.io/basic_training/config/.
 
+### Configuring a SLURM script for each process
+
+If you add the following code to the `nextflow.config` file
+
+```groovy
+process.executor = 'slurm'
+```
+
+Then nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
+
+More information on how to configure this further can be found here https://www.nextflow.io/docs/latest/executor.html#slurm
+
 ## The `.view` Channel Operator
 
 `.view` is a channel operator that consumes every element of a channel and prints it to the screen.
