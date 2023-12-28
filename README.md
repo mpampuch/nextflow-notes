@@ -129,6 +129,40 @@ WORLD!
 
 Now you can find out in which directory everything related to every task performed is stored.
 
+#### The `.command.sh` file
+
+Inside every task directory that was successfully run, there will be a `.command.sh` file (e.g. `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff/.command.sh`). This file contains the **final** script that was run for that task.
+
+Example: If this is in the workflow
+
+```nextflow
+params.greeting = 'Hello world!'
+
+process SPLITLETTERS {
+    input:
+    val x
+
+    output:
+    path 'chunk_*'
+
+    """
+    printf '$x' | split -b 6 - chunk_
+    """
+}
+
+workflow {
+    letters_ch = SPLITLETTERS(greeting_ch)
+}
+```
+
+The `command.sh` file for a task run on this process will look like this
+
+```bash
+printf 'Hello world!' | split -b 6 - chunk_
+```
+
+This is very useful for troubleshooting when things don't work like you'd expect.
+
 
 ## Rerunning Nextflow
 
