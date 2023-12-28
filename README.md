@@ -127,6 +127,8 @@ HELLO
 WORLD!
 ```
 
+Now you can find out in which directory everything related to every task performed is stored.
+
 
 ## Rerunning Nextflow
 
