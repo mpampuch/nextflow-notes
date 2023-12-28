@@ -151,7 +151,9 @@ HELLO
 WORLD!
 ```
 
-Now you can find out in which directory everything related to every task performed is stored.
+Now you can find out in which directory everything related to every task performed is stored straight from the console.
+
+**Note:** Even if you don't use the `-ansi-log false` flag, you can still see the hashes/directories all the tasks are stored in using the `.nextflow.log` file. The task directories can be found in the `[Task monitor]` logs.
 
 #### The `.command.sh` file
 
