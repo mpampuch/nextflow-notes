@@ -121,8 +121,8 @@ Will output
 N E X T F L O W  ~  version 23.10.0
 Launching `hello.nf` [boring_bhabha] DSL2 - revision: 197a0e289a
 [18/f6351b] Submitted process > SPLITLETTERS (1)
-[2f/007bc5] Submitted process > CONVERTTOUPPER (1) # NOTICE THE HASH FOR TASK 1 IS VISIBLE NOW
-[dc/e177f3] Submitted process > CONVERTTOUPPER (2)
+[dc/e177f3] Submitted process > CONVERTTOUPPER (1) # NOTICE THE HASH FOR TASK 1 IS VISIBLE NOW
+[2f/007bc5] Submitted process > CONVERTTOUPPER (2)
 HELLO 
 WORLD!
 ```
