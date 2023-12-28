@@ -26,7 +26,7 @@ HELLO
 
 This is what this all means
 
-```text
+```
 N E X T F L O W  ~  
 
 # THE VERSION OF NEXTFLOW THAT WAS USED FOR THIS RUN SPECIFICALLY
