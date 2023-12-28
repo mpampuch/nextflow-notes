@@ -2,6 +2,61 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
+## Running Nextflow
+
+Nextflow can be run by using the following command
+
+```bash
+nextflow run main.nf # main.nf being the filename with the workflow
+```
+
+Only run it like this the first time. If you run it again it will begin running the entire workflow over again. It's better to not rerun processes that don't need to be rerun to save a lot of time.
+
+When you run a nextflow pipeline, you will get an output like this in your terminal
+
+```
+N E X T F L O W  ~  version 23.10.0
+Launching `main.nf` [focused_noether] DSL2 - revision: 197a0e289a
+executor >  local (3)
+[18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
+[2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
+WORLD!
+HELLO 
+```
+
+This is what this all means
+
+```bash
+N E X T F L O W  ~  
+
+# THE VERSION OF NEXTFLOW THAT WAS USED FOR THIS RUN SPECIFICALLY
+version 23.10.0
+
+# THE NAME OF THE SCRIPT FILE THAT WAS RUN WITH NEXTFLOW
+Launching `main.nf` 
+
+# A GENERATED MNEMONIC WHICH IS AN RANDOM OBJECTIVE AND A RANDOM SURNAME OF A FAMOUS SCIENTIST
+[focused_noether] 
+
+# THE VERSION OF THE NEXTFLOW LANGUAGE
+DSL2
+
+# THE REVISION HASH, WHICH IS LIKE AN ID OF YOUR PIPELINE
+- revision: 197a0e289a
+
+# THE EXECUTOR FOR THE PIPELINE
+executor >  local 
+
+# NEXTFLOW'S GUESS AT HOW MANY TASKS THAT WILL OCCUR IN YOUR PIPELINE
+(3)
+
+# YOUR PROCESSES AND OUTPUTS
+[18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
+[2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
+WORLD!
+HELLO 
+```
+
 ## Rerunning Nextflow
 
 When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
