@@ -189,6 +189,68 @@ rnaseq_gatk_analysis
 
 Just keep in mind processes and channel operators are not guaranteed to emit items in the order that they were received, as they are executed concurrently. This can lead to unintended effects based if you use a operator that takes multiple inputs. For example, the using the `merge` channel operator can lead to different results upon different runs based on the order in which the processes finish. You should always use a matching key (e.g. sample ID) to merge multiple channels, so that they are combined in a deterministic way (using an operator like `join` instead). 
 
+### The `flatten` channel operator
+
+The `flatten` operator transforms a channel in such a way that every item of type `Collection` or `Array` is flattened so that each single entry is emitted separately by the resulting channel. For example:
+
+```nextflow
+Channel
+    .of( [1,[2,3]], 4, [5,[6]] )
+    .flatten()
+    .view()
+```
+
+Outputs
+
+```
+1
+2
+3
+4
+5
+6
+```
+
+## Channel Factories
+
+Channel factories are methods that can be used to create channels explicitly.
+
+For example, the `of` method allows you to create a channel that emits the arguments provided to it, for example:
+```nextflow
+ch = Channel.of( 1, 3, 5, 7 )
+ch.view { "value: $it" }
+```
+
+The first line in this example creates a variable `ch` which holds a channel object. This channel emits the arguments supplied to the of method. Thus the second line prints the following:
+```nextflow
+value: 1
+value: 3
+value: 5
+value: 7
+```
+
+### Range Expansion 
+
+Ranges of values are expanded accordingly:
+
+```nextflow
+Channel
+    .of(1..23, 'X', 'Y')
+    .view()
+```
+Prints:
+
+```nextflow
+1
+2
+3
+4
+:
+23
+X
+Y
+```
+
 ## Tuples
 
 Inputs and outputs in nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
