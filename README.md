@@ -57,6 +57,30 @@ WORLD!
 HELLO 
 ```
 
+### Rerunning Nextflow
+
+When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
+
+```bash
+nextflow run main.nf -resume
+```
+
+In practice, every execution starts from the beginning. However, when using resume, before launching a task, Nextflow uses the unique ID to check if:
+
+- the working directory exists
+- it contains a valid command exit status
+- it contains the expected output files.
+
+The mechanism works by assigning a unique ID to each task. This unique ID is used to create a separate execution directory, called the working directory, where the tasks are executed and the results stored. A task’s unique ID is generated as a 128-bit hash number obtained from a composition of the task’s:
+
+- Inputs values
+- Input files
+- Command line string
+- Container ID
+- Conda environment
+- Environment modules
+- Any executed scripts in the bin directory
+
 ### Task directories
 
 Take a look at the last part of the output when you run a nextflow pipeline
@@ -163,30 +187,6 @@ printf 'Hello world!' | split -b 6 - chunk_
 
 This is very useful for troubleshooting when things don't work like you'd expect.
 
-
-## Rerunning Nextflow
-
-When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
-
-```bash
-nextflow run main.nf -resume
-```
-
-In practice, every execution starts from the beginning. However, when using resume, before launching a task, Nextflow uses the unique ID to check if:
-
-- the working directory exists
-- it contains a valid command exit status
-- it contains the expected output files.
-
-The mechanism works by assigning a unique ID to each task. This unique ID is used to create a separate execution directory, called the working directory, where the tasks are executed and the results stored. A task’s unique ID is generated as a 128-bit hash number obtained from a composition of the task’s:
-
-- Inputs values
-- Input files
-- Command line string
-- Container ID
-- Conda environment
-- Environment modules
-- Any executed scripts in the bin directory
 
 ## Creating a configuration file
 When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
