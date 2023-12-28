@@ -272,6 +272,69 @@ This is because nextflow creates a new directory for every task a process perfor
 
 If you only had the `path` variable defined and not the `tuple` with the `sampleId` then it may have caused an issue but the way it's defined here file conflicts won't be an issue because every sample will get it's own folder.
 
+## Processing things in order / the `fair` directive
+
+While channels do emit items in the order that they are received (FIFO structure), ***processes do not necessarily process items in the order that they are received*** (because of implicit parallelization and later processes ending before earlier ones). While this isn't an issue in most cases, it is important to know. 
+
+For example
+
+```nextflow
+process basicExample {
+  input:
+  val x
+
+  "echo process job $x"
+}
+
+workflow {
+  def num = Channel.of(1,2,3)
+  basicExample(num)
+}
+```
+
+Can output 
+
+```
+process job 3
+process job 1
+process job 2
+```
+
+
+Notice in the above example that the value `3` was processed before the others.
+
+The `fair` directive (new in version 22.12.0-edge), when enabled, guarantees that process outputs will be emitted in the order in which they were received. For example:
+
+```nextflow
+process EXAMPLE {
+    fair true
+
+    input:
+    val x
+    output:
+    tuple val(task.index), val(x)
+
+    script:
+    """
+    sleep \$((RANDOM % 3))
+    """
+}
+
+workflow {
+    channel.of('A','B','C','D') | EXAMPLE | view
+}
+```
+
+The above example produces:
+
+```
+[1, A]
+[2, B]
+[3, C]
+[4, D]
+```
+
+
 ## Channel Operators / performing operations on channels outside of a process
 
 Sometimes the output channel of one process doesn't quite match the input channel of the next process and so it has to be modified slightly. This can be performed using channel operators. A full list of channel operators can be found here https://www.nextflow.io/docs/latest/operator.html.
