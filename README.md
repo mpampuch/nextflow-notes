@@ -57,6 +57,77 @@ WORLD!
 HELLO 
 ```
 
+### Task directories
+
+Take a look at the last part of the output when you run a nextflow pipeline
+
+```
+# YOUR PROCESSES AND OUTPUTS
+[18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
+[2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
+WORLD!
+HELLO 
+```
+
+Breaking down the processes section further this is what each part means
+
+```
+# THE HEXADECIMAL HASH FOR THE TASK (ALSO THE TASK DIRECTORY NAME)
+[18/f6351b] 
+
+# THE NAME OF THE PROCESS USED FOR THE TASK
+process > SPLITLETTERS 
+
+# I'M NOT SURE WHAT THIS NUMBER MEANS YET. MAYBE THE CURRENT PROCESS?
+(1)   
+
+# THE PROGRESS OF ALL THE TASKS (OR MAYBE THE CURRENT TASK?)
+[100%] 
+
+# ENUMERATED PROGRESS OF ALL THE TASKS
+1 of 1 ✔
+
+# THE HEXADECIMAL HASH FOR THE TASK (LAST TASK ONLY IF THERE ARE MORE THAN ONE)
+[2f/007bc5] 
+
+# THE NAME OF THE PROCESS USED FOR THE TASK
+process > CONVERTTOUPPER 
+
+# I'M NOT SURE WHAT THIS NUMBER MEANS YET. MAYBE THE CURRENT PROCESS?
+(1) 
+
+# THE PROGRESS OF ALL THE TASKS (OR MAYBE THE CURRENT TASK?)
+[100%] 
+
+# ENUMERATED PROGRESS OF ALL THE TASKS
+2 of 2 ✔
+```
+
+The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that we call a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
+
+#### The ANSI log
+
+The second process runs twice, executing in two different work directories for each input file. The ANSI log output from Nextflow dynamically refreshes as the workflow runs; in the previous example the work directory `2f/007bc5` is the second of the two directories that were processed (overwriting the log with the first). To print all the relevant paths to the screen, disable the ANSI log output using the `-ansi-log` flag.
+
+Example
+
+```bash
+nextflow run hello.nf -ansi-log false
+```
+
+Will output
+
+```
+N E X T F L O W  ~  version 23.10.0
+Launching `hello.nf` [boring_bhabha] DSL2 - revision: 197a0e289a
+[18/f6351b] Submitted process > SPLITLETTERS (1)
+[2f/007bc5] Submitted process > CONVERTTOUPPER (1)
+[dc/e177f3] Submitted process > CONVERTTOUPPER (2)
+HELLO 
+WORLD!
+```
+
+
 ## Rerunning Nextflow
 
 When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
