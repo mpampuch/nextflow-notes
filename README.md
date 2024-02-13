@@ -149,7 +149,7 @@ println "$params.foo $params.bar"
 #### Config env
 The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
-#### Config process directives
+#### Config process scopes and process directives
 
 Process directives allow the specification of settings for the task execution such as cpus, memory, container, and other resources in the workflow script.
 
@@ -212,7 +212,7 @@ The above configuration snippet sets 2 cpus for the processes annotated with the
 
 #### Config Conda execution
 
-If you already have a conda environment in your machine that you want to use for a process, you can use
+If you already have a conda environment in your machine that you want to use for your processes, you can use
 
 `nextflow.config`
 
