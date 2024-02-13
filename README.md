@@ -81,6 +81,147 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
+### Configuring Nextflow
+
+The first thing that nextflow looks for when a workflow is run is configuration files in multiple locations. Since each configuration file can contain conflicting settings, the sources are ranked to determine which settings are applied. Possible configuration sources, in order of priority:
+
+1. Parameters specified on the command line (`--something value`)
+
+2. Parameters provided using the `-params-file` option
+
+3. Config file specified using the `-c my_config` option
+
+4. The config file named `nextflow.config` in the current directory
+
+5. The config file named `nextflow.config` in the workflow project directory
+
+6. The config file `$HOME/.nextflow/config`
+
+7. Values defined within the pipeline script itself (e.g. `main.nf`)
+
+When more than one of these options for specifying configurations are used, they are merged, so that the settings in the first override the same settings appearing in the second, and so on.
+
+This is an example of a nextflow configuration in a file called `nextflow.config`
+
+```nextflow
+propertyOne = 'world'
+propertyTwo = "Hello $propertyOne"
+customPath = "$PATH:/my/app/folder"
+```
+
+*Note*: The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
+
+#### Config scopes
+Configuration settings can be organized in different scopes by dot prefixing the property names with a scope identifier, or grouping the properties in the same scope using the curly brackets notation. For example:
+
+```nextflow
+alpha.x = 1
+alpha.y = 'string value..'
+
+beta {
+     p = 2
+     q = 'another string ..'
+}
+```
+
+#### Config params
+The scope params allows the definition of workflow parameters that override the values defined in the main workflow script.
+
+This is useful to consolidate one or more execution parameters in a separate file.
+
+`nextflow.config`
+
+```nextflow
+params.foo = 'Bonjour'
+params.bar = 'le monde!'
+```
+
+`snippet.nf`
+
+```nextflow
+params.foo = 'Hello'
+params.bar = 'world!'
+
+// print both params
+println "$params.foo $params.bar"
+```
+
+#### Config env
+The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
+
+#### Config process directives
+
+Process directives allow the specification of settings for the task execution such as cpus, memory, container, and other resources in the workflow script.
+
+This is useful when prototyping a small workflow script.
+
+However, it’s always a good practice to decouple the workflow execution logic from the process configuration settings, i.e. ***it’s strongly suggested to define the process settings in the workflow configuration file instead of the workflow script***.
+
+The process configuration scope allows the setting of any process directives in the Nextflow configuration file:
+
+`nextflow.config`
+
+
+```nextflow
+process {
+    cpus = 10
+    memory = 8.GB
+    container = 'biocontainers/bamtools:v2.4.0_cv3'
+}
+```
+The above config snippet defines the cpus, memory and container directives for all processes in your workflow script. Depending on your executor these things may behave differently.
+
+#### Process selectors
+The `withLabel` selectors allow the configuration of all processes annotated with a label directive as shown below:
+
+```nextflow
+process {
+    withLabel: big_mem {
+        cpus = 16
+        memory = 64.GB
+        queue = 'long'
+    }
+}
+```
+The above configuration example assigns 16 cpus, 64 Gb of memory and the long queue to all processes annotated with the `big_mem` label.
+
+In the same manner, the `withName` selector allows the configuration of a specific process in your pipeline by its name. For example:
+
+```nextflow
+process {
+    withName: hello {
+        cpus = 4
+        memory = 8.GB
+        queue = 'short'
+    }
+}
+```
+
+A process selector can also be negated prefixing it with the special character `!`. For example:
+
+```nextflow
+process {
+    withLabel: 'foo' { cpus = 2 }
+    withLabel: '!foo' { cpus = 4 }
+    withName: '!align.*' { queue = 'long' }
+}
+```
+
+The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does not start with `align`.
+
+
+#### Config Conda execution
+
+If you already have a conda environment in your machine that you want to use for a process, you can use
+
+`nextflow.config`
+
+```
+process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
+```
+
+You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
+
 ### Task directories
 
 Take a look at the last part of the output when you run a nextflow pipeline
