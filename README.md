@@ -365,13 +365,41 @@ Information on writing these config files can be found here https://training.nex
 
 If you add the following code to the `nextflow.config` file
 
-```groovy
+```nextflow
 process.executor = 'slurm'
 ```
 
 Then nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
 
 More information on how to configure this further can be found here https://www.nextflow.io/docs/latest/executor.html#slurm
+
+### Running Nextflow workflows on SLURM / HPC's
+
+When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs. 
+
+`launch_nf.sh`
+```bash
+#!/bin/bash
+#SBATCH --partition WORK
+#SBATCH --mem 5G
+#SBATCH -c 1
+#SBATCH -t 12:00:00
+
+WORKFLOW=$1
+CONFIG=$2
+
+# Use a conda environment where you have installed Nextflow
+# (may not be needed if you have installed it in a different way)
+conda activate nextflow
+
+nextflow -C ${CONFIG} run ${WORKFLOW}
+```
+
+and launch the workflow using
+
+```bash
+sbatch launch_nf.sh /home/my_user/path/my_workflow.nf /home/my_user/path/my_config_file.conf
+```
 
 ## The `.view` Channel Operator
 
