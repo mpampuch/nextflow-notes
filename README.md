@@ -340,7 +340,7 @@ workflow {
 }
 ```
 
-The `command.sh` file for a task run on this process will look like this
+The `.command.sh` file for a task run on this process will look like this
 
 ```bash
 printf 'Hello world!' | split -b 6 - chunk_
@@ -348,6 +348,9 @@ printf 'Hello world!' | split -b 6 - chunk_
 
 This is very useful for troubleshooting when things don't work like you'd expect.
 
+#### The `.command.run` file
+
+The `.command.run` file is very similar to the `.command.sh` file, except that it shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
 ## Creating a configuration file
 When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
