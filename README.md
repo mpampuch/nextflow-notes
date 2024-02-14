@@ -185,6 +185,20 @@ process {
 ```
 The above configuration example assigns 16 cpus, 64 Gb of memory and the long queue to all processes annotated with the `big_mem` label.
 
+Labels can be added using the `label` directive
+
+e.g.
+
+```nextflow
+process bigTask {
+    label 'big_mem'
+
+    ```
+    <task script>
+    ```
+}
+```
+
 In the same manner, the `withName` selector allows the configuration of a specific process in your pipeline by its name. For example:
 
 ```nextflow
@@ -221,6 +235,10 @@ process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
 ```
 
 You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
+
+### The `fair` process directive
+
+Because the processes in nextflow can finish in different orders than they were inputted as, the `fair` directive is a way that you can ensure the tasks finish in the order that they were started. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
 
 ### Task directories
 
