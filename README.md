@@ -764,6 +764,40 @@ That is why the golden rule for dependencies is to use a program like conda or m
 
 The container images are supposed to work the same way forever so doing so in this way each programs should install the same dependencies and produce the exact same enviroment for better reproducibility. 
 
+E.g.
+
+`env.yml`
+
+```yml
+name: nf-tutorial
+channels:
+    - conda-forge
+    - defaults
+    - bioconda
+dependencies:
+    - bioconda::salmon=1.5.1
+    - bioconda::fastqc=0.11.9
+    - bioconda::multiqc=1.12
+    - conda-forge::tbb=2020.2
+```
+
+`Dockerfile`
+```docker
+FROM mambaorg/micromamba:0.25.1
+
+LABEL image.author.name "Your Name Here"
+LABEL image.author.email "your@email.here"
+
+COPY --chown=$MAMBA_USER:$MAMBA_USER env.yml /tmp/env.yml
+
+RUN micromamba create -n nf-tutorial
+
+RUN micromamba install -y -n nf-tutorial -f /tmp/env.yml && \
+    micromamba clean --all --yes
+
+ENV PATH /opt/conda/envs/nf-tutorial/bin:$PATH
+```
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
