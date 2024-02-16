@@ -1055,3 +1055,15 @@ workflow {
 ## Getting Syntax Examples using nf-core
 
 When you don't know how a specific nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
+
+### Nextflow Tower
+
+Nextflow tower provides a useful tool to monitor your pipelines and work on teams. It offered through a web app and a CLI. To learn more about how to use it you can click here:
+
+- Web app:  
+    
+    - https://youtu.be/ERbTqLtAkps?feature=shared&t=5852
+
+- CLI:
+
+    - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
