@@ -81,7 +81,7 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
-### Configuring Nextflow
+## Configuring Nextflow
 
 The first thing that nextflow looks for when a workflow is run is configuration files in multiple locations. Since each configuration file can contain conflicting settings, the sources are ranked to determine which settings are applied. Possible configuration sources, in order of priority:
 
@@ -111,7 +111,7 @@ customPath = "$PATH:/my/app/folder"
 
 *Note*: The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
 
-#### Config scopes
+### Config scopes
 Configuration settings can be organized in different scopes by dot prefixing the property names with a scope identifier, or grouping the properties in the same scope using the curly brackets notation. For example:
 
 ```nextflow
@@ -124,7 +124,7 @@ beta {
 }
 ```
 
-#### Config params
+### Config params
 The scope params allows the definition of workflow parameters that override the values defined in the main workflow script.
 
 This is useful to consolidate one or more execution parameters in a separate file.
@@ -146,10 +146,10 @@ params.bar = 'world!'
 println "$params.foo $params.bar"
 ```
 
-#### Config env
+### Config env
 The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
-#### Config process scopes and process directives
+### Config process scopes and process directives
 
 Process directives allow the specification of settings for the task execution such as cpus, memory, container, and other resources in the workflow script.
 
@@ -171,7 +171,7 @@ process {
 ```
 The above config snippet defines the cpus, memory and container directives for all processes in your workflow script. Depending on your executor these things may behave differently.
 
-#### Process selectors
+### Process selectors
 The `withLabel` selectors allow the configuration of all processes annotated with a label directive as shown below:
 
 ```nextflow
@@ -224,7 +224,7 @@ process {
 The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does not start with `align`.
 
 
-#### Config Conda execution
+### Config Conda execution
 
 If you already have a conda environment in your machine that you want to use for your processes, you can use
 
@@ -236,11 +236,11 @@ process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
 
 You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
 
-### The `fair` process directive
+## The `fair` process directive
 
 Because the processes in nextflow can finish in different orders than they were inputted as, the `fair` directive is a way that you can ensure the tasks finish in the order that they were started. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
 
-### Task directories
+## Task directories
 
 Take a look at the last part of the output when you run a nextflow pipeline
 
@@ -288,7 +288,7 @@ process > CONVERTTOUPPER
 
 The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that we call a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
 
-#### The ANSI log
+### The ANSI log
 
 The second process runs twice, executing in two different work directories for each input file. The ANSI log output from Nextflow dynamically refreshes as the workflow runs; in the previous example the work directory `2f/007bc5` is the second of the two directories that were processed (overwriting the log with the first). To print all the relevant paths to the screen, disable the ANSI log output using the `-ansi-log` flag.
 
@@ -314,7 +314,7 @@ Now you can find out in which directory everything related to every task perform
 
 **Note:** Even if you don't use the `-ansi-log false` flag, you can still see the hashes/directories all the tasks are stored in using the `.nextflow.log` file. The task directories can be found in the `[Task monitor]` logs.
 
-#### The `.command.sh` file
+### The `.command.sh` file
 
 Inside every task directory that was successfully run, there will be a `.command.sh` file (e.g. `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff/.command.sh`). This file contains the **final** script that was run for that task.
 
@@ -348,7 +348,7 @@ printf 'Hello world!' | split -b 6 - chunk_
 
 This is very useful for troubleshooting when things don't work like you'd expect.
 
-#### The `.command.run` file
+### The `.command.run` file
 
 The `.command.run` file is very similar to the `.command.sh` file, except that it shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
@@ -756,6 +756,14 @@ Note that if you delete or move the pipeline work directory, this will prevent t
 
 Also note that the pipeline work directory is intended to be used as a temporary scratch area. The final workflow outputs are expected to be stored in a different location specified using the `publishDir` directive.
 
+## The Golden Practice for Containers
+
+If you just try to install your dependencies using conda or mamba, there's no guarantee that the dependency graph will be solved the same way forever, therefore there is a chance your programs will work slightly different if you try to reinstall your dependencies sometime in the future.
+
+That is why the golden rule for dependencies is to use a program like conda or mamba to intall them, but to do so inside a container image. 
+
+The container images are supposed to work the same way forever so doing so in this way each programs should install the same dependencies and produce the exact same enviroment for better reproducibility. 
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
@@ -1067,3 +1075,4 @@ Nextflow tower provides a useful tool to monitor your pipelines and work on team
 - CLI:
 
     - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
+
