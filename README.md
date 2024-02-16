@@ -810,6 +810,16 @@ Sometimes you'll need to have a container with more than one tool, in this case 
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
 
+### Mulled Container Search
+
+You can also install `galaxy-util-tools` and search for mulled containers in your CLI using the `mulled-search` tool that comes with this tool
+
+```bash
+conda activate a-conda-env-you-already-have
+conda install galaxy-tool-util
+mulled-search --destination quay singularity --channel bioconda --search bowtie samtools | grep mulled
+```
+
 ## `get*()` in Groovy
 
 In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
