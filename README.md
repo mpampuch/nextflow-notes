@@ -2,6 +2,14 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
+## What is Nextflow?
+
+Nextflow is a framework used for writing parallel and distributed computational pipelines, common in bioinformatics, genomics, and other fields where complex data analysis pipelines are common. It simplifies the process of creating complex workflows that involve processing large volumes of data.
+
+Nextflow pipelines are partitioned into channels, processes, and workflows. Channels represent data streams, processes perform computations on that data, and workflows orchestrate the execution of processes and manage the flow of data through the pipeline.
+
+![Nextflow example](what-is-nextflow.png)
+
 ## Running Nextflow
 
 Nextflow can be run by using the following command
