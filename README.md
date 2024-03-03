@@ -435,6 +435,116 @@ You can see in this case it outputs a single channel element created from the `.
 - The first item is an ID (in this case the replicate ID)
 - The second item is a list with all the items (in this case the path to the reads)
 
+## Process Inputs
+
+### The double asterisk
+
+A double asterisk (`**`) in a glob pattern works like `*` but also searches through subdirectories. For example, imagine this is your file structure
+
+```
+data
+├── 2023-11-08_upn22_monarch-hmw_100mg_rep-2
+│   └── no_sample
+│       └── 20231108_1310_MC-115499_FAX00407_d135d0ec
+│           ├── fastq_fail
+│           │   ├── FAX00407_fail_d135d0ec_b0bb43ca_0.fastq.gz
+│           │   └── FAX00407_fail_d135d0ec_b0bb43ca_1.fastq.gz
+│           ├── fastq_pass
+│           │   ├── FAX00407_pass_d135d0ec_b0bb43ca_0.fastq.gz
+│           │   └── FAX00407_pass_d135d0ec_b0bb43ca_1.fastq.gz
+│           ├── other_reports
+│           │   ├── pore_scan_data_FAX00407_d135d0ec_b0bb43ca.csv
+│           │   └── temperature_adjust_data_FAX00407_d135d0ec_b0bb43ca.csv
+│           ├── pod5_fail
+│           │   ├── FAX00407_fail_d135d0ec_b0bb43ca_0.pod5
+│           │   └── FAX00407_fail_d135d0ec_b0bb43ca_1.pod5
+│           └── pod5_pass
+│               ├── FAX00407_pass_d135d0ec_b0bb43ca_0.pod5
+│               └── FAX00407_pass_d135d0ec_b0bb43ca_1.pod5
+├── 2023-11-12_mhmw-dna-recovery-elude-1
+│   └── no_sample
+│       └── 20231112_1338_MC-115499_FAX00228_b67d08a5
+│           ├── fastq_fail
+│           │   ├── FAX00228_fail_b67d08a5_dc19481f_0.fastq.gz
+│           │   └── FAX00228_fail_b67d08a5_dc19481f_1.fastq.gz
+│           ├── fastq_pass
+│           │   ├── FAX00228_pass_b67d08a5_dc19481f_0.fastq.gz
+│           │   └── FAX00228_pass_b67d08a5_dc19481f_1.fastq.gz
+│           ├── final_summary_FAX00228_b67d08a5_dc19481f.txt
+│           ├── other_reports
+│           │   ├── pore_scan_data_FAX00228_b67d08a5_dc19481f.csv
+│           │   └── temperature_adjust_data_FAX00228_b67d08a5_dc19481f.csv
+│           ├── pod5_fail
+│           │   ├── FAX00228_fail_b67d08a5_dc19481f_0.pod5
+│           │   └── FAX00228_fail_b67d08a5_dc19481f_1.pod5
+│           ├── pod5_pass
+│           │   ├── FAX00228_pass_b67d08a5_dc19481f_0.pod5
+│           │   └── FAX00228_pass_b67d08a5_dc19481f_1.pod5
+│           └── sequencing_summary_FAX00228_b67d08a5_dc19481f.txt
+├── 2023-11-16
+│   └── no_sample
+│       └── 20231116_0945_MC-115499_FAX00393_849b7392
+│           ├── barcode_alignment_FAX00393_849b7392_a554d814.tsv
+│           ├── fastq_fail
+│           │   ├── FAX00393_fail_849b7392_a554d814_0.fastq.gz
+│           │   └── FAX00393_fail_849b7392_a554d814_1.fastq.gz
+│           ├── fastq_pass
+│           │   ├── FAX00393_pass_849b7392_a554d814_0.fastq.gz
+│           │   └── FAX00393_pass_849b7392_a554d814_1.fastq.gz
+│           ├── final_summary_FAX00393_849b7392_a554d814.txt
+│           ├── other_reports
+│           │   ├── pore_scan_data_FAX00393_849b7392_a554d814.csv
+│           │   └── temperature_adjust_data_FAX00393_849b7392_a554d814.csv
+│           ├── pod5_fail
+│           │   ├── FAX00393_fail_849b7392_a554d814_0.pod5
+│           │   └── FAX00393_fail_849b7392_a554d814_1.pod5
+│           ├── pod5_pass
+│           │   ├── FAX00393_pass_849b7392_a554d814_0.pod5
+│           │   └── FAX00393_pass_849b7392_a554d814_1.pod5
+│           ├── pore_activity_FAX00393_849b7392_a554d814.csv
+│           ├── report_FAX00393_20231116_0945_849b7392.html
+│           ├── report_FAX00393_20231116_0945_849b7392.json
+│           ├── report_FAX00393_20231116_0945_849b7392.md
+│           ├── sample_sheet_FAX00393_20231116_0945_849b7392.csv
+│           ├── sequencing_summary_FAX00393_849b7392_a554d814.txt
+│           └── throughput_FAX00393_849b7392_a554d814.csv
+└── Oct-26-23-upn22-pci-rep-3
+    └── no_sample
+        └── 20231026_1515_MC-115499_FAW96674_9d505d15
+            ├── barcode_alignment__9d505d15_1f674c3a.tsv
+            ├── fastq_fail
+            │   ├── FAW96674_fail_9d505d15_1f674c3a_0.fastq.gz
+            │   └── FAW96674_fail_9d505d15_1f674c3a_1.fastq.gz
+            ├── fastq_pass
+            │   ├── FAW96674_pass_9d505d15_1f674c3a_0.fastq.gz
+            │   └── FAW96674_pass_9d505d15_1f674c3a_1.fastq.gz
+            ├── final_summary_FAW96674_9d505d15_1f674c3a.txt
+            ├── other_reports
+            │   ├── pore_scan_data_FAW96674_9d505d15_1f674c3a.csv
+            │   └── temperature_adjust_data_FAW96674_9d505d15_1f674c3a.csv
+            ├── pod5_fail
+            │   ├── FAW96674_fail_9d505d15_1f674c3a_0.pod5
+            │   └── FAW96674_fail_9d505d15_1f674c3a_1.pod5
+            ├── pod5_pass
+            │   ├── FAW96674_pass_9d505d15_1f674c3a_0.pod5
+            │   └── FAW96674_pass_9d505d15_1f674c3a_1.pod5
+            ├── pore_activity__9d505d15_1f674c3a.csv
+            ├── report__20231026_1515_9d505d15.html
+            ├── report__20231026_1515_9d505d15.json
+            ├── report__20231026_1515_9d505d15.md
+            ├── sample_sheet__20231026_1515_9d505d15.csv
+            ├── sequencing_summary_FAW96674_9d505d15_1f674c3a.txt
+            └── throughput__9d505d15_1f674c3a.csv
+
+33 directories, 60 files
+```
+
+All the `.fastq.gz` files can be grabbed using the `**` wildcard to search through all the subdirectories to look for the files with the `.fastq` extensions.
+
+```
+fastq_ch = Channel.fromPath("data/**/*.fastq.gz").collect()
+```
+
 ## Process outputs
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
