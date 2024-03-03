@@ -437,6 +437,35 @@ You can see in this case it outputs a single channel element created from the `.
 
 ## Process Inputs
 
+The `input` block allows you to define the input channels of a process, similar to function arguments. A process may have at most one input block, and it must contain at least one input.
+
+The input block follows the syntax shown below:
+
+```nextflow
+input:
+  <input qualifier> <input name>
+```
+
+An input definition consists of a *qualifier* and a *name*. The input qualifier defines the type of data to be received. This information is used by Nextflow to apply the semantic rules associated with each qualifier, and handle it properly depending on the target execution platform (grid, cloud, etc).
+
+The following input qualifiers are available:
+
+`val`: Access the input value by name in the process script.
+
+`file`: (DEPRECATED) Handle the input value as a file, staging it properly in the execution context.
+
+`path`: Handle the input value as a path, staging the file properly in the execution context.
+
+`env`: Use the input value to set an environment variable in the process script.
+
+`stdin`: Forward the input value to the process stdin special file.
+
+`tuple`: Handle a group of input values having any of the above qualifiers.
+
+`each`: Execute the process for each element in the input collection.
+
+More information on how each of these input qualifiers work can be found here https://www.nextflow.io/docs/latest/process.html#inputs
+
 ### The double asterisk
 
 A double asterisk (`**`) in a glob pattern works like `*` but also searches through subdirectories. For example, imagine this is your file structure
