@@ -614,9 +614,9 @@ rnaseq_gatk_analysis
 
 Just keep in mind processes and channel operators are not guaranteed to emit items in the order that they were received, as they are executed concurrently. This can lead to unintended effects based if you use a operator that takes multiple inputs. For example, the using the `merge` channel operator can lead to different results upon different runs based on the order in which the processes finish. You should always use a matching key (e.g. sample ID) to merge multiple channels, so that they are combined in a deterministic way (using an operator like `join` instead). 
 
-### The `flatten` channel operator
+### The `.flatten` channel operator
 
-The `flatten` operator transforms a channel in such a way that every item of type `Collection` or `Array` is flattened so that each single entry is emitted separately by the resulting channel. For example:
+The `.flatten` operator transforms a channel in such a way that every item of type `Collection` or `Array` is flattened so that each single entry is emitted separately by the resulting channel. For example:
 
 ```nextflow
 Channel
@@ -635,6 +635,24 @@ Outputs
 5
 6
 ```
+
+### The `.collect` channel operator
+
+The `.collect` channel operator is basically the oposite of the `.flatten` channel operator, where it collects all the items emitted by a channel to a `List` and return the resulting object as a sole emission. For example:
+
+```nextflow
+Channel
+    .of( 1, 2, 3, 4 )
+    .collect()
+    .view()
+```
+
+Outputs
+
+```
+[1,2,3,4]
+```
+
 
 ## Channel Factories
 
