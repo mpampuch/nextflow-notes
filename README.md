@@ -653,6 +653,44 @@ Outputs
 [1,2,3,4]
 ```
 
+### The `.buffer` channel operator
+
+The `.buffer` channel operator gathers the items emitted by the source channel into subsets and emits these subsets separately.
+
+There are a number of ways you can regulate how buffer gathers the items from the source channel into subsets, however one of the most convienient ways of using it is with `buffer( size: n )`. transform the source channel in such a way that it emits tuples made up of `n` elements. For example:
+
+```nextflow
+Channel
+    .of( 1, 2, 3, 1, 2, 3, 1 )
+    .buffer( size: 2 )
+    .view()
+```
+
+Outputs
+
+```
+[1, 2]
+[3, 1]
+[2, 3]
+```
+
+Be aware that if there is an incomplete tuple it is discarded. To emit the last items in a tuple containing less than n elements, use `buffer( size: n, remainder: true )`. For example:
+
+```nextflow
+Channel
+    .of( 1, 2, 3, 1, 2, 3, 1 )
+    .buffer( size: 2, remainder: true )
+    .view()
+```
+
+Outputs
+
+```
+[1, 2]
+[3, 1]
+[2, 3]
+[1]
+```
 
 ## Channel Factories
 
