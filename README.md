@@ -10,6 +10,11 @@ Nextflow pipelines are partitioned into channels, processes, and workflows. Chan
 
 ![Nextflow example](what-is-nextflow.png)
 
+The central tenant of Nextflow is generating pipelines with 100% reproducibility. Most bioinformatic studies use multiple softwares and languages all with different versions. This makes reproducibility very difficult as you have to go back and figure out what softwares, versions and what dependancies were used. Worst off different softwares can work differently depending on what machine you have or might not work on some machines at all. With Nextflow, if you use it correctly and follow all the best practices, your data analysis pipelines should be fully reproducible at any time and on any machine if you provide it the same input data.
+
+For more information see: https://doi.org/10.1038/nbt.3820
+
+
 ## Running Nextflow
 
 Nextflow can be run by using the following command
