@@ -1219,6 +1219,8 @@ process prepare_star_genome_index {
 
 The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
 
+Process directives can be accessed for a specific task using the `task.` implicit variable. In the context of Nextflow, an implicit variable refers to a special type of variable that holds information about the execution context of a process. 
+
 Process directives can also be defaults and invisible. For example. The default number of CPUs to run a task is 1. You can pass this into a process parameter by using `tasks.cpus`. If you want to change this however, you can write at the top of your process block
 
 ```nextflow
