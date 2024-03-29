@@ -16,7 +16,7 @@ The central tenant of Nextflow is generating pipelines with 100% reproducibility
 
 Nextflow pipelines need to be written into files with the `.nf` extension.
 
-Example:
+Example, create a file called `main.nf` and provide it the following code:
 
 ```nextflow
 #!/usr/bin/env nextflow
@@ -45,7 +45,7 @@ workflow {
 Nextflow can then run by using the following command
 
 ```bash
-nextflow run main.nf # main.nf being the filename with the workflow
+nextflow run main.nf
 ```
 
 Only run it like this the first time. If you run it again it will begin running the entire workflow over again. It's better to not rerun processes that don't need to be rerun to save a lot of time.
