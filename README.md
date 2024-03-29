@@ -421,6 +421,25 @@ This is very useful for troubleshooting when things don't work like you'd expect
 
 The `.command.run` file is very similar to the `.command.sh` file, except that it shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
+## log.info
+
+The `log.info` command can be used to print multiline information using groovy’s logger functionality. Instead of writing a series of `println` commands, it can be used to include a multiline message.
+
+```nextflow
+log.info """\
+    R N A S E Q - N F   P I P E L I N E
+    ===================================
+    transcriptome: ${params.transcriptome_file}
+    reads        : ${params.reads}
+    outdir       : ${params.outdir}
+    """
+    .stripIndent(true)
+```
+
+`log.info` not only prints the ouput of the command to the screen (`stout`), but also prints the results to the log file. 
+
+Usually when you write Nextflow scripts you will add indenting so you can better read the code. However when you want to print the code to the screen you often don't want indenting. The `.stripIndent(true)` method removes the indents from the output.
+
 ## Creating a configuration file
 When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
 
