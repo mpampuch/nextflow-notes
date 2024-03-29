@@ -14,7 +14,35 @@ The central tenant of Nextflow is generating pipelines with 100% reproducibility
 
 ## Running Nextflow
 
-Nextflow can be run by using the following command
+Nextflow pipelines need to be written into files with the `.nf` extension.
+
+Example:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+process fastqc {
+    input:
+    path input
+
+    output:
+    path "*_fastqc.{zip, html}
+
+    script:
+    """
+    fastqc -q $input
+    """
+}
+
+workflow {
+    Channel.fromPath("*.fastq.gz") | fastqc
+}
+```
+
+**Note**: The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, *this line is optional*.
+
+
+Nextflow can then run by using the following command
 
 ```bash
 nextflow run main.nf # main.nf being the filename with the workflow
