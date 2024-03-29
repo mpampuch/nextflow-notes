@@ -1123,6 +1123,27 @@ RUN micromamba install -y -n nf-tutorial -f /tmp/env.yml && \
 ENV PATH /opt/conda/envs/nf-tutorial/bin:$PATH
 ```
 
+## Running Nextflow with Docker
+
+In your `nextflow.config` file, you can specifiy which container you want your Nextflow script file to use using the `params.container` parameter.
+
+Example
+
+```nextflow
+params.container = 'nextflow/rnaseq-nf'
+docker.runOptions = '-u $(id -u):$(id -g)'
+```
+
+Because you are not providing any container repository or container registry for the script to use, by default Nextflow will try to pull the container from Docker Hub.
+
+However, it will only try to pull the container *if you tell Nextflow to run the pipeline with containers*. If you want to run it with docker for example, you can run the script as follows:
+
+```bash
+nextflow run main.nf -with-docker
+```
+
+
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
