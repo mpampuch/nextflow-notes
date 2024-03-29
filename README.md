@@ -21,7 +21,7 @@ Example, create a file called `main.nf` and provide it the following code:
 ```nextflow
 #!/usr/bin/env nextflow
 
-process fastqc {
+process FASTQC {
     input:
     path input
 
@@ -35,7 +35,7 @@ process fastqc {
 }
 
 workflow {
-    Channel.fromPath("*.fastq.gz") | fastqc
+    Channel.fromPath("*.fastq.gz") | FASTQC
 }
 ```
 
@@ -184,6 +184,16 @@ params.bar = 'world!'
 println "$params.foo $params.bar"
 ```
 
+Any variables that are set using `params.` can be modified through the command line when executing Nextflow using two dashes (`--`)
+
+E.g.
+
+```bash
+nextflow run snippet.nf --foo "Bye"
+```
+
+**Note**: In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
+
 ### Config env
 The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
@@ -273,6 +283,10 @@ process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
 ```
 
 You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
+
+## Processes
+
+In nextflow, it is a best practice to always name processes in UPPERCASE. This way you can easily see what are process blocks and what are regular functions.
 
 ## The `fair` process directive
 
