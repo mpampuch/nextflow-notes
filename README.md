@@ -79,7 +79,8 @@ Launching `main.nf`
 # THE VERSION OF THE NEXTFLOW LANGUAGE
 DSL2
 
-# THE REVISION HASH, WHICH IS LIKE AN ID OF YOUR PIPELINE. **If you change the workflow script code, this revision ID will change**
+# THE REVISION HASH, WHICH IS LIKE AN ID OF YOUR PIPELINE.
+ **If you change the workflow script code, this revision ID will change**
 - revision: 197a0e289a
 
 # THE EXECUTOR FOR THE PIPELINE
