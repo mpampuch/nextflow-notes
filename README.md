@@ -299,6 +299,8 @@ In nextflow, it is a best practice to always name processes in UPPERCASE. This w
 
 ## The `fair` process directive
 
+**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
+
 Because the processes in nextflow can finish in different orders than they were inputted as, the `fair` directive is a way that you can ensure the tasks finish in the order that they were started. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
 
 ## Task directories
@@ -705,6 +707,8 @@ This is because nextflow creates a new directory for every task a process perfor
 If you only had the `path` variable defined and not the `tuple` with the `sampleId` then it may have caused an issue but the way it's defined here file conflicts won't be an issue because every sample will get it's own folder.
 
 ## Processing things in order / the `fair` directive
+
+**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
 
 While channels do emit items in the order that they are received (FIFO structure), ***processes do not necessarily process items in the order that they are received*** (because of implicit parallelization and later processes ending before earlier ones). While this isn't an issue in most cases, it is important to know. 
 
