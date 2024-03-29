@@ -198,7 +198,7 @@ Any variables that are set using `params.` can be modified through the command l
 E.g.
 
 ```bash
-nextflow run snippet.nf --foo "Bye"
+nextflow run snippet.nf -resume --foo "Bye"
 ```
 
 **Note**: In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
