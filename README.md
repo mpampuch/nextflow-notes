@@ -751,6 +751,46 @@ The above example produces:
 [4, D]
 ```
 
+## Process scripts
+
+The script block within a process is a string statement that defines the command to be executed by the process' task.
+
+```nextflow
+process CONVERTTOUPPER { 
+    input: 
+    path y 
+
+    output: 
+    stdout 
+
+    script: 
+    """
+    cat $y | tr '[a-z]' '[A-Z]'
+    """
+}
+```
+
+By default, nextflow expects a shell script in the script block. If you are using another language, like R or Python, you need the shebang so that Nextflow knows which software to use to interpret this code.
+
+Example:
+
+```nextflow
+process CONVERTTOUPPER { 
+    input: 
+    path y 
+
+    output: 
+    stdout 
+
+    script: 
+    """
+    #!/usr/bin/env python
+    with open("$y") as f:
+        print(f.read().upper(), end="")
+    """
+}
+```
+
 
 ## Channel Operators / performing operations on channels outside of a process
 
