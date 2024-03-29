@@ -26,7 +26,7 @@ process fastqc {
     path input
 
     output:
-    path "*_fastqc.{zip, html}
+    path "*_fastqc.{zip, html}"
 
     script:
     """
