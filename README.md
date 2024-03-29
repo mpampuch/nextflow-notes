@@ -89,9 +89,16 @@ executor >  local
 # NEXTFLOW'S GUESS AT HOW MANY TASKS THAT WILL OCCUR IN YOUR PIPELINE
 (3)
 
-# YOUR PROCESSES AND OUTPUTS
+# A LIST OF PROCESSES AND TASKS
 [18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
 [2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
+
+## EVERY TASK WILL HAVE A UNIQUE HASH
+## EVERY TASK IS ISOLATED FROM EACH OTHER 
+## THESE HASHES CORRESPOND TO DIRECTORY NAMES WHERE YOU CAN GO AND VIEW INFORMATION ABOUT THAT SPECIFIC TASK
+[18/f6351b]
+[2f/007bc5] # BY DEFAULT NEXTFLOW SHOWS THE HASH OF 1 TASK PER PROCESS. 
+
 WORLD!
 HELLO 
 ```
@@ -321,7 +328,10 @@ process > SPLITLETTERS
 [100%] 
 
 # ENUMERATED PROGRESS OF ALL THE TASKS
-1 of 1 ✔
+1 of 1 
+
+# SIGN SHOWING THE TASK RAN SUCCESSFULLY
+✔
 
 # THE HEXADECIMAL HASH FOR THE TASK (LAST TASK ONLY IF THERE ARE MORE THAN ONE)
 [2f/007bc5] 
@@ -336,7 +346,10 @@ process > CONVERTTOUPPER
 [100%] 
 
 # ENUMERATED PROGRESS OF ALL THE TASKS
-2 of 2 ✔
+2 of 2 
+
+# SIGN SHOWING THE TASK RAN SUCCESSFULLY
+✔
 ```
 
 The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that we call a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
