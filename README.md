@@ -857,6 +857,44 @@ process CONVERTTOUPPER {
 }
 ```
 
+## Channel Factories
+
+Channel factories are methods that can be used to create channels explicitly.
+
+For example, the `of` method allows you to create a channel that emits the arguments provided to it, for example:
+```nextflow
+ch = Channel.of( 1, 3, 5, 7 )
+ch.view { "value: $it" }
+```
+
+The first line in this example creates a variable `ch` which holds a channel object. This channel emits the arguments supplied to the of method. Thus the second line prints the following:
+```nextflow
+value: 1
+value: 3
+value: 5
+value: 7
+```
+
+### The `.fromFilePairs` Channel Factory
+
+The `fromFilePairs` method creates a channel emitting the file pairs matching a glob pattern provided by the user. The matching files are emitted as **tuples** in which the first element is the grouping key of the matching pair and the second element is the list of files (sorted in lexicographical order). For example:
+
+```nextflow
+Channel
+    .fromFilePairs('/my/data/SRR*_{1,2}.fastq')
+    .view()
+```
+It will produce an output similar to the following:
+
+```
+[SRR493366, [/my/data/SRR493366_1.fastq, /my/data/SRR493366_2.fastq]]
+[SRR493367, [/my/data/SRR493367_1.fastq, /my/data/SRR493367_2.fastq]]
+[SRR493368, [/my/data/SRR493368_1.fastq, /my/data/SRR493368_2.fastq]]
+[SRR493369, [/my/data/SRR493369_1.fastq, /my/data/SRR493369_2.fastq]]
+[SRR493370, [/my/data/SRR493370_1.fastq, /my/data/SRR493370_2.fastq]]
+[SRR493371, [/my/data/SRR493371_1.fastq, /my/data/SRR493371_2.fastq]]
+```
+
 
 ## Channel Operators / performing operations on channels outside of a process
 
@@ -981,23 +1019,21 @@ Outputs
 [1]
 ```
 
-## Channel Factories
+### The `.set` channel operator
 
-Channel factories are methods that can be used to create channels explicitly.
+The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
 
-For example, the `of` method allows you to create a channel that emits the arguments provided to it, for example:
 ```nextflow
-ch = Channel.of( 1, 3, 5, 7 )
-ch.view { "value: $it" }
+Channel.of(10, 20, 30).set { my_channel }
 ```
+This is semantically equivalent to the following assignment:
 
-The first line in this example creates a variable `ch` which holds a channel object. This channel emits the arguments supplied to the of method. Thus the second line prints the following:
 ```nextflow
-value: 1
-value: 3
-value: 5
-value: 7
+my_channel = Channel.of(10, 20, 30)
 ```
+However the set operator is more grammatical in Nextflow scripting, since it can be used at the end of a chain of operator transformations, thus resulting in a more fluent and readable operation. 
+
+Whichever way you choose to assign a variable is up to you.
 
 ### Range Expansion 
 
