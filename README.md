@@ -293,6 +293,55 @@ process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
 
 You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
 
+## Creating a configuration file
+When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
+
+When more than one of the above files exists, they are merged, so that the settings in the first override the same settings that may appear in the second, and so on.
+
+The default config file search mechanism can be extended by providing an extra configuration file by using the command line option: `-c <config file>`.
+
+Information on writing these config files can be found here https://training.nextflow.io/basic_training/config/.
+
+### Configuring a SLURM script for each process
+
+If you add the following code to the `nextflow.config` file
+
+```nextflow
+process.executor = 'slurm'
+```
+
+Then nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
+
+More information on how to configure this further can be found here https://www.nextflow.io/docs/latest/executor.html#slurm
+
+### Running Nextflow workflows on SLURM / HPC's
+
+When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs. 
+
+`launch_nf.sh`
+```bash
+#!/bin/bash
+#SBATCH --partition WORK
+#SBATCH --mem 5G
+#SBATCH -c 1
+#SBATCH -t 12:00:00
+
+WORKFLOW=$1
+CONFIG=$2
+
+# Use a conda environment where you have installed Nextflow
+# (may not be needed if you have installed it in a different way)
+conda activate nextflow
+
+nextflow -C ${CONFIG} run ${WORKFLOW}
+```
+
+and launch the workflow using
+
+```bash
+sbatch launch_nf.sh /home/my_user/path/my_workflow.nf /home/my_user/path/my_config_file.conf
+```
+
 ## Processes
 
 In nextflow, it is a best practice to always name processes in UPPERCASE. This way you can easily see what are process blocks and what are regular functions.
@@ -461,55 +510,6 @@ log.info """\
 `log.info` not only prints the ouput of the command to the screen (`stout`), but also prints the results to the log file. 
 
 Usually when you write Nextflow scripts you will add indenting so you can better read the code. However when you want to print the code to the screen you often don't want indenting. The `.stripIndent(true)` method removes the indents from the output.
-
-## Creating a configuration file
-When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
-
-When more than one of the above files exists, they are merged, so that the settings in the first override the same settings that may appear in the second, and so on.
-
-The default config file search mechanism can be extended by providing an extra configuration file by using the command line option: `-c <config file>`.
-
-Information on writing these config files can be found here https://training.nextflow.io/basic_training/config/.
-
-### Configuring a SLURM script for each process
-
-If you add the following code to the `nextflow.config` file
-
-```nextflow
-process.executor = 'slurm'
-```
-
-Then nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
-
-More information on how to configure this further can be found here https://www.nextflow.io/docs/latest/executor.html#slurm
-
-### Running Nextflow workflows on SLURM / HPC's
-
-When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs. 
-
-`launch_nf.sh`
-```bash
-#!/bin/bash
-#SBATCH --partition WORK
-#SBATCH --mem 5G
-#SBATCH -c 1
-#SBATCH -t 12:00:00
-
-WORKFLOW=$1
-CONFIG=$2
-
-# Use a conda environment where you have installed Nextflow
-# (may not be needed if you have installed it in a different way)
-conda activate nextflow
-
-nextflow -C ${CONFIG} run ${WORKFLOW}
-```
-
-and launch the workflow using
-
-```bash
-sbatch launch_nf.sh /home/my_user/path/my_workflow.nf /home/my_user/path/my_config_file.conf
-```
 
 ## The `.view` Channel Operator
 
@@ -784,7 +784,7 @@ The `fair` directive (new in version 22.12.0-edge), when enabled, guarantees tha
 
 **NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
 
-For example:
+Example:
 
 ```nextflow
 process EXAMPLE {
