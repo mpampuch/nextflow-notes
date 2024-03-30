@@ -1366,11 +1366,13 @@ Each program should have its own designated container. Don't create container im
 
 Run only one process per container: In almost all cases, you should only run a single process in a single container. Decoupling applications into multiple containers makes it much easier to scale horizontally and reuse containers. If that service depends on another service, make use of container linking.
 
-Biocontainers is a project to create a docker container for every recipe they have in bioconda.
+Biocontainers is a project to create a docker container for every recipe (package and version) they have in bioconda.
 
 Sometimes you'll need to have a container with more than one tool, in this case there is a *mulled* container. 
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
+
+If a package that you need is missing from Biocontainers, you'll likely have to create your own container as shown [here](https://training.nextflow.io/basic_training/containers/#create-and-use-conda-like-environments-using-micromamba).
 
 ### Mulled Container Search
 
