@@ -875,6 +875,8 @@ value: 5
 value: 7
 ```
 
+Channel factories also have options that can be used to modify their behaviour. For example, the `checkIfExists` option can be used to check if the specified path contains file pairs. If the path does not contain file pairs, an error is thrown. A full list of options can be found in the [channel factory documentation](https://www.nextflow.io/docs/latest/channel.html#channel-factories).
+
 ### The `.fromFilePairs` Channel Factory
 
 The `fromFilePairs` method creates a channel emitting the file pairs matching a glob pattern provided by the user. The matching files are emitted as **tuples** in which the first element is the grouping key of the matching pair and the second element is the list of files (sorted in lexicographical order). For example:
@@ -1019,6 +1021,58 @@ Outputs
 [1]
 ```
 
+### The `.mix` channel operator
+
+The `mix` operator combines the items emitted by two (or more) channels into a single queue channel.
+
+For example:
+
+```nextflow
+c1 = Channel.of( 1, 2, 3 )
+c2 = Channel.of( 'a', 'b' )
+c3 = Channel.of( 'z' )
+
+c1.mix(c2,c3)
+    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+```
+Outputs:
+```
+1
+2
+3
+'a'
+'b'
+'z'
+```
+
+1
+2
+3
+'a'
+'b'
+'z'
+
+**Note**: The items emitted by the resulting mixed channel may appear in any order, regardless of which source channel they came from. Thus, the following example could also be a possible result of the above example:
+
+```
+'z'
+1
+'a'
+2
+'b'
+3
+```
+
+The `mix` operator and the `collect` operator are often chained together to gather the outputs of the multiple processes as a single input. Operators can be used in combinations to combine, split, and transform channels.
+
+Example:
+
+```nextflow
+MULTIQC(quant_ch.mix(fastqc_ch).collect())
+```
+
+You will only want one task of `MultiQC` to be executed to produce one report. Therefore, you can use the `mix` channel operator to combine the `quant_ch` and the `fastqc_ch` channels, followed by the `collect` operator, to return the complete channel contents as a single element.
+
 ### The `.set` channel operator
 
 The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
@@ -1144,6 +1198,20 @@ nextflow run <script> -w /some/scratch/dir
 Note that if you delete or move the pipeline work directory, this will prevent to use the resume feature in subsequent runs.
 
 Also note that the pipeline work directory is intended to be used as a temporary scratch area. The final workflow outputs are expected to be stored in a different location specified using the `publishDir` directive.
+
+### Using the `publishDir` process directive
+
+In order to use the `processDir` directive to publish your desired files to some output directory, add the following to your process block
+
+```nextflow
+process SOMEPROCESS {
+    publishDir params.outdir, mode: 'copy'
+}
+```
+
+You want to provide the `mode: 'copy'` option because by default files are published to the target folder creating a **symbolic link** for each process output that links the file produced into the process working directory. Usually you want an actual copy of your desired file and not just a symbolic link.
+
+
 
 ## The Golden Practice for Containers
 
