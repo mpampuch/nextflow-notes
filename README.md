@@ -1692,3 +1692,204 @@ Nextflow tower provides a useful tool to monitor your pipelines and work on team
 
     - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
 
+## Notes on Groovy
+
+Nextflow is a domain specific language (DSL) implemented on top of the Groovy programming language, which in turn is a super-set of the Java programming language. This means that Nextflow can run any Groovy or Java code.
+
+In some cases it may be useful to know a bit of Groovy when building Nextflow pipelines whenever Nextflow functions are insufficient (rare but sometimes can be the case).
+
+Here are some important things to know about Groovy.
+
+### Defining Variables
+
+To define a variable, simply assign a value to it:
+
+```groovy
+x = 1
+```
+
+These variables are **global** variables.
+
+To define a local variable, use the `def` keyword:
+
+```groovy
+def x = 1
+```
+The `def` should be always used when defining variables local to a function or a closure.
+
+### Assertions
+
+You can use the `assert` keyword to test if a condition is true (similar to an `if` function).
+
+Here, Groovy will print nothing if it is correct, else it will raise an `AssertionError` message.
+
+```groovy
+list = [10, 20, 30, 40]
+
+assert list[0] == 10 // Nothing happens
+
+assert list[0] == 20  /* Outputs
+
+ERROR ~ assert list[0] == 20
+   |   |
+   |   10
+   [10, 20, 30, 40]
+
+*/
+```
+
+### String interpolation
+
+String literals can be defined by enclosing them with either single- (`''`) or double- (`""`) quotation marks.
+
+- Strings enclosed in single quotes are treated literally, meaning they are not subject to string interpolation.
+    - This includes escape characters such as `\n`, `\t`, `\\`, etc. They will be treated literally.
+- Strings enclosed in double quotes allow string interpolation, meaning variables and expressions within the string are evaluated and replaced with their values.
+
+Example:
+
+```groovy
+x = 'Hello'
+y = 'World'
+println '$x $y' // Outputs: $x $y
+println "$x $y" // Outputs: Hello World
+```
+
+Below is another example of how strings can be constructed using string interpolation:
+
+```groovy
+foxtype = 'quick'
+foxcolor = ['b', 'r', 'o', 'w', 'n']
+println "The $foxtype ${foxcolor.join()} fox"
+// Outputs: The quick brown fox
+```
+
+Note the different use of `$` and `${..}` syntax to interpolate value expressions in a string literal.
+
+### Maps
+
+Maps are like lists that have an arbitrary key instead of an integer. Therefore, the syntax is very much aligned.
+
+```groovy
+map = [a: 0, b: 1, c: 2]
+```
+
+Maps can be accessed in a conventional square-bracket syntax or as if the key was a property of the map.
+
+```groovy
+map = [a: 0, b: 1, c: 2]
+
+assert map['a'] == 0 
+assert map.b == 1 
+assert map.get('c') == 2 
+```
+
+To add data or to modify a map, the syntax is similar to adding values to a list:
+
+```groovy
+map = [a: 0, b: 1, c: 2]
+
+map['a'] = 'x' 
+map.b = 'y' 
+map.put('c', 'z') 
+assert map == [a: 'x', b: 'y', c: 'z']
+```
+
+Map objects implement all methods provided by the [java.util.Map](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html) interface, plus the extension methods provided by [Groovy](http://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html).
+
+
+### Functions
+
+It is possible to define a custom function into a script:
+
+```groovy
+def fib(int n) {
+    return n < 2 ? 1 : fib(n - 1) + fib(n - 2)
+}
+
+assert fib(10)==89
+```
+
+A function can take multiple arguments separating them with a comma.
+
+The `return` keyword can be omitted and the function implicitly returns the value of the last evaluated expression. Also, explicit types can be omitted, though not recommended:
+
+```groovy
+def fact(n) {
+    n > 1 ? n * fact(n - 1) : 1
+}
+
+assert fact(5) == 120
+```
+
+### Closures
+
+In Groovy, closures are blocks of code that can take arguments, execute code, and return a value. These blocks of code can be  passed as an argument to a function. They are similar to anonymous functions or lambda expressions in other programming languages. 
+
+More formally, a closure allows the definition of functions as first-class objects.
+
+```groovy
+square = { it * it }
+```
+
+The curly brackets around the expression `it * it` tells the script interpreter to treat this expression as code. The `it` identifier is an **implicit variable** that represents the value that is passed to the function when it is invoked.
+
+Once compiled, the function object is assigned to the variable `square` as any other variable assignment shown previously.
+
+To invoke the closure execution use the special method `call` or just use the round parentheses to specify the closure parameter(s):
+
+```groovy
+assert square.call(5) == 25
+assert square(9) == 81
+```
+
+As is, this may not seem interesting, but you can now pass the `square` function as an argument to other functions or methods. Some built-in functions take a function like this as an argument. One example is the `collect` method on lists:
+
+```groovy
+x = [1, 2, 3, 4].collect(square)
+println x
+// Outputs: [1, 4, 9, 16]
+```
+
+By default, closures take a single parameter called `it`.
+
+To give it a different name use the `->` syntax. For example:
+
+```groovy
+square = { num -> num * num }
+```
+
+It’s also possible to define closures with multiple, custom-named parameters.
+
+For example, when the method `each()` is applied to a map it can take a closure with two arguments, to which it passes the *key-value* pair for each entry in the map object. 
+
+Example:
+
+```groovy
+printMap = { a, b -> println "$a with value $b" } 
+values = ["Yue": "Wu", "Mark": "Williams", "Sudha": "Kumari"] 
+values.each(printMap) /* Outputs
+
+Yue with value Wu
+Mark with value Williams
+Sudha with value Kumari
+
+*/
+```
+
+A closure has two other important features.
+
+1. It can access and *modify* variables in the scope where it is defined.
+
+2. A closure can be defined in an *anonymous* manner, meaning that it is not given a name, and is only defined in the place where it needs to be used.
+
+As an example showing both these features, see the following code fragment:
+
+```groovy
+result = 0 
+values = ["China": 1, "India": 2, "USA": 3] 
+values.keySet().each { result += values[it] } 
+println result // Outputs 6
+```
+
+You can learn more about closures in the [Groovy documentation](http://groovy-lang.org/closures.html).
