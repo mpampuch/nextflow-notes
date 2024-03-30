@@ -297,12 +297,6 @@ You can specify the path of an existing Conda environment as either directory or
 
 In nextflow, it is a best practice to always name processes in UPPERCASE. This way you can easily see what are process blocks and what are regular functions.
 
-## The `fair` process directive
-
-**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
-
-Because the processes in nextflow can finish in different orders than they were inputted as, the `fair` directive is a way that you can ensure the tasks finish in the order that they were started. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
-
 ## Task directories
 
 Take a look at the last part of the output when you run a nextflow pipeline
@@ -786,7 +780,11 @@ process job 2
 
 Notice in the above example that the value `3` was processed before the others.
 
-The `fair` directive (new in version 22.12.0-edge), when enabled, guarantees that process outputs will be emitted in the order in which they were received. For example:
+The `fair` directive (new in version 22.12.0-edge), when enabled, guarantees that process outputs will be emitted in the order in which they were received. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
+
+**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
+
+For example:
 
 ```nextflow
 process EXAMPLE {
