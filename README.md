@@ -1221,8 +1221,7 @@ Example:
 
 ```nextflow
 workflow.onComplete {
-    log.info 
-     ( worflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : 'Oops .. something went wrong' )
+    log.info ( worflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : 'Oops .. something went wrong' )
 }
 ```
 
