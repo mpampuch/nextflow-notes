@@ -1390,9 +1390,6 @@ An even better solution than using Biocontainers is to use the Seqera labs Wave 
 
 You can see more about what Wave containers can do [here](https://github.com/seqeralabs/wave-showcase).
 
-## `get*()` in Groovy
-
-In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
 
 ## Important functions for file attributes and paths
 
@@ -1851,6 +1848,8 @@ println x
 // Outputs: [1, 4, 9, 16]
 ```
 
+(**Note**: This `collect` method in groovy is different than the `collect` operator in Nextflow. This groovy `collect` method does something to each element of the list. In Nextflow there is a `map` operator that performs the same function.)
+
 By default, closures take a single parameter called `it`.
 
 To give it a different name use the `->` syntax. For example:
@@ -1893,3 +1892,7 @@ println result // Outputs 6
 ```
 
 You can learn more about closures in the [Groovy documentation](http://groovy-lang.org/closures.html).
+
+### `get*()` in Groovy
+
+In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
