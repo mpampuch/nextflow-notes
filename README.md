@@ -357,6 +357,8 @@ process > CONVERTTOUPPER
 
 The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that we call a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
 
+**Note**: Inside the work directory for the specific task, you will also find the ***Symbolic links*** used as inputs for the specific task, not copies of the files themselves.
+
 ### The ANSI log
 
 If you look at the second process in the above examples, you notice that it runs twice (once for each task), executing in two different work directories for each input file. The ANSI log output from Nextflow dynamically refreshes as the workflow runs; in the previous example the work directory `2f/007bc5` is the second of the two directories that were processed (overwriting the log with the first). To print all the relevant paths to the screen, disable the ANSI log output using the `-ansi-log` flag.
@@ -383,9 +385,39 @@ Now you can find out in which directory everything related to every task perform
 
 **Note:** Even if you don't use the `-ansi-log false` flag, you can still see the hashes/directories all the tasks are stored in using the `.nextflow.log` file. The task directories can be found in the `[Task monitor]` logs.
 
-### The `.command.sh` file
+### Nextflow `.command` files
 
-Inside every task directory that was successfully run, there will be a `.command.sh` file (e.g. `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff/.command.sh`). This file contains the **final** script that was run for that task.
+Every task that is executed by Nextflow will produe a bunch of hidden files in the tasks work directory beginning with `.command`. Below are a list of all of them and what they contain.
+
+#### The `.command.begin` file
+
+The `.command.begin` file is a file that is created whenever the task really started. 
+
+Whenever you are debugging a pipeline and you don't know if a task really started or not, you can check for the existence of this file.
+
+#### The `.command.err` file
+
+The `.command.err` file contains all the errors that may have occured for this task.
+
+#### The `.command.log` file
+
+The `.command.log` file contains the logs created for this task (e.g. with `log.info` or through other methods).
+
+#### The `.command.out` file
+
+The `.command.out` file contains anything that was printed to your screen (the standard output).
+
+#### The `.command.run` file
+
+The `.command.run` file shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
+
+This script contains all the functions nextflow needs to make sure your script runs on whatever executor you configured (e.g. locally, in the cloud, on a HPC, with or withouth container, etc.)
+
+You're not really supposed to meddle with this file but sometimes you may want to see what's in it. (E.g. To see what Docker command was used to start the container etc.)
+
+#### The `.command.sh` file
+
+The `.command.sh` file contains the **final** script that was run for that task.
 
 Example: If this is in the workflow
 
@@ -416,10 +448,6 @@ printf 'Hello world!' | split -b 6 - chunk_
 ```
 
 This is very useful for troubleshooting when things don't work like you'd expect.
-
-### The `.command.run` file
-
-The `.command.run` file is very similar to the `.command.sh` file, except that it shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
 ## log.info
 
