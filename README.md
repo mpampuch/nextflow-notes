@@ -1693,7 +1693,7 @@ Nextflow tower provides a useful tool to monitor your pipelines and work on team
 
 Nextflow is a domain specific language (DSL) implemented on top of the Groovy programming language, which in turn is a super-set of the Java programming language. This means that Nextflow can run any Groovy or Java code.
 
-In some cases it may be useful to know a bit of Groovy when building Nextflow pipelines whenever Nextflow functions are insufficient (rare but sometimes can be the case).
+In some cases it may be useful to know a bit of Groovy when building Nextflow pipelines whenever Nextflow functions are insufficient (rare but sometimes may be the case).
 
 Here are some important things to know about Groovy.
 
