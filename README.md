@@ -1211,7 +1211,20 @@ process SOMEPROCESS {
 
 You want to provide the `mode: 'copy'` option because by default files are published to the target folder creating a **symbolic link** for each process output that links the file produced into the process working directory. Usually you want an actual copy of your desired file and not just a symbolic link.
 
+## Workflows
 
+### The `onComplete` Event Handler
+
+You can set up an event handler in your workflow to do something when the script finishes using the `workflow.onComplete` event handler.
+
+Example:
+
+```nextflow
+workflow.onComplete {
+    log.info 
+     ( worflow.success ? \nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : "Oops .. something went wrong )
+}
+```
 
 ## The Golden Practice for Containers
 
