@@ -1384,6 +1384,12 @@ conda install galaxy-tool-util
 mulled-search --destination quay singularity --channel bioconda --search bowtie samtools | grep mulled
 ```
 
+## Wave Containers
+
+An even better solution than using Biocontainers is to use the Seqera labs Wave containers service. Wave is an open source software and a service that builds containers on the fly for you. You can just give your conda directives on Nextflow on a conda environment file and remotely Wave is going to build your container image on the fly during the execution of your pipeline and provide it back to you very quickly.
+
+You can see more about what Wave containers can do [here](https://github.com/seqeralabs/wave-showcase).
+
 ## `get*()` in Groovy
 
 In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
