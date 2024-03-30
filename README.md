@@ -857,6 +857,66 @@ process CONVERTTOUPPER {
 }
 ```
 
+### Custom Scripts
+
+Real-world workflows use a lot of custom user scripts (BASH, R, Python, etc.). Nextflow allows you to consistently use and manage these scripts. Simply put them in a directory named `bin` in the workflow project root. They will be automatically added to the workflow execution `PATH`.
+
+For example, imagine this is a process block inside of `main.nf`
+
+```nextflow
+process FASTQ {
+    tag "FASTQ on $sample_id"
+
+    input:
+    tuple val(sample_id), path(reads)
+
+    output:
+    path "fastqc_${sample_id}_logs"
+
+    script:
+    """
+    mkdir fastqc_${sample_id}_logs
+    fastqc -o fastqc_${sample_id}_logs -f fastq -q {reads}
+    """
+}
+```
+
+The `FASTQC` process in `main.nf` could be replaced by creating an executable script named `fastqc.sh` in the bin directory as shown below:
+
+Create a new file named `fastqc.sh` with the following content:
+
+**`fastqc.sh`**
+```bash
+#!/bin/bash
+set -e
+set -u
+
+sample_id=${1}
+reads=${2}
+
+mkdir fastqc_${sample_id}_logs
+fastqc -o fastqc_${sample_id}_logs -f fastq -q ${reads}
+```
+
+Give it execute permission and move it into the bin directory:
+
+```bash
+chmod +x fastqc.sh
+mkdir -p bin
+mv fastqc.sh bin
+```
+
+Open the `main.nf` file and replace the `FASTQC` process script block with the following code:
+
+**`main.nf`**
+
+```nextflow
+script:
+"""
+fastqc.sh "$sample_id" "$reads"
+"""
+```
+
 ## Channel Factories
 
 Channel factories are methods that can be used to create channels explicitly.
@@ -1224,6 +1284,18 @@ workflow.onComplete {
     log.info ( worflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : 'Oops .. something went wrong' )
 }
 ```
+
+## Metrics and reports
+
+Nextflow can produce multiple reports and charts providing several runtime metrics and execution information. These can be enabled by using the following command line options:
+
+The `-with-report` option enables the creation of the workflow execution report.
+
+The `-with-trace` option enables the creation of a tab separated value (TSV) file containing runtime information for each executed task.
+
+The `-with-timeline` option enables the creation of the workflow timeline report showing how processes were executed over time. This may be useful to identify the most time consuming tasks and bottlenecks.
+
+Finally, the `-with-dag` option enables the rendering of the workflow execution direct acyclic graph representation. The dag needs to be given a name (`-with-dag dag.png`). Note: This feature requires the installation of [Graphviz](http://www.graphviz.org/) on your computer. See [here](https://www.nextflow.io/docs/latest/tracing.html#dag-visualisation) for further details. You can also output HTML DAGs (`-with-dag dag.html`), and the `-preview` command my allow you to have a look at an approximate DAG without having to run the pipeline.
 
 ## The Golden Practice for Containers
 
