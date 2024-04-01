@@ -1198,6 +1198,8 @@ Value channels allow processes to consume elements infinite times.
 
 Elements in the queue channel are consumed. You cannot consume the same element for the same process twice.
 
+For more information, see [here](https://training.nextflow.io/basic_training/channels/#channel-types).
+
 ## Single Value Coersion to Value Channels
 
 Processes can only take channels as inputs. That being said, if you pass in a regular variable that has a single value (e.g. string, number, etc), nextflow will implicitly create a value channel containing that value that you are providing. Therefore you can pass a regular value (i.e. string, number) into a process, but just be aware that this is what is going on behind the scenes
