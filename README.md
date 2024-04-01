@@ -203,6 +203,8 @@ nextflow run snippet.nf -resume --foo "Bye"
 
 **Note**: In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
 
+**Also note**: Values assigned to a the config params `params.` will be treated as *value channels* (see more information below on value channels)
+
 ### Config env
 The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
