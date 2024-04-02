@@ -1,5 +1,7 @@
 # Nextflow Notes
 
+## NOTE TO SELF: On 19min of Community Foundational Training 2
+
 Some tips / things of notes for myself while I'm learning Nextflow
 
 ## What is Nextflow?
