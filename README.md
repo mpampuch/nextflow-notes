@@ -348,7 +348,57 @@ sbatch launch_nf.sh /home/my_user/path/my_workflow.nf /home/my_user/path/my_conf
 
 ## Processes
 
-In nextflow, it is a best practice to always name processes in UPPERCASE. This way you can easily see what are process blocks and what are regular functions.
+
+In Nextflow, a process is the basic computing primitive to execute foreign functions (i.e., custom scripts or tools).
+
+The process definition starts with the keyword process, followed by the process name and finally the process body delimited by curly brackets.
+
+It is a best practice to always name processes in UPPERCASE. This way you can easily see what are process blocks and what are regular functions.
+
+A basic process, only using the script definition block, looks like the following:
+
+```nextflow
+process SAYHELLO {
+    script:
+    """
+    echo 'Hello world!'
+    """
+}
+```
+
+However, the process body can contain up to five definition blocks:
+
+1. **Directives** are initial declarations that define optional settings
+
+2. **Input** defines the expected input channel(s)
+
+3. **Output** defines the expected output channel(s)
+
+4. **When** is an optional clause statement to allow conditional processes
+
+5. **Script** is a string statement that defines the command to be executed by the process' task
+
+The full process syntax is defined as follows:
+
+```nextflow
+process < name > {
+    [ directives ] 
+
+    input: 
+    < process inputs >
+
+    output: 
+    < process outputs >
+
+    when: 
+    < condition >
+
+    [script|shell|exec]: 
+    """
+    < user script to be executed >
+    """
+}
+```
 
 ## Task directories
 
