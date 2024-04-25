@@ -919,7 +919,7 @@ process BAR {
 
     script:
     """
-    echo "The current directory is \$PWD"
+    echo "The current directory is $PWD"
     """
 }
 
