@@ -914,7 +914,7 @@ workflow {
 And without `\`
 
 ```nextflow
-process BAR {
+process FOO {
     debug true
 
     script:
@@ -924,7 +924,7 @@ process BAR {
 }
 
 workflow {
-    BAR()
+    FOO()
 }
 
 // The current directory is /workspace/gitpod/nf-training
@@ -933,7 +933,7 @@ workflow {
 It can be tricky to write a script that uses many Bash variables. One possible alternative is to use a script string delimited by single-quote characters (').
 
 ```nextflow
-process BAZ {
+process BAR {
     debug true
 
     script:
@@ -943,11 +943,34 @@ process BAZ {
 }
 
 workflow {
-    BAZ()
+    BAR()
 }
 
 // The current directory is /workspace/gitpod/nf-training/work/7a/4b050a6cdef4b6c1333ce29f7059a0
 ```
+
+However, this using the single quotes (`'`) will block the usage of Nextflow variables in the command script.
+
+Another alternative is to use a `shell` statement instead of script and use a different syntax for Nextflow variables, e.g., `!{..}`. This allows the use of both Nextflow and Bash variables in the same script.
+
+Example:
+
+```nextflow
+params.data = 'le monde'
+
+process BAZ {
+    shell:
+    '''
+    X='Bonjour'
+    echo $X !{params.data}
+    '''
+}
+
+workflow {
+    BAZ()
+}
+```
+
 
 If you are using another language, like R or Python, you need the shebang so that Nextflow knows which software to use to interpret this code.
 
