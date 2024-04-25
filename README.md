@@ -369,8 +369,10 @@ However, the process body can contain up to five definition blocks:
 1. **Directives** are initial declarations that define optional settings
 
 2. **Input** defines the expected input channel(s)
+    - Requires a qualifier
 
 3. **Output** defines the expected output channel(s)
+    - Requires a qualifier
 
 4. **When** is an optional clause statement to allow conditional processes
 
@@ -886,7 +888,68 @@ process CONVERTTOUPPER {
 }
 ```
 
-By default, nextflow expects a shell script in the script block. If you are using another language, like R or Python, you need the shebang so that Nextflow knows which software to use to interpret this code.
+By default, nextflow expects a shell script in the script block. 
+
+**Note:** Since Nextflow uses the same Bash syntax for variable substitutions in strings, Bash environment variables need to be escaped using the `\` character. The escaped version will be resolved later, returning the task directory (e.g. `work/7f/f285b80022d9f61e82cd7f90436aa4/`), while `$PWD` would show the directory where you're running Nextflow.
+
+Example:
+
+```nextflow
+process FOO {
+    debug true
+
+    script:
+    """
+    echo "The current directory is \$PWD"
+    """
+}
+
+workflow {
+    FOO()
+}
+
+// Outputs The current directory is /workspace/gitpod/nf-training/work/7a/4b050a6cdef4b6c1333ce29f7059a0
+```
+
+And without `\`
+
+```nextflow
+process BAR {
+    debug true
+
+    script:
+    """
+    echo "The current directory is \$PWD"
+    """
+}
+
+workflow {
+    BAR()
+}
+
+// The current directory is /workspace/gitpod/nf-training
+```
+
+It can be tricky to write a script that uses many Bash variables. One possible alternative is to use a script string delimited by single-quote characters (').
+
+```nextflow
+process BAZ {
+    debug true
+
+    script:
+    '''
+    echo "The current directory is $PWD"
+    '''
+}
+
+workflow {
+    BAZ()
+}
+
+// The current directory is /workspace/gitpod/nf-training/work/7a/4b050a6cdef4b6c1333ce29f7059a0
+```
+
+If you are using another language, like R or Python, you need the shebang so that Nextflow knows which software to use to interpret this code.
 
 Example:
 
@@ -1007,6 +1070,11 @@ It will produce an output similar to the following:
 [SRR493371, [/my/data/SRR493371_1.fastq, /my/data/SRR493371_2.fastq]]
 ```
 
+### The `.fromSRA` Channel Factory
+
+The `Channel.fromSRA` channel factory makes it possible to query the NCBI SRA archive and returns a channel emitting the FASTQ files matching the specified selection criteria.
+
+To learn more about how to use the `fromSRA` channel factory, see [here](https://training.nextflow.io/basic_training/channels/#fromsra).
 
 ## Channel Operators / performing operations on channels outside of a process
 
