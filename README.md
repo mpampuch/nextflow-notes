@@ -1503,6 +1503,7 @@ Channel
 - baz
 ```
 
+Note that the *closure* replaced the `()` brackets in the `view` operator with `{}` brackets.
 
 ### The `.map` channel operator
 
@@ -1564,6 +1565,8 @@ Outputs
 6
 ```
 
+**Note:** This is different to `.mix` because `.mix` operates on items emitted from channels, not `Collection` or `Array` objects.
+
 ### The `.collect` channel operator
 
 The `.collect` channel operator is basically the oposite of the `.flatten` channel operator, where it collects all the items emitted by a channel to a `List` and return the resulting object as a sole emission. For example:
@@ -1622,7 +1625,7 @@ Outputs
 
 ### The `.mix` channel operator
 
-The `mix` operator combines the items emitted by two (or more) channels into a single queue channel.
+The `mix` operator combines the items emitted by two (or more) **channels** into a single queue channel.
 
 For example:
 
@@ -1671,6 +1674,90 @@ MULTIQC(quant_ch.mix(fastqc_ch).collect())
 ```
 
 You will only want one task of `MultiQC` to be executed to produce one report. Therefore, you can use the `mix` channel operator to combine the `quant_ch` and the `fastqc_ch` channels, followed by the `collect` operator, to return the complete channel contents as a single element.
+
+**Note:** `mix` is different to `.flatten` because `flatten` operates on `Collection` or `Array` objects, not individual items.
+
+### The `.groupTuple` channel operator
+
+Things can get quite complicated when you have lots of different tuples, especially when you're trying to use something like matching keys.
+
+For example, if you had a sample with a bunch of different chromosomes, and you wanted to split them up all together and process them individually. How would you merge them back together based on a sample ID?
+
+The `groupTuple` operator is useful for this.
+
+The `groupTuple` operator collects tuples (or lists) of values emitted by the source channel, grouping the elements that share the same **key** into a list afterwards. Finally, it emits a new tuple object for each distinct key collected.
+
+By default, the *first* element of each tuple is used as the grouping key. The `by` option can be used to specify a different index, or list of indices. See [here](https://www.nextflow.io/docs/latest/operator.html#grouptuple) for more details.
+
+
+```nextflow
+Channel
+    .of([1, 'A'], [1, 'B'], [2, 'C'], [3, 'B'], [1, 'C'], [2, 'A'], [3, 'D'])
+    .groupTuple()
+    .view()
+```
+
+Outputs
+
+```
+[1, [A, B, C]]
+[2, [C, A]]
+[3, [B, D]]
+```
+
+### The `.join` channel operator
+
+The `join` operator is very similar to the `groupTuple` operator except it joins elements from multiple channels.
+
+The join operator creates a channel that joins together the items emitted by two channels with a matching key. The key is defined, by default, as the first element in each item emitted.
+
+```nextflow
+left = Channel.of(['X', 1], ['Y', 2], ['Z', 3], ['P', 7])
+right = Channel.of(['Z', 6], ['Y', 5], ['X', 4])
+left.join(right).view()
+```
+
+Output
+
+```
+[Z, 3, 6]
+[Y, 2, 5]
+[X, 1, 4]
+```
+
+**Note:** by default, `join` drops elements that don't have a match (Notice the `P` key and its corresponding list elements in the above example is missing from the output). This behaviour can be changed with the `remainder` option. See [here](https://www.nextflow.io/docs/latest/operator.html#join) for more details.
+
+### The `.branch` channel operator
+
+The `branch` operator allows you to forward the items emitted by a source channel to one or more output channels.
+
+The selection criterion is defined by specifying a closure that provides one or more boolean expressions, each of which is identified by a unique label. For the first expression that evaluates to a true value, the item is bound to a named channel as the label identifier.
+
+Example:
+
+```nextflow
+Channel
+    .of(1, 2, 3, 10, 40, 50)
+    .branch {
+        small: it <= 10
+        large: it > 10
+    }
+    .set { result }
+
+result.small.view { "$it is small" }
+result.large.view { "$it is large" }
+```
+
+Output
+
+```
+1 is small
+40 is large
+2 is small
+10 is small
+3 is small
+50 is large
+```
 
 ### The `.set` channel operator
 
