@@ -965,7 +965,52 @@ In the above example, each time the process is executed an alignment file is pro
 
 The `${..}` syntax allows you to pass in input variable names to the other parts of the process.
 
-### The `.out` attribute
+### Tuples in outputs (and inputs)
+
+A lot of examples show have used multiple input and output channels that can handle one value at a time. However, Nextflow can also handle a tuple of values.
+
+The `input` and `output` declarations for tuples must be declared with a `tuple` qualifier followed by the definition of each element in the tuple.
+
+***This is really useful when you want to carry the ID of a sample through all the steps of your pipeline.*** The sample ID is something you'd want to carry through every step of your process so you can track what these files are. The files can change names after a lot of input and output steps but keeping them in a tuple with their sample ID will make it easier to figure out what they are. **You might have different pieces of metadata being kept in the tuple as well**.
+
+
+Example:
+
+```nextflow
+reads_ch = Channel.fromFilePairs('data/ggal/*_{1,2}.fq')
+
+process FOO {
+    input:
+    tuple val(sample_id), path(sample_id_paths)
+
+    output:
+    tuple val(sample_id), path('sample.bam')
+
+    script:
+    """
+    echo your_command_here --sample $sample_id_paths > sample.bam
+    """
+}
+
+workflow {
+    sample_ch = FOO(reads_ch)
+    sample_ch.view()
+}
+```
+
+Outputs:
+
+```
+[lung, /workspace/gitpod/nf-training/work/23/fe268295bab990a40b95b7091530b6/sample.bam]
+[liver, /workspace/gitpod/nf-training/work/32/656b96a01a460f27fa207e85995ead/sample.bam]
+[gut, /workspace/gitpod/nf-training/work/ae/3cfc7cf0748a598c5e2da750b6bac6/sample.bam]
+```
+
+### Alternative Output Definitions
+
+Nextflow allows the use of alternative output definitions within workflows to simplify your code.
+
+These are done with the `.out` attribute and the `emit:` option.
 
 By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
 
