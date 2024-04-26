@@ -2572,6 +2572,8 @@ Seqera Platform (formerly known as Nextflow tower) provides a useful tool to mon
 
     - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
 
+Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
+
 ## Notes on Groovy
 
 Nextflow is a domain specific language (DSL) implemented on top of the Groovy programming language, which in turn is a super-set of the Java programming language. This means that Nextflow can run any Groovy or Java code.
