@@ -1011,6 +1011,7 @@ Outputs:
 Nextflow allows the use of alternative output definitions within workflows to simplify your code.
 
 These are done with the `.out` attribute and the `emit:` option.
+- `emit:` is more commonly used than `.out` indexing
 
 By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
 
