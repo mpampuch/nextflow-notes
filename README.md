@@ -346,7 +346,6 @@ sbatch launch_nf.sh /home/my_user/path/my_workflow.nf /home/my_user/path/my_conf
 
 ## Processes
 
-
 In Nextflow, a process is the basic computing primitive to execute foreign functions (i.e., custom scripts or tools).
 
 The process definition starts with the keyword process, followed by the process name and finally the process body delimited by curly brackets.
@@ -990,6 +989,40 @@ process CONVERTTOUPPER {
     with open("$y") as f:
         print(f.read().upper(), end="")
     """
+}
+```
+
+### Conditional Process Scripts 
+
+The process script can also be defined in a completely dynamic manner using an if statement or any other expression for evaluating a string value. 
+
+Example:
+
+```nextflow
+params.compress = 'gzip'
+params.file2compress = "$baseDir/data/ggal/transcriptome.fa"
+
+process FOO {
+    debug true
+
+    input:
+    path file
+
+    script:
+    if (params.compress == 'gzip')
+        """
+        echo "gzip -c $file > ${file}.gz"
+        """
+    else if (params.compress == 'bzip2')
+        """
+        echo "bzip2 -c $file > ${file}.bz2"
+        """
+    else
+        throw new IllegalArgumentException("Unknown compressor $params.compress")
+}
+
+workflow {
+    FOO(params.file2compress)
 }
 ```
 
