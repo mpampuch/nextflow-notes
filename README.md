@@ -856,6 +856,115 @@ fastq_ch = Channel.fromPath("data/**/*.fastq.gz").collect()
 
 When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
 
+The output declaration block defines the channels used by the process to send out the results produced.
+
+Only one output block, that can contain one or more output declaration, can be defined. The output block follows the syntax shown below:
+
+```nextflow
+output:
+<output qualifier> <output name>, emit: <output channel>
+```
+
+This is very similar to the input block, except it can also have an `emit:` option.
+
+### Outputting files
+
+The `path` qualifier specifies one or more files produced by the process into the specified channel as an output.
+
+If you use single quotes (`'`) around the output name, the name of the file outputted by the program has to match **exactly** to the one in the file path, otherwise it won't be collected in the process output.
+
+Example
+
+```nextflow
+process RANDOMNUM {
+    output:
+    path 'result.txt'
+
+    script:
+    """
+    echo \$RANDOM > result.txt
+    """
+}
+
+workflow {
+    receiver_ch = RANDOMNUM()
+    receiver_ch.view()
+}
+```
+
+#### Multiple output files
+
+When an output file name contains a wildcard character (`*` or `?`) it is interpreted as a [glob](https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows us to *capture* multiple files into a **list object** and output them as a sole emission. 
+
+For example:
+
+```nextflow
+process SPLITLETTERS {
+    output:
+    path 'chunk_*'
+
+    script:
+    """
+    printf 'Hola' | split -b 1 - chunk_
+    """
+}
+
+workflow {
+    letters = SPLITLETTERS()
+    letters.view()
+}
+```
+
+Ouputs:
+
+```
+[/workspace/gitpod/nf-training/work/ca/baf931d379aa7fa37c570617cb06d1/chunk_aa, /workspace/gitpod/nf-training/work/ca/baf931d379aa7fa37c570617cb06d1/chunk_ab, /workspace/gitpod/nf-training/work/ca/baf931d379aa7fa37c570617cb06d1/chunk_ac, /workspace/gitpod/nf-training/work/ca/baf931d379aa7fa37c570617cb06d1/chunk_ad]
+```
+
+Some caveats on glob pattern behavior:
+
+- Input files are not included in the list of possible matches
+- Glob pattern matches both files and directory paths
+- When a two stars pattern `**` is used to recourse across directories, only file paths are matched i.e., directories are not included in the result list.
+
+### Dynamic output filenames
+
+When an output file name needs to be expressed dynamically, it is possible to define it using a dynamic string that references values defined in the input declaration block or in the script global context. 
+
+For example:
+
+```nextflow
+species = ['cat', 'dog', 'sloth']
+sequences = ['AGATAG', 'ATGCTCT', 'ATCCCAA']
+
+Channel
+    .fromList(species)
+    .set { species_ch }
+
+process ALIGN {
+    input:
+    val x
+    val seq
+
+    output:
+    path "${x}.aln"
+
+    script:
+    """
+    echo align -in $seq > ${x}.aln
+    """
+}
+
+workflow {
+    genomes = ALIGN(species_ch, sequences)
+    genomes.view()
+}
+```
+
+In the above example, each time the process is executed an alignment file is produced whose name depends on the actual value of the `x` input.
+
+The `${..}` syntax allows you to pass in input variable names to the other parts of the process.
+
 ### The `.out` attribute
 
 By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
@@ -917,7 +1026,7 @@ process rnaseq_call_variants {
     """
 ```
 
-This won't create a name conflict for every sample that gets processed
+This won't create a name conflict for every sample that gets processed.
 
 This is because nextflow creates a new directory for every task a process performs. So if you're trying to process 10 samples (run 10 tasks from a single process), you're going to have 10 isolated folders.
 
