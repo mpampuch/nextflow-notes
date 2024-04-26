@@ -1775,6 +1775,10 @@ However the set operator is more grammatical in Nextflow scripting, since it can
 
 Whichever way you choose to assign a variable is up to you.
 
+### Channel operators for text files
+
+Nextflow also offers a lot of channel operators for working with common text file formats (e.g. `.txt`, `.csv`, `.json`). More information on these and how they work can be found [here](https://training.nextflow.io/basic_training/operators/#text-files).
+
 ### Range Expansion 
 
 Ranges of values are expanded accordingly:
@@ -1913,6 +1917,226 @@ Example:
 workflow.onComplete {
     log.info ( worflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : 'Oops .. something went wrong' )
 }
+```
+
+## Modules
+
+Nextflow DSL2 allows for the definition of stand-alone module scripts that can be included and shared across multiple workflows. Each module can contain its own `process` or `workflow` definition.
+
+More information can be found [here](https://training.nextflow.io/basic_training/modules/#modules) (Take careful note of the Module aliases section. This section talks about how to invoke processes multiple times after importing).
+
+## Workflow definitions
+
+The `workflow` scope allows the definition of components that define the invocation of one or more processes or operators.
+
+Example:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+params.greeting = 'Hello world!'
+
+include { SPLITLETTERS } from './modules.nf'
+include { CONVERTTOUPPER } from './modules.nf'
+
+
+workflow my_workflow {
+    greeting_ch = Channel.of(params.greeting)
+    SPLITLETTERS(greeting_ch)
+    CONVERTTOUPPER(SPLITLETTERS.out.flatten())
+    CONVERTTOUPPER.out.view { it }
+}
+
+workflow {
+    my_workflow()
+}
+```
+
+The snippet above defines a `workflow` named `my_workflow`, that is invoked via another `workflow` definition.
+
+### Workflow inputs
+
+A `workflow` component can declare one or more input channels using the `take` statement. 
+
+For example:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+params.greeting = 'Hello world!'
+
+include { SPLITLETTERS } from './modules.nf'
+include { CONVERTTOUPPER } from './modules.nf'
+
+workflow my_workflow {
+    take:
+    greeting
+
+    main:
+    SPLITLETTERS(greeting)
+    CONVERTTOUPPER(SPLITLETTERS.out.flatten())
+    CONVERTTOUPPER.out.view { it }
+}
+```
+
+The input for the workflow can then be specified as an argument:
+
+```nextflow
+workflow {
+    my_workflow(Channel.of(params.greeting))
+}
+```
+
+### Workflow outputs
+
+A `workflow` can declare one or more output channels using the `emit` statement. 
+
+For example:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+params.greeting = 'Hello world!'
+greeting_ch = Channel.of(params.greeting)
+
+process SPLITLETTERS {
+    input:
+    val x
+
+    output:
+    path 'chunk_*'
+
+    """
+    printf '$x' | split -b 6 - chunk_
+    """
+}
+
+process CONVERTTOUPPER {
+    input:
+    path y
+
+    output:
+    stdout emit: upper
+
+    """
+    cat $y | tr '[a-z]' '[A-Z]'
+    """
+}
+
+workflow my_workflow {
+    take:
+    greeting
+
+    main:
+    SPLITLETTERS(greeting)
+    CONVERTTOUPPER(SPLITLETTERS.out.flatten())
+
+    emit:
+    CONVERTTOUPPER.out.upper
+}
+
+workflow {
+    my_workflow(Channel.of(params.greeting))
+    my_workflow.out.view()
+}
+```
+
+As a result, you can use the my_workflow.out notation to access the outputs of my_workflow in the invoking workflow.
+
+You can also declare named outputs within the emit block.
+
+Example:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+params.greeting = 'Hello world!'
+greeting_ch = Channel.of(params.greeting)
+
+process SPLITLETTERS {
+    input:
+    val x
+
+    output:
+    path 'chunk_*'
+
+    """
+    printf '$x' | split -b 6 - chunk_
+    """
+}
+
+process CONVERTTOUPPER {
+    input:
+    path y
+
+    output:
+    stdout emit: upper
+
+    """
+    cat $y | tr '[a-z]' '[A-Z]'
+    """
+}
+
+workflow my_workflow {
+    take:
+    greeting
+
+    main:
+    SPLITLETTERS(greeting)
+    CONVERTTOUPPER(SPLITLETTERS.out.flatten())
+
+    emit:
+    my_data = CONVERTTOUPPER.out.upper
+}
+
+workflow {
+    my_workflow(Channel.of(params.greeting))
+    my_workflow.out.my_data.view()
+}
+```
+
+The result of the above snippet can then be accessed using `my_workflow.out.my_data`.
+
+### Calling named workflows
+
+Within a `main.nf` script you can also have multiple workflows. In which case you may want to call a specific workflow when running the code. For this you could use the entrypoint call `-entry <workflow_name>`.
+
+The following snippet has two named workflows (`my_workflow_one` and `my_workflow_two`):
+
+```nextflow
+#!/usr/bin/env nextflow
+
+params.greeting = 'Hello world!'
+
+include { SPLITLETTERS as SPLITLETTERS_one } from './modules.nf'
+include { SPLITLETTERS as SPLITLETTERS_two } from './modules.nf'
+
+include { CONVERTTOUPPER as CONVERTTOUPPER_one } from './modules.nf'
+include { CONVERTTOUPPER as CONVERTTOUPPER_two } from './modules.nf'
+
+
+workflow my_workflow_one {
+    letters_ch1 = SPLITLETTERS_one(params.greeting)
+    results_ch1 = CONVERTTOUPPER_one(letters_ch1.flatten())
+    results_ch1.view { it }
+}
+
+workflow my_workflow_two {
+    letters_ch2 = SPLITLETTERS_two(params.greeting)
+    results_ch2 = CONVERTTOUPPER_two(letters_ch2.flatten())
+    results_ch2.view { it }
+}
+
+workflow {
+    my_workflow_one(Channel.of(params.greeting))
+    my_workflow_two(Channel.of(params.greeting))
+}
+```
+
+You can choose which workflow to run by using the `entry` flag:
+
+```bash
+nextflow run hello2.nf -entry my_workflow_one
 ```
 
 ## Metrics and reports
