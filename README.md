@@ -621,6 +621,129 @@ The following input qualifiers are available:
 
 More information on how each of these input qualifiers work can be found here https://www.nextflow.io/docs/latest/process.html#inputs
 
+### Handling multiple inputs
+
+A key feature of processes is the ability to handle inputs from multiple channels. However, it’s important to understand how channel contents and their semantics affect the execution of a process.
+
+Consider the following example:
+
+```nextflow
+ch1 = Channel.of(1, 2, 3)
+ch2 = Channel.of('a', 'b', 'c')
+
+process FOO {
+    debug true
+
+    input:
+    val x
+    val y
+
+    script:
+    """
+    echo $x and $y
+    """
+}
+
+workflow {
+    FOO(ch1, ch2)
+}
+```
+
+Ouputs:
+
+```
+1 and a
+3 and c
+2 and b
+```
+
+Both channels emit three values, therefore the process is executed three times, each time with a different pair.
+
+The process waits until there’s a complete input configuration, i.e., it receives an input value from all the channels declared as input.
+
+When this condition is verified, it consumes the input values coming from the respective channels, spawns a task execution, then repeats the same logic until one or more channels have no more content.
+
+This means channel values are consumed serially one after another and the first empty channel causes the process execution to stop, even if there are other values in other channels.
+
+What happens when channels do not have the same cardinality (i.e., they emit a different number of elements)?
+
+```nextflow
+ch1 = Channel.of(1, 2, 3)
+ch2 = Channel.of('a')
+
+process FOO {
+    debug true
+
+    input:
+    val x
+    val y
+
+    script:
+    """
+    echo $x and $y
+    """
+}
+
+workflow {
+    FOO(ch1, ch2)
+}
+```
+
+Outputs:
+
+```
+1 and a
+```
+
+In the above example, the process is only executed once because the process stops when a channel has no more data to be processed.
+
+However, replacing `ch2` with a value channel will cause the process to be executed three times, each time with the same value of `a`.
+
+For more information see [here](https://training.nextflow.io/basic_training/processes/#combine-input-channels).
+
+### Input repeaters
+
+The `each` qualifier allows you to repeat the execution of a process for each item in a collection every time new data is received. 
+
+***This is a very good way to try multiple parameters for a certain process***.
+
+Example:
+
+```nextflow
+sequences = Channel.fromPath("$baseDir/data/ggal/*_1.fq")
+methods = ['regular', 'espresso']
+
+process ALIGNSEQUENCES {
+    debug true
+
+    input:
+    path seq
+    each mode
+
+    script:
+    """
+    echo t_coffee -in $seq -mode $mode
+    """
+}
+
+workflow {
+    ALIGNSEQUENCES(sequences, methods)
+}
+```
+
+Outputs:
+
+```
+t_coffee -in gut_1.fq -mode regular
+t_coffee -in lung_1.fq -mode espresso
+t_coffee -in liver_1.fq -mode regular
+t_coffee -in gut_1.fq -mode espresso
+t_coffee -in lung_1.fq -mode regular
+t_coffee -in liver_1.fq -mode espresso
+```
+
+In the above example, every time a file of sequences is received as an input by the process, it executes three tasks, each running a different alignment method set as a mode variable. This is useful when you need to repeat the same task for a given set of parameters.
+
 ### The double asterisk
 
 A double asterisk (`**`) in a glob pattern works like `*` but also searches through subdirectories. For example, imagine this is your file structure
