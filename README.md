@@ -1412,6 +1412,18 @@ To learn more about how to use the `fromSRA` channel factory, see [here](https:/
 
 ## Channel Operators / performing operations on channels outside of a process
 
+Nextflow operators are methods that allow you to manipulate channels. Every operator, with the exception of `set` and `subscribe`, produces one or more new channels, allowing you to chain operators to fit your needs.
+
+There are seven main groups of operators are described in greater detail within the Nextflow Reference Documentation, linked below:
+
+1. [Filtering operators](https://www.nextflow.io/docs/latest/operator.html#filtering-operators)
+2. [Transforming operators](https://www.nextflow.io/docs/latest/operator.html#transforming-operators)
+3. [Splitting operators](https://www.nextflow.io/docs/latest/operator.html#splitting-operators)
+4. [Combining operators](https://www.nextflow.io/docs/latest/operator.html#combining-operators)
+5. [Forking operators](https://www.nextflow.io/docs/latest/operator.html#forking-operators)
+6. [Maths operators](https://www.nextflow.io/docs/latest/operator.html#maths-operators)
+7. [Other operators](https://www.nextflow.io/docs/latest/operator.html#other-operators)
+
 Sometimes the output channel of one process doesn't quite match the input channel of the next process and so it has to be modified slightly. This can be performed using channel operators. A full list of channel operators can be found here https://www.nextflow.io/docs/latest/operator.html.
 
 For example, in this code:
@@ -1454,6 +1466,81 @@ rnaseq_gatk_analysis
 ```
 
 Just keep in mind processes and channel operators are not guaranteed to emit items in the order that they were received, as they are executed concurrently. This can lead to unintended effects based if you use a operator that takes multiple inputs. For example, the using the `merge` channel operator can lead to different results upon different runs based on the order in which the processes finish. You should always use a matching key (e.g. sample ID) to merge multiple channels, so that they are combined in a deterministic way (using an operator like `join` instead). 
+
+### The `.view` channel operator
+
+The `view` operator prints the items emitted by a channel to the console standard output, appending a new line character to each item. 
+
+For example:
+
+```nextflow
+Channel
+    .of('foo', 'bar', 'baz')
+    .view()
+```
+
+Outputs:
+
+```
+foo
+bar
+baz
+```
+
+An optional *closure* parameter can be specified to customize how items are printed. 
+
+For example:
+
+```nextflow
+Channel
+    .of('foo', 'bar', 'baz')
+    .view { "- $it" }
+```
+
+```
+- foo
+- bar
+- baz
+```
+
+
+### The `.map` channel operator
+
+The `map` operator applies a function of your choosing to every item emitted by a channel and returns the items obtained as a new channel. The function applied is called the *mapping* function and is expressed with a *closure*. 
+
+In the example below the groovy `reverse` method has been used to reverse the order of the characters in each string emitted by the channel.
+
+```nextflow
+Channel
+    .of('hello', 'world')
+    .map { it -> it.reverse() }
+    .view()
+```
+
+Outputs:
+
+```
+olleh
+dlrow
+```
+
+A `map` can associate a generic *tuple* to each element and can contain any data. 
+
+In the example below the groovy `size` method is used to return the length of each string emitted by the channel.
+
+```nextflow
+Channel
+    .of('hello', 'world')
+    .map { word -> [word, word.size()] }
+    .view()
+```
+
+Outputs:
+
+```
+[hello, 5]
+[world, 5]
+```
 
 ### The `.flatten` channel operator
 
