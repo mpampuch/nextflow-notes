@@ -1796,6 +1796,8 @@ Nextflow also offers a lot of channel operators for working with common text fil
 
 Sometimes you'll have a filepath you want to use in your workflow (e.g. `path/to/some/file`). It's a good idea to check the class of your file because it may be a string instead of a file object.
 
+Turning your file path into a path object is important because it helps Nextflow provision and stage your data.
+
 Example:
 
 ```nextflow
