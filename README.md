@@ -1772,6 +1772,29 @@ Output
 50 is large
 ```
 
+An element is only emitted to a channel where the test condition is met. If an element does not meet any of the tests, it is not emitted to any of the output channels. You can 'catch' any such samples by specifying true as a condition. 
+
+Example:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header: true )
+    | map { row -> [[id: row.id, repeat: row.repeat, type: row.type], [file(row.fastq1), file(row.fastq2)]] }
+    | branch { meta, reads ->
+        tumor: meta.type == "tumor"
+        normal: meta.type == "normal"
+        other: true
+    }
+    | set { samples }
+
+    samples.tumor | view { "Tumor: $it"}
+    samples.normal | view { "Normal: $it"}
+}
+```
+
+`other` here will catch any rows that don't fall into either branches. This is good for testing for typos or errors in the data.
+
 ### The `multiMap` channel operator
 
 The `multiMap` channel operator is similar to the `branch` channel operator
