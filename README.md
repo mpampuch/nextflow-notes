@@ -2565,6 +2565,20 @@ You can also use this simple one liner that employs `;` to be treated as a multi
 | view(); return; //
 ```
 
+In vscode you can make use this code to make this a custom user snippet
+
+```json
+"Nextflow debug snippet": {
+		"scope": "nf,groovy",
+		"prefix": "vv",
+		"body": [
+				"| view(); return; //"
+		],
+		"description": "Inserts | view(); return; //"
+}
+```
+
+
 ## Nextflow best practices
 
 ### Keeping track of metadata
