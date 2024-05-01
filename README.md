@@ -2998,6 +2998,36 @@ assertEquals(demo - ~/t.o ?/, "one three")
 
 **Note:** In Groovy, `-` is just a shorthand notation for the `minus` method. 
 
+#### Tokenizing
+
+The `tokenize()` method is a convenient method provided by Groovy for splitting strings into tokens based on a delimiter (kind of like the `.split()` method in Python). It is really useful for parsing metadata delimited by a certain delimeter.
+
+Example:
+
+```groovy
+def metadata = "sampleA_rep1_tumor"
+tokens = metadata.tokenize("_")
+println(tokens)
+// Outputs: [sampleA, rep1, tumor]
+```
+
+Combining this with tuple unpacking syntax you can quickly create a lot of variables for your metadata.
+
+Example:
+
+```groovy
+def metadata = "sampleA_rep1_tumor"
+(sample, replicate, type) = metadata.tokenize("_")
+println(sample)
+println(replicate)
+println(type)
+/* Outputs:
+sampleA
+rep1
+tumor 
+*/ 
+```
+
 ### Maps
 
 Maps are like lists that have an arbitrary key instead of an integer. Therefore, the syntax is very much aligned.
@@ -3166,3 +3196,7 @@ workflow {
     | view
 }
 ```
+
+### Groovy web console
+
+A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
