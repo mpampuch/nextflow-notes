@@ -2619,6 +2619,50 @@ In vscode you can make use this code to make this a custom user snippet
 
 In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again. 
 
+### Styling code
+
+Most Nextflow users prefer the `set` notation rather than the `=` notation
+
+Example:
+
+```nextflow
+workflow { 
+    // Create a channel with all the fastq files in the data directory
+    Channel.fromPath("${params.dataDir}/**/*.fastq.gz")
+    | map { path ->
+            // Extract the part of the path that is to the right of params.dataDir
+            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])    
+            // Create a tuple with the relative path and the file path
+            Tuple.tuple(relativePath, path)
+    }
+    | set { fastqFiles_ch }
+    
+    // Subset the fastq files
+    SUBSET_FASTQ(fastqFiles_ch)
+    | set { fastqFilesSubsetted_ch }
+    | view()
+}
+```
+
+Instead of:
+
+```nextflow
+workflow { 
+    // Create a channel with all the fastq files in the data directory
+    fastqFiles_ch = Channel.fromPath("${params.dataDir}/**/*.fastq.gz")
+    | map { path ->
+            // Extract the part of the path that is to the right of params.dataDir
+            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])    
+            // Create a tuple with the relative path and the file path
+            Tuple.tuple(relativePath, path)
+    }
+    
+    // Subset the fastq files
+    fastqFilesSubsetted_ch = SUBSET_FASTQ(fastqFiles_ch)
+    
+    fastqFilesSubsetted_ch.view()
+}
+```
 
 ### Organizing your *in-silico* experiments 
 
