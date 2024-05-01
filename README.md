@@ -1702,10 +1702,6 @@ The `groupTuple` operator collects tuples (or lists) of values emitted by the so
 
 By default, the *first* element of each tuple is used as the grouping key. The `by` option can be used to specify a different index, or list of indices. See [here](https://www.nextflow.io/docs/latest/operator.html#grouptuple) for more details.
 
-`groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
-
-**Note:** By default, `groupTuple` is a *blocking* operator (see example above for explaination).
-
 ```nextflow
 Channel
     .of([1, 'A'], [1, 'B'], [2, 'C'], [3, 'B'], [1, 'C'], [2, 'A'], [3, 'D'])
@@ -1719,6 +1715,75 @@ Outputs
 [1, [A, B, C]]
 [2, [C, A]]
 [3, [B, D]]
+```
+
+`groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
+
+**Note:** By default, `groupTuple` is a *blocking* operator (see example above for explaination).
+
+### The `.transpose` channel operator
+
+The transpose operator is often misunderstood. It can be thought of as the inverse of the `groupTuple` operator ([see here for an example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3850))
+
+Given the following workflow, the `groupTuple` and `transpose` operators cancel each other out. Removing lines 8 and 9 returns the same result.
+
+Given a workflow that returns one element per sample, where we have grouped the samplesheet lines on a meta containing only id and type:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv(header: true)
+    | map { row ->
+        meta = [id: row.id, type: row.type]
+        [meta, row.repeat, [row.fastq1, row.fastq2]]
+    }
+    | groupTuple
+    | view
+}
+```
+
+Outputs:
+
+```
+N E X T F L O W  ~  version 23.04.1
+Launching `./main.nf` [spontaneous_rutherford] DSL2 - revision: 7dc1cc0039
+[[id:sampleA, type:normal], [1, 2], [[data/reads/sampleA_rep1_normal_R1.fastq.gz, data/reads/sampleA_rep1_normal_R2.fastq.gz], [data/reads/sampleA_rep2_normal_R1.fastq.gz, data/reads/sampleA_rep2_normal_R2.fastq.gz]]]
+[[id:sampleA, type:tumor], [1, 2], [[data/reads/sampleA_rep1_tumor_R1.fastq.gz, data/reads/sampleA_rep1_tumor_R2.fastq.gz], [data/reads/sampleA_rep2_tumor_R1.fastq.gz, data/reads/sampleA_rep2_tumor_R2.fastq.gz]]]
+[[id:sampleB, type:normal], [1], [[data/reads/sampleB_rep1_normal_R1.fastq.gz, data/reads/sampleB_rep1_normal_R2.fastq.gz]]]
+[[id:sampleB, type:tumor], [1], [[data/reads/sampleB_rep1_tumor_R1.fastq.gz, data/reads/sampleB_rep1_tumor_R2.fastq.gz]]]
+[[id:sampleC, type:normal], [1], [[data/reads/sampleC_rep1_normal_R1.fastq.gz, data/reads/sampleC_rep1_normal_R2.fastq.gz]]]
+[[id:sampleC, type:tumor], [1], [[data/reads/sampleC_rep1_tumor_R1.fastq.gz, data/reads/sampleC_rep1_tumor_R2.fastq.gz]]]
+```
+
+If we add in a `transpose`, each repeat number is matched back to the appropriate list of reads:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv(header: true)
+    | map { row ->
+        meta = [id: row.id, type: row.type]
+        [meta, row.repeat, [row.fastq1, row.fastq2]]
+    }
+    | groupTuple
+    | transpose
+    | view
+}
+```
+
+Outputs:
+
+```
+N E X T F L O W  ~  version 23.04.1
+Launching `./main.nf` [elegant_rutherford] DSL2 - revision: 2c5476b133
+[[id:sampleA, type:normal], 1, [data/reads/sampleA_rep1_normal_R1.fastq.gz, data/reads/sampleA_rep1_normal_R2.fastq.gz]]
+[[id:sampleA, type:normal], 2, [data/reads/sampleA_rep2_normal_R1.fastq.gz, data/reads/sampleA_rep2_normal_R2.fastq.gz]]
+[[id:sampleA, type:tumor], 1, [data/reads/sampleA_rep1_tumor_R1.fastq.gz, data/reads/sampleA_rep1_tumor_R2.fastq.gz]]
+[[id:sampleA, type:tumor], 2, [data/reads/sampleA_rep2_tumor_R1.fastq.gz, data/reads/sampleA_rep2_tumor_R2.fastq.gz]]
+[[id:sampleB, type:normal], 1, [data/reads/sampleB_rep1_normal_R1.fastq.gz, data/reads/sampleB_rep1_normal_R2.fastq.gz]]
+[[id:sampleB, type:tumor], 1, [data/reads/sampleB_rep1_tumor_R1.fastq.gz, data/reads/sampleB_rep1_tumor_R2.fastq.gz]]
+[[id:sampleC, type:normal], 1, [data/reads/sampleC_rep1_normal_R1.fastq.gz, data/reads/sampleC_rep1_normal_R2.fastq.gz]]
+[[id:sampleC, type:tumor], 1, [data/reads/sampleC_rep1_tumor_R1.fastq.gz, data/reads/sampleC_rep1_tumor_R2.fastq.gz]]
 ```
 
 ### The `.join` channel operator
