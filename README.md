@@ -485,25 +485,25 @@ Now you can find out in which directory everything related to every task perform
 
 Every task that is executed by Nextflow will produe a bunch of hidden files in the tasks work directory beginning with `.command`. Below are a list of all of them and what they contain.
 
-#### The `.command.begin` file
+#### **The `.command.begin` file**
 
 The `.command.begin` file is a file that is created whenever the task really started. 
 
 Whenever you are debugging a pipeline and you don't know if a task really started or not, you can check for the existence of this file.
 
-#### The `.command.err` file
+#### **The `.command.err` file**
 
 The `.command.err` file contains all the errors that may have occured for this task.
 
-#### The `.command.log` file
+#### **The `.command.log` file**
 
 The `.command.log` file contains the logs created for this task (e.g. with `log.info` or through other methods).
 
-#### The `.command.out` file
+#### **The `.command.out` file**
 
 The `.command.out` file contains anything that was printed to your screen (the standard output).
 
-#### The `.command.run` file
+#### **The `.command.run` file**
 
 The `.command.run` file shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
@@ -511,7 +511,7 @@ This script contains all the functions nextflow needs to make sure your script r
 
 You're not really supposed to meddle with this file but sometimes you may want to see what's in it. (E.g. To see what Docker command was used to start the container etc.)
 
-#### The `.command.sh` file
+#### **The `.command.sh` file**
 
 The `.command.sh` file contains the **final** script that was run for that task.
 
@@ -905,7 +905,7 @@ workflow {
 }
 ```
 
-#### Multiple output files
+#### **Multiple output files**
 
 When an output file name contains a wildcard character (`*` or `?`) it is interpreted as a [glob](https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows us to *capture* multiple files into a **list object** and output them as a sole emission. 
 
@@ -1910,7 +1910,7 @@ workflow {
 }
 ```
 
-#### Deciding when to use `branch` or `multimap`
+#### **Deciding when to use `branch` or `multimap`**
 
 One way to think about this is if you have for example data in a `.csv` file. 
 
@@ -2976,7 +2976,7 @@ Note the different use of `$` and `${..}` syntax to interpolate value expression
 
 Groovy has a lot of very helpful syntactic sugar for string manipulation.
 
-#### Trimming strings
+#### **Trimming strings**
 
 You can trim parts of a string by simply subtracting another string.
 
@@ -2987,7 +2987,7 @@ demo = "one two three"
 assertEquals(demo - "two ", "one three")
 ```
 
-#### Subtracting Regular Expressions
+#### **Subtracting Regular Expressions**
 
 Regex's can be creating in Groovy using the `~` pattern
 
@@ -2998,7 +2998,7 @@ assertEquals(demo - ~/t.o ?/, "one three")
 
 **Note:** In Groovy, `-` is just a shorthand notation for the `minus` method. 
 
-#### Tokenizing
+#### **Tokenizing**
 
 The `tokenize()` method is a convenient method provided by Groovy for splitting strings into tokens based on a delimiter (kind of like the `.split()` method in Python). It is really useful for parsing metadata delimited by a certain delimeter.
 
@@ -3178,7 +3178,7 @@ map { id, reads ->
 }
 ```
 
-#### Combining property-style notation and spread-dot notation
+#### **Combining property-style notation and spread-dot notation**
 
 You can significantly shorten lines if you combine property-style notation and spread-dot notation in groovy.
 
