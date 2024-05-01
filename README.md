@@ -1806,6 +1806,13 @@ workflow {
 }
 ```
 
+#### Deciding when to use `branch` or `multimap`
+
+One way to think about this is if you have for example data in a `.csv` file. 
+
+- If you need to output two channels for every single row, use `multiMap`
+- If you need to output two channels, and you need to filter which parts of all the rows should go into which channel, use `branch`
+
 ### The `.set` channel operator
 
 The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
