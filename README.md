@@ -1702,6 +1702,9 @@ The `groupTuple` operator collects tuples (or lists) of values emitted by the so
 
 By default, the *first* element of each tuple is used as the grouping key. The `by` option can be used to specify a different index, or list of indices. See [here](https://www.nextflow.io/docs/latest/operator.html#grouptuple) for more details.
 
+`groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
+
+**Note:** By default, `groupTuple` is a *blocking* operator (see example above for explaination).
 
 ```nextflow
 Channel
