@@ -1723,7 +1723,7 @@ Outputs
 
 ### The `.transpose` channel operator
 
-The transpose operator is often misunderstood. It can be thought of as the inverse of the `groupTuple` operator ([see here for an example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3850))
+The transpose operator is often misunderstood. It can be thought of as the inverse of the `groupTuple` operator ([see here for an example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3850)).
 
 Given the following workflow, the `groupTuple` and `transpose` operators cancel each other out. Removing lines 8 and 9 returns the same result.
 
@@ -1917,6 +1917,37 @@ One way to think about this is if you have for example data in a `.csv` file.
 - If you need to output two channels for every single row, use `multiMap`
 - If you need to output two channels, and you need to filter which parts of all the rows should go into which channel, use `branch`
 
+### The `.flatMap` channel operator
+
+The `flatMap` operator allows you to modify the elements in a channel and then flatten the resulting collection. This is useful if you need to "expand" elements in a channel an incoming element can turn into zero or more elements in the output channel. 
+
+For example:
+
+```nextflow
+workflow {
+    numbers = Channel.of(1, 2)
+
+    numbers
+    | flatMap { n -> [ n, n*10, n*100 ] }
+    | view
+}
+```
+
+The input channel has two elements. For each element in the input channel, we return a List of length three. The List is flattened and each element in our returned list is emitted independently into the output channel:
+
+Outputs:
+
+```
+1
+10
+100
+2
+20
+200
+```
+
+This differs from the `flatten` operator because the `flatten` operator only "unfolds" one layer from the returned collection
+
 ### The `.set` channel operator
 
 The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
@@ -1933,9 +1964,18 @@ However the set operator is more grammatical in Nextflow scripting, since it can
 
 Whichever way you choose to assign a variable is up to you.
 
+### The `.collectFile` channel operator
+
+The `collectFile` operator allows you to write one or more new files based on the contents of a channel.
+
+More information on how this works can be found [here](https://training.nextflow.io/advanced/operators/#collectfile).
+
+
 ### Channel operators for text files
 
 Nextflow also offers a lot of channel operators for working with common text file formats (e.g. `.txt`, `.csv`, `.json`). More information on these and how they work can be found [here](https://training.nextflow.io/basic_training/operators/#text-files).
+
+
 
 ### The `file` method for creating file paths
 
