@@ -1996,6 +1996,24 @@ SOME_PROCESS.out.view{ file(it).getClass() }
 // outputs sun.nio.fs.UnixPath
 ```
 
+The `file` method also comes with an optional `checkIfExists` parameter, that will check if the file exists. It works on local machines and file systems on remote files and block storage.
+
+Example:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header:true )
+    | map { row ->
+        meta = row.subMap('id', 'repeat', 'type')
+        [meta, [
+            file(row.fastq1, checkIfExists: true),
+            file(row.fastq2, checkIfExists: true)]]
+    }
+    | view
+}
+```
+
 ### Range Expansion 
 
 Ranges of values are expanded accordingly:
@@ -2756,6 +2774,112 @@ In vscode you can make use this code to make this a custom user snippet
 
 ## Nextflow best practices
 
+### Never perform in-place operations on objects in Nextflow.
+
+Because Nextflow is a deeply asyncronous system, modifying data in place can affect the results of another process that may be trying to access the same memory. Whenever you need to modify data, make sure to perform operations that create a *copy* or *new object* for the data.
+
+For example, this code intentionally performs data modifications in-place:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header:true )
+    | map { row ->
+        meta = row.subMap('id', 'repeat', 'type')
+        [meta, [
+            file(row.fastq1, checkIfExists: true),
+            file(row.fastq2, checkIfExists: true)]]
+    }
+    | set { samples }
+
+
+    samples
+    | map { sleep 10; it }
+    | view { meta, reads -> "Should be unmodified: $meta" }
+
+    samples
+    | map { meta, reads ->
+        meta.type = "BROKEN"
+        [meta, reads]
+    }
+    | view { meta, reads -> "Should be MODIFIED: $meta" }
+}
+```
+
+What you would expect is to have outputs from two channels, one with the data as was (unmodified) and one with the data modified. This is what you get as output instead.
+
+```
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN] 
+Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN] 
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleA, repeat:1, type: BROKEN]
+Should be unmodified: [id: sampleA, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleA, repeat:2, type: BROKEN] 
+Should be unmodified: [id:sampleA, repeat:2, type: BROKEN] 
+Should be unmodified: [id:sampleB, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleB, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleC, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleC, repeat:1, type: BROKEN]
+```
+
+Instead you have all the data having been modified because both maps were performing over the same `meta` object in memory.
+
+To make this operation safe, you must ensure that you are using operators that return copies (e.g. `subMap`, `+`, etc.)
+
+Example:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header:true )
+    | map { row ->
+        meta = row.subMap('id', 'repeat', 'type')
+        [meta, [
+            file(row.fastq1, checkIfExists: true),
+            file(row.fastq2, checkIfExists: true)]]
+    }
+    | set { samples }
+
+
+    samples
+    | map { sleep 10; it }
+    | view { meta, reads -> "Should be unmodified: $meta" }
+
+    samples
+    | map { meta, reads ->
+        [meta + [type: "BROKEN"], reads]
+    }
+    | view { meta, reads -> "Should be MODIFIED: $meta" }
+}
+```
+
+Outputs:
+
+```
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN] 
+Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN] 
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleA, repeat:1, type: normal]
+Should be unmodified: [id: sampleA, repeat:1, type: tumor] 
+Should be unmodified: [id:sampleA, repeat:2, type: normal] 
+Should be unmodified: [id:sampleA, repeat:2, type: tumor] 
+Should be unmodified: [id:sampleB, repeat:1, type: normal] 
+Should be unmodified: [id:sampleB, repeat:1, type: tumor] 
+Should be unmodified: [id:sampleC, repeat:1, type: normal] 
+Should be unmodified: [id:sampleC, repeat:1, type: tumor]
+```
+
+
 ### Keeping track of metadata
 
 In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again. 
@@ -2796,6 +2920,11 @@ workflow {
 ```
 
 More information on metadata propogation can be found [here](https://training.nextflow.io/advanced/metadata/#metadata-import).
+
+### Grouping and splitting data
+
+Using grouping you can constuct more complicated graph structures inside your workflow by taking data from multiple processes, splitting it apart, and then putting it back together. Below are a few best practices for doing so.
+
 
 ### Styling code
 
