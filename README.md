@@ -2559,7 +2559,20 @@ workflow {
 }
 ```
 
-## How to keep your *in-silico* experiments organized
+You can also use this simple one liner that employs `;` to be treated as a multiline expression which is very useful for debugging
+
+```nextflow
+| view(); return;
+```
+
+## Nextflow best practices
+
+### Keeping track of metadata
+
+In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again. 
+
+
+### Organizing your *in-silico* experiments 
 
 It’s good practice to organize each **experiment** in its own folder. The main experiment input parameters should be specified using a Nextflow config file. This makes it simple to track and replicate an experiment over time.
 
