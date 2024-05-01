@@ -2935,6 +2935,31 @@ println "The $foxtype ${foxcolor.join()} fox"
 
 Note the different use of `$` and `${..}` syntax to interpolate value expressions in a string literal.
 
+### String Manipulations
+
+Groovy has a lot of very helpful syntactic sugar for string manipulation.
+
+#### Trimming strings
+
+You can trim parts of a string by simply subtracting another string.
+
+Example:
+
+```groovy
+demo = "one two three"
+assertEquals(demo - "two ", "one three")
+```
+
+#### Subtracting Regular Expressions
+
+Regex's can be creating in Groovy using the `~` pattern
+
+```groovy
+demo = "one two three"
+assertEquals(demo - ~/t.o ?/, "one three")
+```
+
+
 ### Maps
 
 Maps are like lists that have an arbitrary key instead of an integer. Therefore, the syntax is very much aligned.
@@ -3067,4 +3092,36 @@ You can learn more about closures in the [Groovy documentation](http://groovy-la
 
 ### `get*()` in Groovy
 
-In Groovy, any method that looks like `get*()` can also be accessed as a field. For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
+In Groovy, any gettersmethod that looks like `get*()` can also be accessed as a field (aka in property-style notation). For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
+
+### Spread-dot notation
+
+If we want to call a set method on every item in a Collection, Groovy provides this convenient "spread dot" notation
+
+```groovy
+map { id, reads ->
+    reads.collect { it.getParent() }
+}
+
+// Is equivalent to 
+
+map { id, reads ->
+    reads*.getParent()
+}
+```
+
+#### Combining property-style notation and spread-dot notation
+
+You can significantly shorten lines if you combine property-style notation and spread-dot notation in groovy.
+
+For example, the following 4 lines in the map are equivalent.
+
+```nextflow
+Channel.fromFilePairs("data/reads/*/*_R{1,2}.fastq.gz")
+| map { id, reads -> 
+    reads.collect { it.getParent() }.collect { it.getName() }
+    reads.collect { it.parent }.collect { it.name }
+    reads*.getParent()*.getName()
+    reads*.parent*.name
+}
+```
