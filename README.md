@@ -2770,6 +2770,43 @@ In vscode you can make use this code to make this a custom user snippet
 
 In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again. 
 
+An extremely common channel "shape" or cardinality in nf-core modules and subworkflows is the `tuple val(meta), path(reads)` structure.
+
+Example:
+
+```nextflow
+process EXAMPLE_PROCESS {
+    input:
+    tuple val(meta), path(reads)
+
+    // ...
+```
+
+This style is critical to enabling reusability of these modules. If you structure your data to have a tuple containing a "metadata map" and the path to your data your data would be suitable for any Nextflow process with inputs in the above form.
+
+Example:
+
+```nextflow
+workflow {
+    Channel.fromFilePairs("data/reads/*/*_R{1,2}.fastq.gz")
+    | map { id, reads ->
+        (sample, replicate, type) = id.tokenize("_")
+        (treatmentFwd, treatmentRev) = reads*.parent*.name*.minus(~/treatment/)
+        meta = [
+            sample:sample,
+            replicate:replicate,
+            type:type,
+            treatmentFwd:treatmentFwd,
+            treatmentRev:treatmentRev,
+        ]
+        [meta, reads]
+    }
+    | view
+}
+```
+
+More information on metadata propogation can be found [here](https://training.nextflow.io/advanced/metadata/#metadata-import).
+
 ### Styling code
 
 Most Nextflow users prefer the `set` notation rather than the `=` notation
@@ -2959,6 +2996,7 @@ demo = "one two three"
 assertEquals(demo - ~/t.o ?/, "one three")
 ```
 
+**Note:** In Groovy, `-` is just a shorthand notation for the `minus` method. 
 
 ### Maps
 
