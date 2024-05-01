@@ -2468,35 +2468,25 @@ The `file()` method returns a Path, so any method defined for Path can also be u
 
 Additionally, the following methods are also defined for Paths in Nextflow:
 
-`exists()`
-Returns true if the file exists.
+- `exists()` Returns true if the file exists.
 
-`getBaseName()`
-Gets the file name without its extension, e.g. `/some/path/file.tar.gz` -> `file.tar`.
+- `getBaseName()` Gets the file name without its extension, e.g. `/some/path/file.tar.gz` -> `file.tar`.
 
-`getExtension()`
-Gets the file extension, e.g. `/some/path/file.txt` -> `txt`.
+- `getExtension()` Gets the file extension, e.g. `/some/path/file.txt` -> `txt`.
 
-`getName()`
-Gets the file name, e.g. `/some/path/file.txt` -> `file.txt`.
+- `getName()` Gets the file name, e.g. `/some/path/file.txt` -> `file.txt`.
 
-`getSimpleName()`
-Gets the file name without any extension, e.g. `/some/path/file.tar.gz` -> `file`.
+- `getSimpleName()` Gets the file name without any extension, e.g. `/some/path/file.tar.gz` -> `file`.
 
-`getParent()`
-Gets the file parent path, e.g. `/some/path/file.txt` -> `/some/path`.
+- `getParent()` Gets the file parent path, e.g. `/some/path/file.txt` -> `/some/path`.
 
-`isDirectory()`
-Returns true if the file is a directory.
+- `isDirectory()` Returns true if the file is a directory.
 
-`isEmpty()`
-Returns true if the file is empty or does not exist.
+- `isEmpty()` Returns true if the file is empty or does not exist.
 
-`isFile()`
-Returns true if it is a regular file (i.e. not a directory).
+- `isFile()` Returns true if it is a regular file (i.e. not a directory).
 
-`isLink()`
-Returns true if the file is a symbolic link.
+- `isLink()` Returns true if the file is a symbolic link.
 
 ## Process Directives
 
