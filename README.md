@@ -1802,10 +1802,10 @@ Example:
 SOME_PROCESS.out.view() 
 // outputs path/to/some/file
 
-SOME_PROCESS.out.view{ ${it.getClass()} } 
+SOME_PROCESS.out.view{ it.getClass() } 
 // outputs java.lang.string
 
-SOME_PROCESS.out.view{ ${file(it).getClass()} } 
+SOME_PROCESS.out.view{ file(it).getClass() } 
 // outputs sun.nio.fs.UnixPath
 ```
 
