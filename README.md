@@ -590,6 +590,19 @@ You can see in this case it outputs a single channel element created from the `.
 - The first item is an ID (in this case the replicate ID)
 - The second item is a list with all the items (in this case the path to the reads)
 
+In addition to the argument-less usage of `view` as shown above, this operator can also take a closure to customize the stdout message. We can create a closure to print the value of the elements in a channel as well as their type, for example.
+
+```nextflow
+def timesN = { multiplier, it -> it * multiplier }
+def timesTen = timesN.curry(10)
+
+workflow {
+    Channel.of( 1, 2, 3, 4, 5 )
+    | map( timesTen )
+    | view { "Found '$it' (${it.getClass()})"}
+}
+```
+
 ## Process Inputs
 
 The `input` block allows you to define the input channels of a process, similar to function arguments. A process may have at most one input block, and it must contain at least one input.
