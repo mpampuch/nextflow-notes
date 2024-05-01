@@ -1772,7 +1772,7 @@ Output
 50 is large
 ```
 
-An element is only emitted to a channel where the test condition is met. If an element does not meet any of the tests, it is not emitted to any of the output channels. You can 'catch' any such samples by specifying true as a condition. 
+An element is only emitted to a channel where the test condition is met. If an element does not meet any of the tests, it is not emitted to any of the output channels. You can 'catch' any such samples by specifying `true` as a condition. 
 
 Example:
 
@@ -1790,10 +1790,23 @@ workflow {
 
     samples.tumor | view { "Tumor: $it"}
     samples.normal | view { "Normal: $it"}
+    samples.other | view { log.warn "Non-tumour or normal sample found in samples: $it"}
 }
 ```
 
 `other` here will catch any rows that don't fall into either branches. This is good for testing for typos or errors in the data.
+
+You can then combine this with log functions `log.warn` to warn the user there may be an error or more strictly `log.error` to halt the pipeline.
+
+You may also want to emit a slightly different element than the one passed as input. The `branch` operator can (optionally) return a *new* element to an channel. For example, to add an extra key in the meta map of the tumor samples, we add a new line under the condition and return our new element. In this example, we modify the first element of the `List` to be a new list that is the result of merging the existing meta map with a new map containing a single key:
+
+```nextflow
+branch { meta, reads ->
+    tumor: meta.type == "tumor"
+        return [meta + [newKey: 'myValue'], reads]
+    normal: true
+}
+```
 
 ### The `multiMap` channel operator
 
@@ -2670,7 +2683,6 @@ workflow {
     // Subset the fastq files
     SUBSET_FASTQ(fastqFiles_ch)
     | set { fastqFilesSubsetted_ch }
-    | view()
 }
 ```
 
