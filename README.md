@@ -3117,11 +3117,14 @@ You can significantly shorten lines if you combine property-style notation and s
 For example, the following 4 lines in the map are equivalent.
 
 ```nextflow
-Channel.fromFilePairs("data/reads/*/*_R{1,2}.fastq.gz")
-| map { id, reads -> 
-    reads.collect { it.getParent() }.collect { it.getName() }
-    reads.collect { it.parent }.collect { it.name }
-    reads*.getParent()*.getName()
-    reads*.parent*.name
+workflow{
+    Channel.fromFilePairs("data/reads/*/*_R{1,2}.fastq.gz")
+    | map { id, reads -> 
+        reads.collect { it.getParent() }.collect { it.getName() }
+        reads.collect { it.parent }.collect { it.name }
+        reads*.getParent()*.getName()
+        reads*.parent*.name
+    }
+    | view
 }
 ```
