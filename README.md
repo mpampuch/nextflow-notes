@@ -2562,7 +2562,7 @@ workflow {
 You can also use this simple one liner that employs `;` to be treated as a multiline expression which is very useful for debugging
 
 ```nextflow
-| view(); return;
+| view(); return; //
 ```
 
 ## Nextflow best practices
