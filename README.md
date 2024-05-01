@@ -1772,6 +1772,40 @@ Output
 50 is large
 ```
 
+### The `multiMap` channel operator
+
+The `multiMap` channel operator is similar to the `branch` channel operator
+
+The `multiMap` ([documentation](https://www.nextflow.io/docs/latest/operator.html#multimap)) operator is a way of taking a single input channel and emitting into **multiple channels for each input element**.
+
+Let's assume we've been given a samplesheet that has tumor/normal pairs bundled together on the same row. View the example samplesheet with:
+
+```bash
+cd operators
+cat data/samplesheet.ugly.csv
+```
+
+Using the `splitCsv` operator would give us one entry that would contain all four fastq files. Let's consider that we wanted to split these fastqs into separate channels for tumor and normal. In other words, for every row in the samplesheet, we would like to emit an entry into two new channels. To do this, we can use the `multiMap` operator:
+
+```nextflow
+workflow {
+    Channel.fromPath("data/samplesheet.ugly.csv")
+    | splitCsv( header: true )
+    | multiMap { row ->
+        tumor:
+            metamap = [id: row.id, type:'tumor', repeat:row.repeat]
+            [metamap, file(row.tumor_fastq_1), file(row.tumor_fastq_2)]
+        normal:
+            metamap = [id: row.id, type:'normal', repeat:row.repeat]
+            [metamap, file(row.normal_fastq_1), file(row.normal_fastq_2)]
+    }
+    | set { samples }
+
+    samples.tumor | view { "Tumor: $it"}
+    samples.normal | view { "Normal: $it"}
+}
+```
+
 ### The `.set` channel operator
 
 The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
