@@ -3018,6 +3018,16 @@ tumor
 */ 
 ```
 
+**Note:** Be aware of an important difference between the `tokenize` and `split` methods in Groovy. The `tokenize()` method uses each character of a string as a delimiter whereas `split()` takes the entire string as a delimiter.
+
+Example:
+
+```groovy
+String testString='hello world'
+assert ['hel',' world']==testString.split('lo')
+assert ['he',' w','r','d']==testString.tokenize('lo')
+```
+
 ### Maps
 
 Maps are like lists that have an arbitrary key instead of an integer. Therefore, the syntax is very much aligned.
