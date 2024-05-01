@@ -1792,6 +1792,23 @@ Whichever way you choose to assign a variable is up to you.
 
 Nextflow also offers a lot of channel operators for working with common text file formats (e.g. `.txt`, `.csv`, `.json`). More information on these and how they work can be found [here](https://training.nextflow.io/basic_training/operators/#text-files).
 
+### The `file` method for creating file paths
+
+Sometimes you'll have a filepath you want to use in your workflow (e.g. `path/to/some/file`). It's a good idea to check the class of your file because it may be a string instead of a file object.
+
+Example:
+
+```nextflow
+SOME_PROCESS.out.view() 
+// outputs path/to/some/file
+
+SOME_PROCESS.out.view{ ${it.getClass()} } 
+// outputs java.lang.string
+
+SOME_PROCESS.out.view{ ${file(it).getClass()} } 
+// outputs sun.nio.fs.UnixPath
+```
+
 ### Range Expansion 
 
 Ranges of values are expanded accordingly:
