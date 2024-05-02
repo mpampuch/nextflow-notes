@@ -1894,7 +1894,7 @@ MapReads( samples, reference )
 | CombineBams
 ```
 
-So because here groupKey is being used, the elements from groupTuple were emitted much faster than they would otherwise have been because you don't have to wait for all of the mapping operations to complete before your groupTuple operation starts to emit items. The groupTuple operator already knows that some of these samples are ready because as soon as the second argument of groupKey is satisfied (in this case the length of the `repeatcount`) it knows that the tuple is ready to be emitted and will emit it immediately instead of having to wait for all the samples. This is very useful for when you have large runs with tens to hundreds of samples and will save lots of time by emitting ready items as soon as possible for downstream process to begin working on them.
+So because here `groupKey` is being used, the elements from `groupTuple` were emitted much faster than they would otherwise have been because you don't have to wait for all of the mapping operations to complete before your `groupTuple` operation starts to emit items. The `groupTuple` operator already knows that some of these samples are ready because as soon as the second argument of `groupKey` is satisfied (in this case the length of the `repeatcount`) it knows that the tuple is ready to be emitted and will emit it immediately instead of having to wait for all the samples. This is very useful for when you have large runs with tens to hundreds of samples and will save lots of time by emitting ready items as soon as possible for downstream process to begin working on them.
 
 ### The `.transpose` channel operator
 
