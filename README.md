@@ -2393,6 +2393,25 @@ workflow.onComplete {
 
 Nextflow DSL2 allows for the definition of stand-alone module scripts that can be included and shared across multiple workflows. Each module can contain its own `process` or `workflow` definition.
 
+Commonly modules are stored in `main.nf` files within a module folder and are imported the top-level `main.nf` file.
+
+Example:
+
+```
+.
+├── main.nf
+└── modules
+    └── local
+        └── fastp
+            └── main.nf
+```
+
+The module is then imported into the top-level `main.nf` using:
+
+```nextflow
+include { FASTP } from './modules/local/fastp/main.nf'
+```
+
 More information can be found [here](https://training.nextflow.io/basic_training/modules/#modules) (Take careful note of the Module aliases section. This section talks about how to invoke processes multiple times after importing).
 
 ## Workflow definitions
@@ -3423,6 +3442,30 @@ assert map == [a: 'x', b: 'y', c: 'z']
 Map objects implement all methods provided by the [java.util.Map](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html) interface, plus the extension methods provided by [Groovy](http://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html).
 
 
+#### **The `.keySet()` method** 
+
+The `keySet()` method is a Java method (not a Groovy method) that is part of the `Map` interface, which is implemented by classes like `HashMap`, `TreeMap`, etc. This method returns a `Set` containing all the keys present in the map.
+
+It's very useful when working with map objects in Groovy and Nextflow. Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be super useful. 
+
+Example:
+
+```nextflow
+Channel.fromPath(params.input)
+| splitCsv(header: true)
+| map { row ->
+    (readKeys, metaKeys) = row.keySet().split { it =~ /^fastq/ }
+    reads = row.subMap(readKeys).values()
+    .findAll { it != "" } // Single-end reads will have an empty string
+    .collect { file(it) } // Turn those strings into paths
+    meta = row.subMap(metaKeys)
+    meta.id ?= meta.sample
+    meta.single_end = reads.size == 1
+    [meta, reads]
+}
+| view
+```
+
 ### Functions
 
 It is possible to define a custom function into a script:
@@ -3560,6 +3603,11 @@ workflow {
 }
 ```
 
+### Groovy Imports 
+
+There exists in Groovy and the JVM ecosystem a wealth of helper classes that can be imported into Nextflow scripts to help you accomplish some small tasks and helpful bits and pieces inside your Nextflow workflow.
+
 ### Groovy web console
 
 A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
+
