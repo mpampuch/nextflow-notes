@@ -1885,8 +1885,6 @@ process CombineBams {
 
 // In the workflow
 
-// ...
-
 MapReads( samples, reference )
 | map { meta, bam ->
     key = groupKey(meta.subMap('id', 'type'), meta.repeatcount)
