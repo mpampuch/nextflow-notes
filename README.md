@@ -1589,7 +1589,7 @@ Since this returns a value channel and value channels are inexaustable, this is 
 Example:
 
 ```nextflow
-    reference = Channel.fromPath("data/genome.fasta").first()
+reference = Channel.fromPath("data/genome.fasta").first()
 ```
 
 ### The `.flatten` channel operator
