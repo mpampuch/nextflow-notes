@@ -3446,7 +3446,7 @@ Map objects implement all methods provided by the [java.util.Map](https://docs.o
 
 The `keySet()` method is a Java method (not a Groovy method), but it's still very useful when working with map objects in Groovy and Nextflow. It is part of the `Map` interface, which is implemented by classes like `HashMap`, `TreeMap`, etc. This method returns a `Set` containing all the keys present in the map.
 
-Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be super useful. 
+Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be very convienient. 
 
 Example:
 
