@@ -3451,19 +3451,7 @@ It's very useful when working with map objects in Groovy and Nextflow. Often in 
 Example:
 
 ```nextflow
-Channel.fromPath(params.input)
-| splitCsv(header: true)
-| map { row ->
-    (readKeys, metaKeys) = row.keySet().split { it =~ /^fastq/ }
-    reads = row.subMap(readKeys).values()
-    .findAll { it != "" } // Single-end reads will have an empty string
-    .collect { file(it) } // Turn those strings into paths
-    meta = row.subMap(metaKeys)
-    meta.id ?= meta.sample
-    meta.single_end = reads.size == 1
-    [meta, reads]
-}
-| view
+(readKeys, metaKeys) = row.keySet().split { it =~ /^fastq/ }
 ```
 
 ### Functions
