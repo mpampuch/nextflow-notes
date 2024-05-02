@@ -1556,6 +1556,42 @@ Outputs:
 [world, 5]
 ```
 
+### The `.first` channel operator 
+
+The `first` operator emits the first item in a source channel, or the first item that matches a condition, and outputs a **value** channel. The condition can be a regular expression, a type qualifier (i.e. Java class), or a boolean predicate. 
+
+For example:
+
+```nextflow
+// no condition is specified, emits the very first item: 1
+Channel.of( 1, 2, 3 )
+    .first()
+    .view()
+
+// emits the first item matching the regular expression: 'aa'
+Channel.of( 'a', 'aa', 'aaa' )
+    .first( ~/aa.*/ )
+    .view()
+
+// emits the first String value: 'a'
+Channel.of( 1, 2, 'a', 'b', 3 )
+    .first( String )
+    .view()
+
+// emits the first item for which the predicate evaluates to true: 4
+Channel.of( 1, 2, 3, 4, 5 )
+    .first { it > 3 }
+    .view()
+```
+
+Since this returns a value channel and value channels are inexaustable, this is really good for channels that contain files which are reused oftens, like reference genomes.
+
+Example:
+
+```nextflow
+    reference = Channel.fromPath("data/genome.fasta").first()
+```
+
 ### The `.flatten` channel operator
 
 The `.flatten` operator transforms a channel in such a way that every item of type `Collection` or `Array` is flattened so that each single entry is emitted separately by the resulting channel. For example:
