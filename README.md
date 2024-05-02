@@ -1755,7 +1755,148 @@ Outputs
 
 `groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
 
-**Note:** By default, `groupTuple` is a *blocking* operator (see example above for explaination).
+**Note:** By default, `groupTuple` is a *blocking* operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
+
+#### The **groupKey()** method
+
+By default, if you don’t specify a size, the `groupTuple` operator will not emit any groups until *all* inputs have been received. If possible, you should always try to specify the number of expected elements in each group using the `size` option, so that each group can be emitted as soon as it’s ready. In cases where the size of each group varies based on the grouping key, you can use the built-in `groupKey()` function, which allows you to define a different expected size for each group:
+
+```nextflow
+chr_frequency = ["chr1": 2, "chr2": 3]
+
+Channel.of(
+        ['region1', 'chr1', '/path/to/region1_chr1.vcf'],
+        ['region2', 'chr1', '/path/to/region2_chr1.vcf'],
+        ['region1', 'chr2', '/path/to/region1_chr2.vcf'],
+        ['region2', 'chr2', '/path/to/region2_chr2.vcf'],
+        ['region3', 'chr2', '/path/to/region3_chr2.vcf']
+    )
+    .map { region, chr, vcf -> tuple( groupKey(chr, chr_frequency[chr]), vcf ) }
+    .groupTuple()
+    .view()
+```
+
+Outputs:
+
+```
+[chr1, [/path/to/region1_chr1.vcf, /path/to/region2_chr1.vcf]]
+[chr2, [/path/to/region1_chr2.vcf, /path/to/region2_chr2.vcf, /path/to/region3_chr2.vcf]]
+```
+
+As a further explaination, take a look at the following example which shows a dummy read mapping process.:
+
+```nextflow
+process MapReads {
+    input:
+    tuple val(meta), path(reads)
+    path(genome)
+
+    output:
+    tuple val(meta), path("*.bam")
+
+    "touch out.bam"
+}
+
+workflow {
+    reference = Channel.fromPath("data/genome.fasta").first()
+
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header:true )
+    | map { row ->
+        meta = row.subMap('id', 'repeat', 'type')
+        [meta, [
+            file(row.fastq1, checkIfExists: true),
+            file(row.fastq2, checkIfExists: true)]]
+    }
+    | set { samples }
+
+    MapReads( samples, reference )
+    | view
+}
+```
+
+Let's consider that you might now want to merge the repeats. You'll need to group bams that share the id and type attributes.
+
+```nextflow
+MapReads( samples, reference )
+| map { meta, bam -> [meta.subMap('id', 'type'), bam]}
+| groupTuple
+| view
+```
+
+This is easy enough, but the `groupTuple` operator has to wait until all items are emitted from the incoming queue before it is able to reassemble the output queue. If even one read mapping job takes a long time, the processing of all other samples is held up. You need a way of signalling to nextflow how many items are in a given group so that items can be emitted as early as possible.
+
+By default, the `groupTuple` operator groups on the first item in the element, which at the moment is a `Map`. You can turn this map into a special class using the `groupKey` method, which takes our grouping object as a first parameter and the number of expected elements in the second parameter.
+
+```nextflow
+MapReads( samples, reference )
+| map { meta, bam ->
+    key = groupKey(meta.subMap('id', 'type'), NUMBER_OF_ITEMS_IN_GROUP)
+    [key, bam]
+}
+| groupTuple
+| view
+```
+
+So modifying the upstream channel would look like this:
+
+```nextflow
+
+workflow {
+    reference = Channel.fromPath("data/genome.fasta").first()
+
+    Channel.fromPath("data/samplesheet.csv")
+    | splitCsv( header:true )
+    | map { row ->
+        meta = row.subMap('id', 'repeat', 'type')
+        [meta, [file(row.fastq1, checkIfExists: true), file(row.fastq2, checkIfExists: true)]]
+    }
+    | map { meta, reads -> [meta.subMap('id', 'type'), meta.repeat, reads] }
+    | groupTuple
+    | map { meta, repeats, reads -> [meta + [repeatcount:repeats.size()], repeats, reads] }
+    | transpose
+    | map { meta, repeat, reads -> [meta + [repeat:repeat], reads]}
+    | set { samples }
+
+    MapReads( samples, reference )
+    | map { meta, bam ->
+        key = groupKey(meta.subMap('id', 'type'), meta.repeatcount)
+        [key, bam]
+    }
+    | groupTuple
+    | view
+}
+```
+
+Now that you have our repeats together in an output channel, you can combine them using "advanced bioinformatics":
+
+```nextflow
+process CombineBams {
+    input:
+    tuple val(meta), path("input/in_*_.bam")
+
+    output:
+    tuple val(meta), path("combined.bam")
+
+    "cat input/*.bam > combined.bam"
+}
+
+// ...
+
+// In the workflow
+
+// ...
+
+MapReads( samples, reference )
+| map { meta, bam ->
+    key = groupKey(meta.subMap('id', 'type'), meta.repeatcount)
+    [key, bam]
+}
+| groupTuple
+| CombineBams
+```
+
+
 
 ### The `.transpose` channel operator
 
