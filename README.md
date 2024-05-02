@@ -3383,7 +3383,7 @@ println(tokens)
 // Outputs: [sampleA, rep1, tumor]
 ```
 
-Combining this with tuple unpacking syntax you can quickly create a lot of variables for your metadata.
+Combining this with destructuring syntax you can quickly create a lot of variables for your metadata.
 
 Example:
 
@@ -3444,9 +3444,9 @@ Map objects implement all methods provided by the [java.util.Map](https://docs.o
 
 #### **The `.keySet()` method** 
 
-The `keySet()` method is a Java method (not a Groovy method) that is part of the `Map` interface, which is implemented by classes like `HashMap`, `TreeMap`, etc. This method returns a `Set` containing all the keys present in the map.
+The `keySet()` method is a Java method (not a Groovy method), but it's still very useful when working with map objects in Groovy and Nextflow. It is part of the `Map` interface, which is implemented by classes like `HashMap`, `TreeMap`, etc. This method returns a `Set` containing all the keys present in the map.
 
-It's very useful when working with map objects in Groovy and Nextflow. Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be super useful. 
+Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be super useful. 
 
 Example:
 
