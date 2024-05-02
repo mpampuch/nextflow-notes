@@ -1757,7 +1757,7 @@ Outputs
 
 **Note:** By default, `groupTuple` is a *blocking* operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
 
-#### The **groupKey()** method
+#### The **`groupKey()`** method
 
 By default, if you don’t specify a size, the `groupTuple` operator will not emit any groups until *all* inputs have been received. If possible, you should always try to specify the number of expected elements in each group using the `size` option, so that each group can be emitted as soon as it’s ready. In cases where the size of each group varies based on the grouping key, you can use the built-in `groupKey()` function, which allows you to define a different expected size for each group:
 
