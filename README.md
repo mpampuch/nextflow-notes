@@ -1896,6 +1896,8 @@ MapReads( samples, reference )
 
 So because here `groupKey` is being used, the elements from `groupTuple` were emitted much faster than they would otherwise have been because you don't have to wait for all of the mapping operations to complete before your `groupTuple` operation starts to emit items. The `groupTuple` operator already knows that some of these samples are ready because as soon as the second argument of `groupKey` is satisfied (in this case the length of the `meta.repeatcount` value) it knows that the tuple is ready to be emitted and will emit it immediately instead of having to wait for all the samples. This is very useful for when you have large runs with tens to hundreds of samples and will save lots of time by emitting ready items as soon as possible for downstream process to begin working on them.
 
+**Note:** The class of a `groupKey` object is `nextflow.extension.GroupKey`. If you need the raw contents of the `groupKey` object (e.g. the metadata map), you can use the `.getGroupTarget()` method to extract those. [See here for more information](https://youtu.be/nPAH9owvKvI?feature=shared&t=9538).
+
 ### The `.transpose` channel operator
 
 The transpose operator is often misunderstood. It can be thought of as the inverse of the `groupTuple` operator ([see here for an example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3850)).
@@ -2122,6 +2124,64 @@ Outputs:
 ```
 
 This differs from the `flatten` operator because the `flatten` operator only "unfolds" one layer from the returned collection
+
+### The `.combine` channel operator
+
+The `combine` operator produces the combinations (i.e. cross product, “Cartesian” product) of two source channels, or a channel and a list (as the right operand), emitting each combination separately.
+
+For example:
+
+```nextflow
+numbers = Channel.of(1, 2, 3)
+words = Channel.of('hello', 'ciao')
+
+numbers
+    .combine(words)
+    .view()
+```
+
+Outputs:
+
+```
+[1, hello]
+[2, hello]
+[3, hello]
+[1, ciao]
+[2, ciao]
+[3, ciao]
+```
+
+The `by` option can be used to combine items that share a matching key. The value should be the zero-based index of the tuple, or a list of indices. 
+
+For example:
+
+```nextflow
+source = Channel.of( [1, 'alpha'], [2, 'beta'] )
+target = Channel.of( [1, 'x'], [1, 'y'], [1, 'z'], [2, 'p'], [2, 'q'], [2, 't'] )
+
+source.combine(target, by: 0).view()
+```
+
+Outputs:
+
+```
+[1, alpha, x]
+[1, alpha, y]
+[1, alpha, z]
+[2, beta, p]
+[2, beta, q]
+[2, beta, t]
+```
+
+This is very useful for splitting or fanning-out your data to perforom operations on multiple subgroups of your data (See [here](https://training.nextflow.io/advanced/grouping/#fanning-out-over-intervals) for more info).
+
+**Note:** The `combine` operator is similar to `cross` and `join`, making them easy to confuse. Their differences can be summarized as follows:
+- `combine` and `cross` both produce an *outer product* or *cross product*, whereas `join` produces an *inner product*.
+- `combine` filters pairs with a matching key only if the by option is used, whereas `cross` always filters pairs with a matching key.
+- `combine` with the by option merges and flattens each pair, whereas `cross` does not. Compare the [examples here](https://www.nextflow.io/docs/latest/operator.html#cross) for `combine` and `cross` to see this difference.
+
+
+
 
 ### The `.set` channel operator
 
@@ -3098,8 +3158,7 @@ More information on metadata propogation can be found [here](https://training.ne
 
 ### Grouping and splitting data
 
-Using grouping you can constuct more complicated graph structures inside your workflow by taking data from multiple processes, splitting it apart, and then putting it back together. Below are a few best practices for doing so.
-
+Using grouping you can constuct more complicated graph structures inside your workflow by taking data from multiple processes, splitting it apart, and then putting it back together. See [here](https://training.nextflow.io/advanced/grouping/) for some of the best practices for doing so.
 
 ### Styling code
 
