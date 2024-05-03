@@ -2377,7 +2377,7 @@ You want to provide the `mode: 'copy'` option because by default files are publi
 
 You can also provide the option `saveAs` to the `publishDir` directive if you want to rename the names of the output files. `saveAs` takes in a closure. If you want to not publish a file (e.g. if you only want to publish some output files from a process that produces multiple of them), return the value `null` from the closure.
 
-Example (this example is using the syntax found in config files.):
+Example (this example is using the syntax found in config files):
 
 ```nextflow
 process {
