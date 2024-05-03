@@ -3295,6 +3295,34 @@ def x = 1
 ```
 The `def` should be always used when defining variables local to a function or a closure.
 
+### The Ternary Operator
+
+Groovy supports the use of the ternary operator.
+
+```groovy
+def x = condition ? valueIfTrue : valueIfFalse
+```
+
+#### **The Elvis Operator**
+
+Groovy supports the use of the Elvis operator (`?:`).
+
+```groovy
+somethingThatMightBeFalsey ?: somethingElse
+
+// ^This is equivalent to 
+somethingThatMightBeFalsey ? somethingThatMightBeFalsey : somethingElse
+```
+
+Another form of the Elvis operator can be used to quickly assign a conditional value to a variable (`?=`).
+
+```groovy
+meta.id ?= meta.sample
+
+// ^This is equivalent to
+meta.id = meta.id ? meta.id : meta.sample
+```
+
 ### Assertions
 
 You can use the `assert` keyword to test if a condition is true (similar to an `if` function).
