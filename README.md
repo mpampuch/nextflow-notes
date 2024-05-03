@@ -3667,6 +3667,24 @@ FASTP.out.json
 | view
 ```
 
+### The safe navigation operator 
+
+Groovy has a safe navigation operator `?.`.  It's used to safely access properties or methods of an object without throwing a `NullPointerException` if the object itself is null (Similar to optional chaining in JavaScript).
+
+For example:
+
+```groovy
+import groovy.json.JsonSlurper
+
+def getFilteringResult(json_file) {
+    fastpResult = new JsonSlurper().parseText(json_file.text)
+
+    fastpResult?.summary?.after_filtering
+}
+```
+
+This code is safeguarded in case the `summary` or `after_filtering` objects don't exist. If these objects don't exist, the code will return early and return a `null` object.
+
 ### Groovy web console
 
 A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
