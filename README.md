@@ -2375,6 +2375,21 @@ process SOMEPROCESS {
 
 You want to provide the `mode: 'copy'` option because by default files are published to the target folder creating a **symbolic link** for each process output that links the file produced into the process working directory. Usually you want an actual copy of your desired file and not just a symbolic link.
 
+You can also provide the option `saveAs` to the `publishDir` directive if you want to rename the names of the output files. `saveAs` takes in a closure. If you want to not publish a file (e.g. if you only want to publish some output files from a process that produces multiple of them), return the value `null` from the closure.
+
+Example (this example is using the syntax found in config files.):
+
+```nextflow
+process {
+    withName: 'FASTP' {
+        publishDir = [
+            path: { "results/fastp/json" },
+            saveAs: { filename -> filename.endsWith('.json') ? filename : null },
+        ]
+    }
+}
+```
+
 ## Workflows
 
 ### The `onComplete` Event Handler
