@@ -3638,6 +3638,35 @@ workflow {
 
 There exists in Groovy and the JVM ecosystem a wealth of helper classes that can be imported into Nextflow scripts to help you accomplish some small tasks and helpful bits and pieces inside your Nextflow workflow.
 
+For example, if you want to parse some JSON files in your code, you can import a Groovy JSON parser.
+
+At the top of you `main.nf` file, add this:
+
+```groovy
+import groovy.json.JsonSlurper
+
+// We can also import a Yaml parser just as easily:
+//   import org.yaml.snakeyaml.Yaml
+//   new Yaml().load(new FileReader('your/data.yml'))
+```
+
+You can then use the contents of this Groovy module in your Nextflow workflows:
+
+```nextflow
+def getFilteringResult(json_file) {
+    fastpResult = new JsonSlurper().parseText(json_file.text)
+}
+
+// ...
+
+// In the workflow block
+
+FASTP.out.json
+| map { meta, json -> [meta, getFilteringResult(json)] }
+| join( FASTP.out.reads )
+| view
+```
+
 ### Groovy web console
 
 A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
