@@ -451,7 +451,7 @@ process > CONVERTTOUPPER
 ✔
 ```
 
-The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that we call a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
+The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that is called a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
 
 **Note**: Inside the work directory for the specific task, you will also find the ***Symbolic links*** used as inputs for the specific task, not copies of the files themselves.
 
@@ -3050,7 +3050,7 @@ The `bin` directory (if it exists) is always added to the `$PATH` for all tasks.
 
 It is important to know that Nextflow will take care of updating `$PATH` and ensuring the files are available wherever the task is running, but **will not change the permissions of any files in that directory**. If a file is called by a task as an executable, **the workflow developer must ensure that the file has the correct permissions to be executed**.
 
-For example, let's say we have a small R script that produces a csv and a tsv:
+For example, let's say you have a small R script that produces a csv and a tsv:
 
 ```R
 #!/usr/bin/env Rscript
@@ -3061,7 +3061,7 @@ mtcars |> write_tsv("cars.tsv")
 ggsave("cars.png", plot = plot)
 ```
 
-We'd like to use this script in a simple workflow:
+You'd like to use this script in a simple workflow:
 
 ```nextflow
 process PlotCars {
@@ -3085,7 +3085,7 @@ workflow {
 }
 ```
 
-To do this, we can create the bin directory, write our R script into the directory. Finally, and crucially, we make the script executable:
+To do this, you can create the bin directory, write our R script into the directory. Finally, and crucially, **make the script executable**:
 
 
 ```bash
@@ -3144,7 +3144,7 @@ It is **strongly** recommended to use `#!/usr/bin/env` when setting the shebang 
 
 If a process script block is becoming too long, it can be moved to a template file. The template file can then be imported into the process script block using the `template` method. This is useful for keeping the process block tidy and readable. Nextflow's use of `$` to indicate variables also allows for directly testing the template file by running it as a script.
 
-The structure directory already contains an example template - a very simple python script. We can add a new process that uses this template:
+The structure directory already contains an example template - a very simple python script. You can add a new process that uses this template:
 
 ```nextflow
 process SayHiTemplate {
@@ -3717,7 +3717,7 @@ In Groovy, any gettersmethod that looks like `get*()` can also be accessed as a 
 
 ### Spread-dot notation
 
-If we want to call a set method on every item in a Collection, Groovy provides this convenient "spread dot" notation
+If you want to call a set method on every item in a Collection, Groovy provides this convenient "spread dot" notation
 
 ```groovy
 map { id, reads ->
