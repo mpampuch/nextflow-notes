@@ -3046,7 +3046,113 @@ Inside a Nextflow workflow repository there are a couple special directories tha
 
 ### The `./bin` directory
 
+The `bin` directory (if it exists) is always added to the `$PATH` for all tasks. If the tasks are performed on a remote machine, the directory is copied across to the new machine before the task begins. This Nextflow feature is designed to make it easy to include accessory scripts directly in the workflow without having to commit those scripts into the container. This feature also ensures that the scripts used inside of the workflow move on the same revision schedule as the workflow itself.
+
+It is important to know that Nextflow will take care of updating `$PATH` and ensuring the files are available wherever the task is running, but **will not change the permissions of any files in that directory**. If a file is called by a task as an executable, **the workflow developer must ensure that the file has the correct permissions to be executed**.
+
+For example, let's say we have a small R script that produces a csv and a tsv:
+
+```R
+#!/usr/bin/env Rscript
+library(tidyverse)
+
+plot <- ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point()
+mtcars |> write_tsv("cars.tsv")
+ggsave("cars.png", plot = plot)
+```
+
+We'd like to use this script in a simple workflow:
+
+```nextflow
+process PlotCars {
+    container 'rocker/tidyverse:latest'
+
+    output:
+    path("*.png"), emit: "plot"
+    path("*.tsv"), emit: "table"
+
+    script:
+    """
+    cars.R
+    """
+}
+
+workflow {
+    PlotCars()
+
+    PlotCars.out.table | view { "Found a tsv: $it" }
+    PlotCars.out.plot | view { "Found a png: $it" }
+}
+```
+
+To do this, we can create the bin directory, write our R script into the directory. Finally, and crucially, we make the script executable:
+
+
+```bash
+mkdir -p bin
+cat << EOF > bin/cars.R
+#!/usr/bin/env Rscript
+library(tidyverse)
+
+plot <- ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point()
+mtcars |> write_tsv("cars.tsv")
+ggsave("cars.png", plot = plot)
+EOF
+chmod +x bin/cars.R
+```
+
+Let's run the script and see what Nextflow is doing for us behind the scenes:
+
+```bash
+cat << EOF > nextflow.config
+profiles {
+    docker {
+        docker.enabled = true
+    }
+}
+EOF
+rm -r work
+nextflow run . -profile docker
+```
+
+and then inspect the `.command.run` file that Nextflow has generated
+
+```bash
+code work/*/*/.command.run
+```
+
+You'll notice a `nxf_container_env` bash function that appends our bin directory to `$PATH`:
+
+```bash
+nxf_container_env() {
+cat << EOF
+export PATH="\$PATH:/workspace/gitpod/nf-training/advanced/structure/bin"
+EOF
+}
+```
+
+When working on the cloud, Nextflow will also ensure that the bin directory is copied onto the virtual machine running your task in addition to the modification of `$PATH`.
+
+**Note:** Always use a portable shebang line in your bin directory scripts.
+
+In the R script example shown above, the `Rscript` program may be installed at (for example) `/opt/homebrew/bin/Rscript`. If you hard-code this path into `cars.R`, everything will work when you're testing locally outside of the docker container, but will fail when running with docker/singularity or in the cloud as the `Rscript` program may be installed in a different location in those contexts.
+
+It is **strongly** recommended to use `#!/usr/bin/env` when setting the shebang for scripts in the `bin` directory to ensure maximum portability.
+
+
 ### The `./templates` directory
+
+If a process script block is becoming too long, it can be moved to a template file. The template file can then be imported into the process script block using the `template` method. This is useful for keeping the process block tidy and readable. Nextflow's use of `$` to indicate variables also allows for directly testing the template file by running it as a script.
+
+The structure directory already contains an example template - a very simple python script. We can add a new process that uses this template:
+
+```nextflow
+process SayHiTemplate {
+    debug true
+    input: val(name)
+    script: template 'adder.py'
+}
+```
 
 ### The `./lib` directory
 
