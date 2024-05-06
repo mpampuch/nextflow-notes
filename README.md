@@ -3386,6 +3386,31 @@ If we try to use this new class in a resumed process, no caches will be used.
 
 #### **Making a ValueObject**
 
+Nextflow has provided a decorator to help serialize your custom classes. By adding `@ValueObject` to the class definition, Nextflow will automatically serialize the class and cache it. This is useful if you want to pass a custom class through a channel, or if you want to use the class in a resumed workflow.
+
+To do this, we first add the decorator to the desired class:
+
+```groovy
+import nextflow.io.ValueObject
+
+@ValueObject
+class Dog {
+    String name
+    Boolean isHungry = true
+}
+```
+
+Lastly, we will need to register the class with Kryo, the Java serialization framework. Again, Nextflow provides a helper method to do this. We can add the following to the `main.nf` file:
+
+```nextflow
+import nextflow.util.KryoHelper
+
+KryoHelper.register(Dog)
+```
+
+Now the Dog class can now be used in processes and cached correctly.
+
+
 
 ## Nextflow best practices
 
