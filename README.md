@@ -3085,7 +3085,7 @@ workflow {
 }
 ```
 
-**Note:** Take a look here: In the R script, the tidyverse library was loaded using `library(tidyverse)`. In order for this to work, the tidyverse package has to be somewhere where the R script could access it. This is why in the process block calling the R script, there is the process directive `container 'rocker/tidyverse:latest'` that loads in a container containing tidyverse
+**Note:** If you take a look in the R script, you'll notice that the tidyverse package was loaded using `library(tidyverse)`. In order for this to work, the tidyverse package has to be somewhere where the R script could access it. This is why in the process block calling the R script, there is the process directive `container 'rocker/tidyverse:latest'` that loads in a container containing tidyverse.
 
 To do this, you can create the bin directory, write our R script into the directory. Finally, and crucially, **make the script executable**:
 
