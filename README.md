@@ -3085,8 +3085,9 @@ workflow {
 }
 ```
 
-To do this, you can create the bin directory, write our R script into the directory. Finally, and crucially, **make the script executable**:
+**Note:** Take a look here: In the R script, the tidyverse library was loaded using `library(tidyverse)`. In order for this to work, the tidyverse package has to be somewhere where the R script could access it. This is why in the process block calling the R script, there is the process directive `container 'rocker/tidyverse:latest'` that loads in a container containing tidyverse
 
+To do this, you can create the bin directory, write our R script into the directory. Finally, and crucially, **make the script executable**:
 
 ```bash
 mkdir -p bin
@@ -3155,6 +3156,22 @@ process SayHiTemplate {
 ```
 
 ### The `./lib` directory
+
+It may at times be helpful to bundle functionality into a new Groovy class. Any classes defined in the `lib` directory are available for use in the workflow - both `main.nf` and any imported modules.
+
+Classes defined in `lib` directory can be used for a variety of purposes. For example, the [nf-core/rnaseq](https://github.com/nf-core/rnaseq/tree/master/lib) workflow uses five custom classes:
+
+1. `NfcoreSchema.groovy` for parsing the schema.json file and validating the workflow parameters.
+2. `NfcoreTemplate.groovy` for email templating and nf-core utility functions.
+3. `Utils.groovy` for provision of a single `checkCondaChannels` method.
+4. `WorkflowMain.groovy` for workflow setup and to call the `NfcoreTemplate` class.
+5. `WorkflowRnaseq.groovy` for the workflow-specific functions.
+
+The classes listed above all provide utility executed at the beginning of a workflow, and are generally used to "set up" the workflow. However, classes defined in `lib` can also be used to provide functionality to the workflow itself.
+
+#### **Making a Class**
+
+#### **Making a ValueObject**
 
 
 ## Nextflow best practices
