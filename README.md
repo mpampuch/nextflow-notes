@@ -502,7 +502,7 @@ process {
 ```
 
 **Note:** Be aware of the differences between configuration and process syntax differences.
-- When defining values inside configuration, an equals sign `=` is ***required*** as shown above. 
+- When defining values inside configuration, an equals sign `=` is **required** as shown above. 
 - When specifying process directives inside the process (in a `.nf` file), no `=` is required:
 
 ```nextflow
