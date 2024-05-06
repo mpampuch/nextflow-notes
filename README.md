@@ -3183,7 +3183,7 @@ process SayHi {
 }
 ```
 
-Then inside a file called `templates/adder.py` you can have the following code:
+Then inside a file called `./templates/adder.py` you can have the following code:
 
 ```python
 #!/usr/bin/env python3
@@ -3214,7 +3214,7 @@ process SayHi {
 
 ### The `./lib` directory
 
-It may at times be helpful to bundle functionality into a new Groovy class. Any classes defined in the `lib` directory are available for use in the workflow - both `main.nf` and any imported modules.
+It may at times be helpful to bundle functionality into a new Groovy class (e.g. if a Groovy function that you need starts to grow with a lot of complexity). Any classes defined in the `lib` directory are added to the classpath and are available for use in the workflow - both `main.nf` and any imported modules.
 
 Classes defined in `lib` directory can be used for a variety of purposes. For example, the [nf-core/rnaseq](https://github.com/nf-core/rnaseq/tree/master/lib) workflow uses five custom classes:
 
@@ -3227,6 +3227,162 @@ Classes defined in `lib` directory can be used for a variety of purposes. For ex
 The classes listed above all provide utility executed at the beginning of a workflow, and are generally used to "set up" the workflow. However, classes defined in `lib` can also be used to provide functionality to the workflow itself.
 
 #### **Making a Class**
+
+Let's consider an example where we create our own custom class to handle metadata. We can create a new class in `./lib/Metadata.groovy`. We'll extend the built-in `HashMap` class, and add a simple method to return a value:
+
+```groovy
+class Metadata extends HashMap {
+    def hi() {
+        return "Hello, workshop participants!"
+    }
+}
+```
+
+We can then use the new hi method in the workflow:
+
+```nextflow
+workflow {
+    Channel.of("Montreal")
+    | map { new Metadata() }
+    | view { it.hi() }
+}
+```
+
+At the moment, the `Metadata` class is not making use of the "Montreal" being passed into the closure. You can change that by adding a constructor to the class:
+
+```groovy
+class Metadata extends HashMap {
+    Metadata(String location) {
+        this.location = location
+    }
+
+    def hi() {
+        return this.location ? "Hello, from ${this.location}!" : "Hello, workshop participants!"
+    }
+}
+```
+
+Which we can use like so:
+
+```nextflow
+workflow {
+    Channel.of("Montreal")
+    | map { place -> new Metadata(place) }
+    | view { it.hi() }
+}
+```
+
+We can also use this method when passing the object to a process:
+
+```nextflow
+process UseMeta {
+    input: val(meta)
+    output: path("out.txt")
+    script: "echo '${meta.hi()}' | tee out.txt"
+}
+
+workflow {
+    Channel.of("Montreal")
+    | map { place -> new Metadata(place) }
+    | UseMeta
+    | view
+}
+```
+
+This might be helpful because you can add extra classes to the metadata which can be computed from the existing metadata. For example, we might want want to grab the adapter prefix:
+
+```groovy
+def getAdapterStart() {
+    this.adapter?.substring(0, 3)
+}
+```
+
+Which we might use like so:
+
+```nextflow
+process UseMeta {
+    input: val(meta)
+    output: path("out.txt")
+    script: "echo '${meta.adapter} prefix is ${meta.getAdapterStart()}' | tee out.txt"
+}
+
+workflow {
+    Channel.of("Montreal")
+    | map { place -> new Metadata(place) }
+    | map { it + [adapter:"AACGTAGCTTGAC"] }
+    | UseMeta
+    | view
+}
+```
+
+You might even want to reach out to external services such as a LIMS or the E-utilities API. Here we add a dummy "getSampleName()" method that reaches out to a public API:
+
+```groovy
+def getSampleName() {
+    def get = new URL('https://postman-echo.com/get?sampleName=Fido').openConnection()
+    def getRC = get.getResponseCode();
+    if (getRC.equals(200)) {
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def json = jsonSlurper.parseText(get.getInputStream().getText())
+        return json.args.sampleName
+    }
+}
+```
+
+Which we can use like so:
+
+```nextflow
+process UseMeta {
+    input: val(meta)
+    output: path("out.txt")
+    script:
+    "echo '${meta.adapter} prefix is ${meta.getAdapterStart()} with sampleName ${meta.getSampleName()}' | tee out.txt"
+}
+```
+
+**Note:** When we start passing custom classes through the workflow, it's important to understand a little about the Nextflow caching mechanism. When a task is run, a unique hash is calculated based on the task name, the input files/values, and the input parameters. Our class extends from `HashMap`, which means that the hash will be calculated based on the contents of the `HashMap`. If we add a new method to the class, or amend a class method, this does not change the value of the objects in the hash, which means that the hash will not change. Example:
+- We might increase the length of the adapter prefix to 5 characters:
+
+```groovy
+def getAdapterStart() {
+        this.adapter?.substring(0, 5)
+    }
+```
+
+- Changing this method and resuming the workflow will not change the hash, and the existing method will be used.
+
+##### **Extending Existing Classes**
+
+We are not limited to using or extending the built-in Groovy classes. For example, if you have created a `Dog` class in `./lib/Dog.groovy`:
+
+```groovy
+class Dog {
+    String name
+    Boolean isHungry = true
+}
+```
+
+We can create a new dog at the beginning of the workflow:
+
+```nextflow
+workflow {
+    dog = new Dog(name: "fido")
+    log.info "Found a new dog: $dog"
+}
+```
+
+We can pass objects of our class through channels. Here we take a channel of dog names and create a channel of dogs:
+
+```nextflow
+workflow {
+    Channel.of("Argente", "Absolon", "Chowne")
+    | map { new Dog(name: it) }
+    | view
+}
+```
+
+If we try to use this new class in a resumed process, no caches will be used.
+
 
 #### **Making a ValueObject**
 
