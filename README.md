@@ -3267,7 +3267,7 @@ Which we can use like so:
 ```nextflow
 workflow {
     Channel.of("Montreal")
-    | map { place -> new Metadata(place) }
+    | map { new Metadata(it) }
     | view { it.hi() }
 }
 ```
@@ -3318,6 +3318,10 @@ workflow {
 You might even want to reach out to external services such as a LIMS or the E-utilities API. Here we add a dummy "getSampleName()" method that reaches out to a public API:
 
 ```groovy
+import groovy.json.JsonSlurper
+
+// ...
+
 def getSampleName() {
     def get = new URL('https://postman-echo.com/get?sampleName=Fido').openConnection()
     def getRC = get.getResponseCode();
@@ -3408,9 +3412,7 @@ import nextflow.util.KryoHelper
 KryoHelper.register(Dog)
 ```
 
-Now the Dog class can now be used in processes and cached correctly.
-
-
+Now the `Dog` class can now be used in processes and cached correctly.
 
 ## Nextflow best practices
 
