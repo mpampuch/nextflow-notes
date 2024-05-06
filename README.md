@@ -2817,6 +2817,29 @@ Process directives can also be defaults and invisible. For example. The default 
 cpus = 4
 ```
 
+### The `debug` process directive
+
+The `debug` directive echos out the `stdout` from each of the tasks into the Nextflow `stdout`. By default the `stdout` produced by the commands executed in all processes is ignored.
+
+Example:
+
+```nextflow
+process sayHello {
+  debug true
+
+  script:
+  "echo Hello"
+}
+```
+
+Outputs (in the shell terminal):
+
+```
+Hello
+```
+
+
+
 ### The `.tag` process directive
 
 Whenever you have multiple samples being processed in a process, it's useful to use the `.tag` process directive.
