@@ -3404,6 +3404,8 @@ class Dog {
 }
 ```
 
+By adding the `@ValueObject` decorator to the `Dog` class, Nextflow will now use the properties `name` and `isHungry` as the elements that are be hashed to provide the input to the task and to check if the task outputs can be pulled from the cache.
+
 Lastly, we will need to register the class with Kryo, the Java serialization framework. Again, Nextflow provides a helper method to do this. We can add the following to the `main.nf` file:
 
 ```nextflow
