@@ -3136,9 +3136,9 @@ EOF
 
 **Note:** Always use a portable shebang line in your bin directory scripts.
 
-In the R script example shown above, the `Rscript` program may be installed at (for example) `/opt/homebrew/bin/Rscript`. If you hard-code this path into `cars.R`, everything will work when you're testing locally outside of the docker container, but will fail when running with docker/singularity or in the cloud as the `Rscript` program may be installed in a different location in those contexts.
+- In the R script example shown above, the `Rscript` program may be installed at (for example) `/opt/homebrew/bin/Rscript`. If you hard-code this path into `cars.R`, everything will work when you're testing locally outside of the docker container, but will fail when running with docker/singularity or in the cloud as the `Rscript` program may be installed in a different location in those contexts.
 
-It is **strongly** recommended to use `#!/usr/bin/env` when setting the shebang for scripts in the `bin` directory to ensure maximum portability.
+- It is **strongly** recommended to use `#!/usr/bin/env` when setting the shebang for scripts in the `bin` directory to ensure maximum portability.
 
 
 ### The `./templates` directory
