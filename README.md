@@ -3132,7 +3132,7 @@ EOF
 }
 ```
 
-When working on the cloud, Nextflow will also ensure that the bin directory is copied onto the virtual machine running your task in addition to the modification of `$PATH`.
+**Note:** When working on the cloud, this `nxf_container_env` function will be slightly different. Nextflow will first also ensure that the `bin` directory is copied onto the virtual machine running your task in addition to the modification of `$PATH`.
 
 **Note:** Always use a portable shebang line in your bin directory scripts.
 
