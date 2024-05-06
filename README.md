@@ -3168,15 +3168,49 @@ EOF
 
 If a process script block is becoming too long, it can be moved to a template file. The template file can then be imported into the process script block using the `template` method. This is useful for keeping the process block tidy and readable. Nextflow's use of `$` to indicate variables also allows for directly testing the template file by running it as a script.
 
-The structure directory already contains an example template - a very simple python script. You can add a new process that uses this template:
+
+For example, let's say you want to run a python script inside a Nextflow process. You can set up your process like this:
 
 ```nextflow
-process SayHiTemplate {
+process SayHi {
     debug true
-    input: val(name)
-    script: template 'adder.py'
+
+    input: 
+    val(name)
+
+    script: 
+    template 'adder.py'
 }
 ```
+
+Then inside a file called `templates/adder.py` you can have the following code:
+
+```python
+#!/usr/bin/env python3
+
+print("Hello $name!")
+print("Process completed")
+```
+
+**Note:** Notice how this script is *not quite python* because it's using `$` string interpolation. This is as if you had written the script block like this instead:
+
+```nextflow
+process SayHi {
+    debug true
+
+    input: 
+    val(name)
+
+    script: 
+    """
+    #!/usr/bin/env python3
+    
+    print("Hello $name!")
+    print("Process completed")
+    """
+}
+```
+
 
 ### The `./lib` directory
 
