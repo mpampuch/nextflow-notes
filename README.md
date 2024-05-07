@@ -712,25 +712,25 @@ Every task that is executed by Nextflow will produe a bunch of hidden files in t
 
 #### **The `.command.begin` file**
 
-The `.command.begin` file is a file that is created whenever the task really started. 
+This file is created whenever the task really started. 
 
 Whenever you are debugging a pipeline and you don't know if a task really started or not, you can check for the existence of this file.
 
 #### **The `.command.err` file**
 
-The `.command.err` file contains all the errors that may have occured for this task.
+This file contains all the errors that may have occured for this task.
 
 #### **The `.command.log` file**
 
-The `.command.log` file contains the logs created for this task (e.g. with `log.info` or through other methods).
+This file contains the logs created for this task (e.g. with `log.info` or through other methods).
 
 #### **The `.command.out` file**
 
-The `.command.out` file contains anything that was printed to your screen (the standard output).
+This file contains anything that was printed to your screen (the standard output).
 
 #### **The `.command.run` file**
 
-The `.command.run` file shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
+This file shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
 This script contains all the functions nextflow needs to make sure your script runs on whatever executor you configured (e.g. locally, in the cloud, on a HPC, with or withouth container, etc.)
 
@@ -738,7 +738,7 @@ You're not really supposed to meddle with this file but sometimes you may want t
 
 #### **The `.command.sh` file**
 
-The `.command.sh` file contains the **final** script that was run for that task.
+This file contains the **final** script that was run for that task.
 
 Example: If this is in the workflow
 
