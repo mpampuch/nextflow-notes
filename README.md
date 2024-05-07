@@ -549,10 +549,10 @@ To enable this, two directives are needed:
 The `errorStrategy` directive determines what action Nextflow should take in the event of a task failure (**a non-zero exit code**). The available options are:
 - `terminate`: (***default***) Nextflow terminates the execution as soon as an error condition is reported. Pending jobs are killed 
 - `finish`: Initiates an orderly pipeline shutdown when an error condition is raised, waiting the completion of any submitted job.
-- `ignore`: Ignores processes execution errors.
+- `ignore`: Ignores processes execution errors. (*dangerous*)
 - `retry`: Re-submit for execution a process returning an error condition.
 
-If the `errorStrategy` is "retry", then it will retry up to the value of `maxRetries` times.
+If the `errorStrategy` is `retry`, then it will retry up to the value of `maxRetries` times.
 
 If using a closure to specify a directive in configuration, you have access to the `task` variable, which includes the `task.attempt` value - an integer specifying how many times the task has been retried. We can use this to dynamically set values such as `memory` and `cpus`
 
