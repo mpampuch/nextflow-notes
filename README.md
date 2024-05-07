@@ -404,6 +404,63 @@ process {
 }
 ```
 
+This will run *any* task that ends with `:INDEX` to run with 2 cpus.
+
+Just to make sure the globbing is working, you can also configure your processes to have a `tag` directive. The process tag is the value that's printed out in parentheses after the process name.
+
+For example, when run the Nextflow pipeline with the above configuration will output this
+
+```
+N E X T F L O W  ~  version 23.04.3
+Launching `https://github.com/nextflow-io/rnaseq-nf` [fabulous_bartik] DSL2 - revision: d910312506 [master]
+ R N A S E Q - N F   P I P E L I N E
+ ===================================
+ transcriptome: /home/gitpod/.nextflow/assets/nextflow-io/rnaseq-nf/data/ggal/ggal_1_48850000_49020000.Ggal71.500bpflank.fa
+ reads        : /home/gitpod/.nextflow/assets/nextflow-io/rnaseq-nf/data/ggal/ggal_gut_{1,2}.fq
+ outdir       : results
+
+executor >  local (4)
+[1d/3c5cfc] process > RNASEQ:INDEX (ggal_1_48850000_49020000) [100%] 1 of 1 ✔
+[38/a6b717] process > RNASEQ:FASTQC (FASTQC on ggal_gut)      [100%] 1 of 1 ✔
+[39/5f1cc4] process > RNASEQ:QUANT (ggal_gut)                 [100%] 1 of 1 ✔
+[f4/351d02] process > MULTIQC                                 [100%] 1 of 1 ✔
+
+Done! Open the following report in your browser --> results/multiqc_report.html
+```
+
+If you modify the `nextflow.config` to look like this:
+
+```nextflow
+process {
+    withLabel: '.*:INDEX' {
+        cpus = 2
+        tag = "Example debug"
+    }
+}
+```
+
+The output will then turn into this, showing that only the processes with `:INDEX` will be affected.
+
+```
+N E X T F L O W  ~  version 23.04.3
+Launching `https://github.com/nextflow-io/rnaseq-nf` [fabulous_bartik] DSL2 - revision: d910312506 [master]
+ R N A S E Q - N F   P I P E L I N E
+ ===================================
+ transcriptome: /home/gitpod/.nextflow/assets/nextflow-io/rnaseq-nf/data/ggal/ggal_1_48850000_49020000.Ggal71.500bpflank.fa
+ reads        : /home/gitpod/.nextflow/assets/nextflow-io/rnaseq-nf/data/ggal/ggal_gut_{1,2}.fq
+ outdir       : results
+
+executor >  local (4)
+[1d/3c5cfc] process > RNASEQ:INDEX (Example debug)            [100%] 1 of 1 ✔
+[38/a6b717] process > RNASEQ:FASTQC (FASTQC on ggal_gut)      [100%] 1 of 1 ✔
+[39/5f1cc4] process > RNASEQ:QUANT (ggal_gut)                 [100%] 1 of 1 ✔
+[f4/351d02] process > MULTIQC                                 [100%] 1 of 1 ✔
+
+Done! Open the following report in your browser --> results/multiqc_report.html
+```
+
+
+
 #### **Dynamic Directives**
 
 We can specify dynamic directives using closures that are computed as the task is submitted. This allows us to (for example) scale the number of CPUs used by a task by the number of input files.
@@ -510,11 +567,6 @@ process MULTIQC {
     cpus 2
     // ...
 ```
-
-
-
-
-
 
 
 ## Processes
