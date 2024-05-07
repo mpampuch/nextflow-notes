@@ -463,7 +463,7 @@ Done! Open the following report in your browser --> results/multiqc_report.html
 
 #### **Dynamic Directives**
 
-We can specify dynamic directives using closures that are computed as the task is submitted. This allows us to (for example) scale the number of CPUs used by a task by the number of input files.
+We can specify dynamic directives using *closures* that are computed as the task is submitted. This allows us to (for example) scale the number of CPUs used by a task by the number of input files. This is one of the benefits of Nextflow, which is that because it is such a dynamic paradigm, there are elements of the task that can be calculated as the task is being executed, rather than before when the run begins.
 
 Give the `FASTQC` process in the [`rnaseq-nf` workflow](https://github.com/nextflow-io/rnaseq-nf)
 
@@ -496,16 +496,23 @@ process {
 }
 ```
 
-we can even use the size of the input files. Here we simply sum together the file sizes (in bytes) and use it in the `tag` block:
+Remember, dynamic directives are supplied a closure, in this case `{ reads.size() }`. This is telling Nextflow "I want to defer evaluation of this. I'm just supplying a closure that will be evaluated later" (Think like callback functions in JavaScript).
+
+We can even use the size of the input files. Here we simply sum together the file sizes (in bytes) and use it in the `tag` block:
 
 ```nextflow
 process {
     withName: 'FASTQC' {
         cpus = { reads.size() }
-        tag = { "Total size: ${reads*.size().sum() as MemoryUnit}" }
+        tag = { 
+            total_bytes = reads*.size().sum()
+            "Total size: ${total_bytes as MemoryUnit}" 
+        }
     }
 }
 ```
+
+**Note:** `MemoryUnit` is a Nextflow built-in class for turning strings and integers into human-readable memory units.
 
 When we run this:
 
@@ -531,14 +538,16 @@ Done! Open the following report in your browser --> results/multiqc_report.html
 
 #### **Retry Strategies**
 
+Nextflow gives you the option of resubmitting a task if a task fails. This is really useful if you're working with a flakey program or dealing with network I/O.
+
 The most common use for dynamic process directives is to enable tasks that fail due to insufficient memory to be resubmitted for a second attempt with more memory.
 
 To enable this, two directives are needed:
 - `maxRetries`
 - `errorStrategy`
 
-The `errorStrategy` directive determines what action Nextflow should take in the event of a task failure (a non-zero exit code). The available options are:
-- `terminate`: Nextflow terminates the execution as soon as an error condition is reported. Pending jobs are killed (default)
+The `errorStrategy` directive determines what action Nextflow should take in the event of a task failure (**a non-zero exit code**). The available options are:
+- `terminate`: (***default***) Nextflow terminates the execution as soon as an error condition is reported. Pending jobs are killed 
 - `finish`: Initiates an orderly pipeline shutdown when an error condition is raised, waiting the completion of any submitted job.
 - `ignore`: Ignores processes execution errors.
 - `retry`: Re-submit for execution a process returning an error condition.
