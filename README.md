@@ -997,7 +997,7 @@ A double asterisk (`**`) in a glob pattern works like `*` but also searches thro
 
 ```
 data
-├── 2023-11-08_upn22_monarch-hmw_100mg_rep-2
+├── 2023-11-08_upn22_rep-1_mhmw--100mg
 │   └── no_sample
 │       └── 20231108_1310_MC-115499_FAX00407_d135d0ec
 │           ├── fastq_fail
@@ -1015,7 +1015,7 @@ data
 │           └── pod5_pass
 │               ├── FAX00407_pass_d135d0ec_b0bb43ca_0.pod5
 │               └── FAX00407_pass_d135d0ec_b0bb43ca_1.pod5
-├── 2023-11-12_mhmw-dna-recovery-elude-1
+├── 2023-11-12_upn22_rep-2_mhmw--recovery-elude-1
 │   └── no_sample
 │       └── 20231112_1338_MC-115499_FAX00228_b67d08a5
 │           ├── fastq_fail
@@ -1035,7 +1035,7 @@ data
 │           │   ├── FAX00228_pass_b67d08a5_dc19481f_0.pod5
 │           │   └── FAX00228_pass_b67d08a5_dc19481f_1.pod5
 │           └── sequencing_summary_FAX00228_b67d08a5_dc19481f.txt
-├── 2023-11-16
+├── 2023-11-16_upn22_rep-3_mhmw
 │   └── no_sample
 │       └── 20231116_0945_MC-115499_FAX00393_849b7392
 │           ├── barcode_alignment_FAX00393_849b7392_a554d814.tsv
@@ -1062,7 +1062,7 @@ data
 │           ├── sample_sheet_FAX00393_20231116_0945_849b7392.csv
 │           ├── sequencing_summary_FAX00393_849b7392_a554d814.txt
 │           └── throughput_FAX00393_849b7392_a554d814.csv
-└── Oct-26-23-upn22-pci-rep-3
+└── 2023-10-26_upn22_rep-3_pci
     └── no_sample
         └── 20231026_1515_MC-115499_FAW96674_9d505d15
             ├── barcode_alignment__9d505d15_1f674c3a.tsv
