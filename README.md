@@ -3004,6 +3004,48 @@ You can see more about what Wave containers can do with the following resrouces:
 
 ### Building Docker containers for conda packages with Wave
 
+Wave containers containing conda packages can be built without the need for a `Dockerfile`. To do this, perfrom the following steps:
+
+1. In the `nextflow.config` file, add: 
+
+```nextflow
+docker {
+  enabled = true
+  runOptions = '-u $(id -u):$(id -g)'
+}
+
+wave {
+  strategy = 'conda'
+}
+```
+
+2. In your `process` block, add a `conda` directive:
+
+```nextflow
+process SUBSET_FASTQ {
+    conda 'seqtk'
+
+    input:
+    tuple val(meta), path(fastqFile)
+
+    output:
+    tuple val(meta), path("${params.subsetCount}_rand-samples-from_${fastqFile}")
+
+    script:
+    """
+    seqtk sample ${fastqFile} ${params.subsetCount} | gzip > ${params.subsetCount}_rand-samples-from_${fastqFile}
+    """
+}
+```
+
+3. Run the Nextflow pipeline with the `-with-wave` option: 
+
+```bash
+nextflow run main.nf -with-wave
+```
+
+Now Nextflow will automatically build a container containing the conda package that you requested.
+
 ### Wavelit
 
 Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
@@ -3901,7 +3943,7 @@ More information can be found [here](https://training.nextflow.io/basic_training
 
 ## Visualizing the Nextflow execution DAG
 
-A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The vertices in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
+A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The nodes in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
 
 To render the workflow DAG, run your pipeline with the `-with-dag` option. You can use the `-preview` option with `-with-dag` to render the workflow DAG **without** executing any tasks.
 
@@ -3948,6 +3990,8 @@ flowchart TB
     v2 --> v3
     v3 --> v4
 ```
+
+**Note:** The small nodes in the graph that don't have any text or names by them represent `map` operations on the data (think of these like anonymous function operations. That's why they have no names).
 
 ## Getting Syntax Examples using nf-core
 
