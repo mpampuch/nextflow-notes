@@ -3365,6 +3365,7 @@ In vscode you can make use this code to make this a custom user snippet
             "| view { it }; return; //"
     ],
     "description": "Inserts | view { it }; return; // for debugging"
+  }
 }
 ```
 
@@ -3375,6 +3376,39 @@ Because this returns the `view` command with a closure, you can easily modify in
 ```
 
 ^ This will tell you what the class is of the elements in your workflow.
+
+#### More debugging VSCode snippets
+
+Here are some more user snippets that are alterations of the snippet above.
+
+```json
+{
+  "Nextflow debug snippet - basic": {
+    "scope": "nf,groovy",
+    "prefix": "vv",
+    "body": [
+            "| view { it }; return; //"
+    ],
+    "description": "Inserts | view { it }; return; // for debugging"
+  },
+  "Nextflow debug snippet - with count": {
+    "scope": "nf,groovy",
+    "prefix": "cc",
+    "body": [
+            "| count | view { it }; return; //"
+    ],
+    "description": "Inserts | count | view { it }; return; // for debugging"
+  },
+  "Nextflow debug snippet - detailed": {
+    "scope": "nf,groovy",
+    "prefix": "vvv",
+    "body": [
+            "| view { println(it.class); println(it.size()); it }; return; //"
+    ],
+    "description": "Inserts | view { println(it.class); println(it.size()); it }; return; // for debugging"
+  }
+}
+```
 
 ## Nextflow special directories
 
