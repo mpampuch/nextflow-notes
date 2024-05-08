@@ -39,8 +39,7 @@ workflow {
 }
 ```
 
-**Note**: The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, *this line is optional*.
-
+**Note**: The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
 
 Nextflow can then run by using the following command
 
@@ -59,22 +58,22 @@ executor >  local (3)
 [18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
 [2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
 WORLD!
-HELLO 
+HELLO
 ```
 
 This is what this all means
 
 ```
-N E X T F L O W  ~  
+N E X T F L O W  ~
 
 # THE VERSION OF NEXTFLOW THAT WAS USED FOR THIS RUN SPECIFICALLY
 version 23.10.0
 
 # THE NAME OF THE SCRIPT FILE THAT WAS RUN WITH NEXTFLOW
-Launching `main.nf` 
+Launching `main.nf`
 
 # A GENERATED MNEMONIC WHICH IS AN RANDOM OBJECTIVE AND A RANDOM SURNAME OF A FAMOUS SCIENTIST
-[focused_noether] 
+[focused_noether]
 
 # THE VERSION OF THE NEXTFLOW LANGUAGE
 DSL2
@@ -84,7 +83,7 @@ DSL2
 - revision: 197a0e289a
 
 # THE EXECUTOR FOR THE PIPELINE
-executor >  local 
+executor >  local
 
 # NEXTFLOW'S GUESS AT HOW MANY TASKS THAT WILL OCCUR IN YOUR PIPELINE
 (3)
@@ -94,19 +93,19 @@ executor >  local
 [2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
 
 ## EVERY TASK WILL HAVE A UNIQUE HASH
-## EVERY TASK IS ISOLATED FROM EACH OTHER 
+## EVERY TASK IS ISOLATED FROM EACH OTHER
 ## THESE HASHES CORRESPOND TO DIRECTORY NAMES WHERE YOU CAN GO AND VIEW INFORMATION ABOUT THAT SPECIFIC TASK
 [18/f6351b]
-[2f/007bc5] # BY DEFAULT NEXTFLOW SHOWS THE HASH OF 1 TASK PER PROCESS. 
+[2f/007bc5] # BY DEFAULT NEXTFLOW SHOWS THE HASH OF 1 TASK PER PROCESS.
 
 # THE WORKFLOW OUTPUTS
 WORLD!
-HELLO 
+HELLO
 ```
 
 ### Rerunning Nextflow
 
-When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks. 
+When using the `-resume` flag, successfully completed tasks are skipped and the previously cached results are used in downstream tasks.
 
 ```bash
 nextflow run main.nf -resume
@@ -158,9 +157,10 @@ propertyTwo = "Hello $propertyOne"
 customPath = "$PATH:/my/app/folder"
 ```
 
-*Note*: The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
+_Note_: The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
 
 ### Config scopes
+
 Configuration settings can be organized in different scopes by dot prefixing the property names with a scope identifier, or grouping the properties in the same scope using the curly brackets notation. For example:
 
 ```nextflow
@@ -174,6 +174,7 @@ beta {
 ```
 
 ### Config params
+
 The scope params allows the definition of workflow parameters that override the values defined in the main workflow script.
 
 This is useful to consolidate one or more execution parameters in a separate file.
@@ -205,9 +206,10 @@ nextflow run snippet.nf -resume --foo "Bye"
 
 **Note**: In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
 
-**Also note**: Values assigned to a the config params `params.` will be treated as *value channels* (see more information below on value channels)
+**Also note**: Values assigned to a the config params `params.` will be treated as _value channels_ (see more information below on value channels)
 
 ### Config env
+
 The env scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
 ### Config process scopes and process directives
@@ -216,7 +218,7 @@ Process directives allow the specification of settings for the task execution su
 
 This is useful when prototyping a small workflow script.
 
-However, it’s always a good practice to decouple the workflow execution logic from the process configuration settings, i.e. ***it’s strongly suggested to define the process settings in the workflow configuration file instead of the workflow script***.
+However, it’s always a good practice to decouple the workflow execution logic from the process configuration settings, i.e. **_it’s strongly suggested to define the process settings in the workflow configuration file instead of the workflow script_**.
 
 The process configuration scope allows the setting of any process directives in the Nextflow configuration file:
 
@@ -229,9 +231,11 @@ process {
     container = 'biocontainers/bamtools:v2.4.0_cv3'
 }
 ```
+
 The above config snippet defines the cpus, memory and container directives for all processes in your workflow script. Depending on your executor these things may behave differently.
 
 ### Process selectors
+
 The `withLabel` selectors allow the configuration of all processes annotated with a label directive as shown below:
 
 ```nextflow
@@ -243,13 +247,14 @@ process {
     }
 }
 ```
+
 The above configuration example assigns 16 cpus, 64 Gb of memory and the long queue to all processes annotated with the `big_mem` label.
 
 Labels can be added using the `label` directive
 
 e.g.
 
-```nextflow
+````nextflow
 process bigTask {
     label 'big_mem'
 
@@ -257,7 +262,7 @@ process bigTask {
     <task script>
     ```
 }
-```
+````
 
 In the same manner, the `withName` selector allows the configuration of a specific process in your pipeline by its name. For example:
 
@@ -283,7 +288,6 @@ process {
 
 The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does not start with `align`.
 
-
 ### Config Conda execution
 
 If you already have a conda environment in your machine that you want to use for your processes, you can use
@@ -297,6 +301,7 @@ process.conda = "/home/ubuntu/miniconda2/envs/nf-tutorial"
 You can specify the path of an existing Conda environment as either directory or the path of Conda environment YAML file.
 
 ## Creating a configuration file
+
 When a workflow script is launched, Nextflow looks for a file named `nextflow.config` in the current directory and in the script base directory (if it is not the same as the current directory). Finally, it checks for the file: `$HOME/.nextflow/config`.
 
 When more than one of the above files exists, they are merged, so that the settings in the first override the same settings that may appear in the second, and so on.
@@ -319,9 +324,10 @@ More information on how to configure this further can be found here https://www.
 
 ### Running Nextflow workflows on SLURM / HPC's
 
-When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs. 
+When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs.
 
 `launch_nf.sh`
+
 ```bash
 #!/bin/bash
 #SBATCH --partition WORK
@@ -366,7 +372,7 @@ singularity.enable = true
 
 #### **Overriding Process Directives**
 
-Process directives (listed here) can be overridden using the `process` block. 
+Process directives (listed here) can be overridden using the `process` block.
 
 For example, if we wanted to specify that all tasks for a given run should use 2 cpus. In the `nextflow.config` file in the current working directory add:
 
@@ -382,7 +388,7 @@ process {
 nextflow run rnaseq-nf
 ```
 
-We can make the configuration more specific by using [process selectors](https://www.nextflow.io/docs/latest/config.html#process-selectors). 
+We can make the configuration more specific by using [process selectors](https://www.nextflow.io/docs/latest/config.html#process-selectors).
 
 We can use process names and/or labels to apply process-level directives to specific tasks:
 
@@ -404,7 +410,7 @@ process {
 }
 ```
 
-This will run *any* task that ends with `:INDEX` to run with 2 cpus.
+This will run _any_ task that ends with `:INDEX` to run with 2 cpus.
 
 Just to make sure the globbing is working, you can also configure your processes to have a `tag` directive. The process tag is the value that's printed out in parentheses after the process name.
 
@@ -459,11 +465,9 @@ executor >  local (4)
 Done! Open the following report in your browser --> results/multiqc_report.html
 ```
 
-
-
 #### **Dynamic Directives**
 
-We can specify dynamic directives using *closures* that are computed as the task is submitted. This allows us to (for example) scale the number of CPUs used by a task by the number of input files. This is one of the benefits of Nextflow, which is that because it is such a dynamic paradigm, there are elements of the task that can be calculated as the task is being executed, rather than before when the run begins.
+We can specify dynamic directives using _closures_ that are computed as the task is submitted. This allows us to (for example) scale the number of CPUs used by a task by the number of input files. This is one of the benefits of Nextflow, which is that because it is such a dynamic paradigm, there are elements of the task that can be calculated as the task is being executed, rather than before when the run begins.
 
 Give the `FASTQC` process in the [`rnaseq-nf` workflow](https://github.com/nextflow-io/rnaseq-nf)
 
@@ -504,9 +508,9 @@ We can even use the size of the input files. Here we simply sum together the fil
 process {
     withName: 'FASTQC' {
         cpus = { reads.size() }
-        tag = { 
+        tag = {
             total_bytes = reads*.size().sum()
-            "Total size: ${total_bytes as MemoryUnit}" 
+            "Total size: ${total_bytes as MemoryUnit}"
         }
     }
 }
@@ -534,7 +538,7 @@ executor >  local (4)
 Done! Open the following report in your browser --> results/multiqc_report.html
 ```
 
-**Note:** Dynamic directives need to be supplied as closures encases in *curly braces*.
+**Note:** Dynamic directives need to be supplied as closures encases in _curly braces_.
 
 #### **Retry Strategies**
 
@@ -543,13 +547,15 @@ Nextflow gives you the option of resubmitting a task if a task fails. This is re
 The most common use for dynamic process directives is to enable tasks that fail due to insufficient memory to be resubmitted for a second attempt with more memory.
 
 To enable this, two directives are needed:
+
 - `maxRetries`
 - `errorStrategy`
 
 The `errorStrategy` directive determines what action Nextflow should take in the event of a task failure (**a non-zero exit code**). The available options are:
-- `terminate`: (***default***) Nextflow terminates the execution as soon as an error condition is reported. Pending jobs are killed 
+
+- `terminate`: (**_default_**) Nextflow terminates the execution as soon as an error condition is reported. Pending jobs are killed
 - `finish`: Initiates an orderly pipeline shutdown when an error condition is raised, waiting the completion of any submitted job.
-- `ignore`: Ignores processes execution errors. (*dangerous*)
+- `ignore`: Ignores processes execution errors. (_dangerous_)
 - `retry`: Re-submit for execution a process returning an error condition.
 
 If the `errorStrategy` is `retry`, then it will retry up to the value of `maxRetries` times.
@@ -568,7 +574,8 @@ process {
 ```
 
 **Note:** Be aware of the differences between configuration and process syntax differences.
-- When defining values inside configuration, an equals sign `=` is **required** as shown above. 
+
+- When defining values inside configuration, an equals sign `=` is **required** as shown above.
 - When specifying process directives inside the process (in a `.nf` file), no `=` is required:
 
 ```nextflow
@@ -576,7 +583,6 @@ process MULTIQC {
     cpus 2
     // ...
 ```
-
 
 ## Processes
 
@@ -602,10 +608,12 @@ However, the process body can contain up to five definition blocks:
 1. **Directives** are initial declarations that define optional settings
 
 2. **Input** defines the expected input channel(s)
-    - Requires a qualifier
+
+   - Requires a qualifier
 
 3. **Output** defines the expected output channel(s)
-    - Requires a qualifier
+
+   - Requires a qualifier
 
 4. **When** is an optional clause statement to allow conditional processes
 
@@ -615,18 +623,18 @@ The full process syntax is defined as follows:
 
 ```nextflow
 process < name > {
-    [ directives ] 
+    [ directives ]
 
-    input: 
+    input:
     < process inputs >
 
-    output: 
+    output:
     < process outputs >
 
-    when: 
+    when:
     < condition >
 
-    [script|shell|exec]: 
+    [script|shell|exec]:
     """
     < user script to be executed >
     """
@@ -642,52 +650,52 @@ Take a look at the last part of the output when you run a nextflow pipeline
 [18/f6351b] process > SPLITLETTERS (1)   [100%] 1 of 1 ✔
 [2f/007bc5] process > CONVERTTOUPPER (1) [100%] 2 of 2 ✔
 WORLD!
-HELLO 
+HELLO
 ```
 
 Breaking down the processes section further this is what each part means
 
 ```
 # THE HEXADECIMAL HASH FOR THE TASK (ALSO THE TASK DIRECTORY NAME)
-[18/f6351b] 
+[18/f6351b]
 
 # THE NAME OF THE PROCESS USED FOR THE TASK
-process > SPLITLETTERS 
+process > SPLITLETTERS
 
 # I'M NOT SURE WHAT THIS NUMBER MEANS YET. MAYBE THE CURRENT PROCESS?
-(1)   
+(1)
 
 # THE PROGRESS OF ALL THE TASKS (OR MAYBE THE CURRENT TASK?)
-[100%] 
+[100%]
 
 # ENUMERATED PROGRESS OF ALL THE TASKS
-1 of 1 
+1 of 1
 
 # SIGN SHOWING THE TASK RAN SUCCESSFULLY
 ✔
 
 # THE HEXADECIMAL HASH FOR THE TASK (LAST TASK ONLY IF THERE ARE MORE THAN ONE)
-[2f/007bc5] 
+[2f/007bc5]
 
 # THE NAME OF THE PROCESS USED FOR THE TASK
-process > CONVERTTOUPPER 
+process > CONVERTTOUPPER
 
 # I'M NOT SURE WHAT THIS NUMBER MEANS YET. MAYBE THE CURRENT PROCESS?
-(1) 
+(1)
 
 # THE PROGRESS OF ALL THE TASKS (OR MAYBE THE CURRENT TASK?)
-[100%] 
+[100%]
 
 # ENUMERATED PROGRESS OF ALL THE TASKS
-2 of 2 
+2 of 2
 
 # SIGN SHOWING THE TASK RAN SUCCESSFULLY
 ✔
 ```
 
-The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that is called a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to  `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
+The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that is called a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
 
-**Note**: Inside the work directory for the specific task, you will also find the ***Symbolic links*** used as inputs for the specific task, not copies of the files themselves.
+**Note**: Inside the work directory for the specific task, you will also find the **_Symbolic links_** used as inputs for the specific task, not copies of the files themselves.
 
 ### The ANSI log
 
@@ -707,7 +715,7 @@ Launching `hello.nf` [boring_bhabha] DSL2 - revision: 197a0e289a
 [18/f6351b] Submitted process > SPLITLETTERS (1)
 [dc/e177f3] Submitted process > CONVERTTOUPPER (1) # NOTICE THE HASH FOR TASK 1 IS VISIBLE NOW
 [2f/007bc5] Submitted process > CONVERTTOUPPER (2)
-HELLO 
+HELLO
 WORLD!
 ```
 
@@ -721,7 +729,7 @@ Every task that is executed by Nextflow will produe a bunch of hidden files in t
 
 #### **The `.command.begin` file**
 
-This file is created whenever the task really started. 
+This file is created whenever the task really started.
 
 Whenever you are debugging a pipeline and you don't know if a task really started or not, you can check for the existence of this file.
 
@@ -794,7 +802,7 @@ log.info """\
     .stripIndent(true)
 ```
 
-`log.info` not only prints the ouput of the command to the screen (`stout`), but also prints the results to the log file. 
+`log.info` not only prints the ouput of the command to the screen (`stout`), but also prints the results to the log file.
 
 Usually when you write Nextflow scripts you will add indenting so you can better read the code. However when you want to print the code to the screen you often don't want indenting. The `.stripIndent(true)` method removes the indents from the output.
 
@@ -821,6 +829,7 @@ nextflow run main.nf
 ```
 
 You can see in this case it outputs a single channel element created from the `.fromFilePairs` channel operator.
+
 - The first item is an ID (in this case the replicate ID)
 - The second item is a list with all the items (in this case the path to the reads)
 
@@ -848,7 +857,7 @@ input:
   <input qualifier> <input name>
 ```
 
-An input definition consists of a *qualifier* and a *name*. The input qualifier defines the type of data to be received. This information is used by Nextflow to apply the semantic rules associated with each qualifier, and handle it properly depending on the target execution platform (grid, cloud, etc).
+An input definition consists of a _qualifier_ and a _name_. The input qualifier defines the type of data to be received. This information is used by Nextflow to apply the semantic rules associated with each qualifier, and handle it properly depending on the target execution platform (grid, cloud, etc).
 
 The following input qualifiers are available:
 
@@ -950,9 +959,9 @@ For more information see [here](https://training.nextflow.io/basic_training/proc
 
 ### Input repeaters
 
-The `each` qualifier allows you to repeat the execution of a process for each item in a collection every time new data is received. 
+The `each` qualifier allows you to repeat the execution of a process for each item in a collection every time new data is received.
 
-***This is a very good way to try multiple parameters for a certain process***.
+**_This is a very good way to try multiple parameters for a certain process_**.
 
 Example:
 
@@ -1101,7 +1110,7 @@ fastq_ch = Channel.fromPath("data/**/*.fastq.gz").collect()
 
 ## Process outputs
 
-When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output *channel* for the next process or processes.
+When you run a program, theres a very high likelihood that many output or intermediate files will be created. what the `output:` syntax specifies is the only file or files (or stdout) that your want to include in your output _channel_ for the next process or processes.
 
 The output declaration block defines the channels used by the process to send out the results produced.
 
@@ -1141,7 +1150,7 @@ workflow {
 
 #### **Multiple output files**
 
-When an output file name contains a wildcard character (`*` or `?`) it is interpreted as a [glob](https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows us to *capture* multiple files into a **list object** and output them as a sole emission. 
+When an output file name contains a wildcard character (`*` or `?`) it is interpreted as a [glob](https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html#glob) path matcher. This allows us to _capture_ multiple files into a **list object** and output them as a sole emission.
 
 For example:
 
@@ -1176,7 +1185,7 @@ Some caveats on glob pattern behavior:
 
 ### Dynamic output filenames
 
-When an output file name needs to be expressed dynamically, it is possible to define it using a dynamic string that references values defined in the input declaration block or in the script global context. 
+When an output file name needs to be expressed dynamically, it is possible to define it using a dynamic string that references values defined in the input declaration block or in the script global context.
 
 For example:
 
@@ -1218,8 +1227,7 @@ A lot of examples show have used multiple input and output channels that can han
 
 The `input` and `output` declarations for tuples must be declared with a `tuple` qualifier followed by the definition of each element in the tuple.
 
-***This is really useful when you want to carry the ID of a sample through all the steps of your pipeline.*** The sample ID is something you'd want to carry through every step of your process so you can track what these files are. The files can change names after a lot of input and output steps but keeping them in a tuple with their sample ID will make it easier to figure out what they are. **You might have different pieces of metadata being kept in the tuple as well**.
-
+**_This is really useful when you want to carry the ID of a sample through all the steps of your pipeline._** The sample ID is something you'd want to carry through every step of your process so you can track what these files are. The files can change names after a lot of input and output steps but keeping them in a tuple with their sample ID will make it easier to figure out what they are. **You might have different pieces of metadata being kept in the tuple as well**.
 
 Example:
 
@@ -1258,6 +1266,7 @@ Outputs:
 Nextflow allows the use of alternative output definitions within workflows to simplify your code.
 
 These are done with the `.out` attribute and the `emit:` option.
+
 - `emit:` is more commonly used than `.out` indexing
 
 By using `.out`, your are getting the output channel of one process, and you can pass it in as the input channel of another process
@@ -1270,11 +1279,12 @@ workflow {
 
     prepare_star_genome_index(params.genome)
 
-    rnaseq_mapping_star(params.genome, 
+    rnaseq_mapping_star(params.genome,
                         prepare_star_genome_index.out,
                         reads_ch)
 }
 ```
+
 When a process defines multiple output channels, each output can be accessed using the array element operator (`out[0]`, `out[1]`, etc.)
 
 Outputs can also be accessed by name if the `emit` option is specified
@@ -1302,16 +1312,16 @@ If you have a process that only has a static pathname, for example
 ```nextflow
 process rnaseq_call_variants {
     container 'quay.io/broadinstitute/gotc-prod-gatk:1.0.0-4.1.8.0-1626439571'
-    tag "${sampleId}" 
+    tag "${sampleId}"
 
     input:
-    path genome 
-    path index 
-    path dict  
-    tuple val(sampleId), path(bam), path(bai) 
+    path genome
+    path index
+    path dict
+    tuple val(sampleId), path(bam), path(bai)
 
     output:
-    tuple val(sampleId), path('final.vcf') 
+    tuple val(sampleId), path('final.vcf')
 
     script:
     """
@@ -1329,7 +1339,7 @@ If you only had the `path` variable defined and not the `tuple` with the `sample
 
 **NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
 
-While channels do emit items in the order that they are received (FIFO structure), ***processes do not necessarily process items in the order that they are received*** (because of implicit parallelization and later processes ending before earlier ones). While this isn't an issue in most cases, it is important to know. 
+While channels do emit items in the order that they are received (FIFO structure), **_processes do not necessarily process items in the order that they are received_** (because of implicit parallelization and later processes ending before earlier ones). While this isn't an issue in most cases, it is important to know.
 
 For example
 
@@ -1347,14 +1357,13 @@ workflow {
 }
 ```
 
-Can output 
+Can output
 
 ```
 process job 3
 process job 1
 process job 2
 ```
-
 
 Notice in the above example that the value `3` was processed before the others.
 
@@ -1398,21 +1407,21 @@ The above example produces:
 The script block within a process is a string statement that defines the command to be executed by the process' task.
 
 ```nextflow
-process CONVERTTOUPPER { 
-    input: 
-    path y 
+process CONVERTTOUPPER {
+    input:
+    path y
 
-    output: 
-    stdout 
+    output:
+    stdout
 
-    script: 
+    script:
     """
     cat $y | tr '[a-z]' '[A-Z]'
     """
 }
 ```
 
-By default, nextflow expects a shell script in the script block. 
+By default, nextflow expects a shell script in the script block.
 
 **Note:** Since Nextflow uses the same Bash syntax for variable substitutions in strings, Bash environment variables need to be escaped using the `\` character. The escaped version will be resolved later, returning the task directory (e.g. `work/7f/f285b80022d9f61e82cd7f90436aa4/`), while `$PWD` would show the directory where you're running Nextflow.
 
@@ -1495,20 +1504,19 @@ workflow {
 }
 ```
 
-
 If you are using another language, like R or Python, you need the shebang so that Nextflow knows which software to use to interpret this code.
 
 Example:
 
 ```nextflow
-process CONVERTTOUPPER { 
-    input: 
-    path y 
+process CONVERTTOUPPER {
+    input:
+    path y
 
-    output: 
-    stdout 
+    output:
+    stdout
 
-    script: 
+    script:
     """
     #!/usr/bin/env python
     with open("$y") as f:
@@ -1517,9 +1525,9 @@ process CONVERTTOUPPER {
 }
 ```
 
-### Conditional Process Scripts 
+### Conditional Process Scripts
 
-The process script can also be defined in a completely dynamic manner using an if statement or any other expression for evaluating a string value. 
+The process script can also be defined in a completely dynamic manner using an if statement or any other expression for evaluating a string value.
 
 Example:
 
@@ -1580,6 +1588,7 @@ The `FASTQC` process in `main.nf` could be replaced by creating an executable sc
 Create a new file named `fastqc.sh` with the following content:
 
 **`fastqc.sh`**
+
 ```bash
 #!/bin/bash
 set -e
@@ -1616,12 +1625,14 @@ fastqc.sh "$sample_id" "$reads"
 Channel factories are methods that can be used to create channels explicitly.
 
 For example, the `of` method allows you to create a channel that emits the arguments provided to it, for example:
+
 ```nextflow
 ch = Channel.of( 1, 3, 5, 7 )
 ch.view { "value: $it" }
 ```
 
 The first line in this example creates a variable `ch` which holds a channel object. This channel emits the arguments supplied to the of method. Thus the second line prints the following:
+
 ```nextflow
 value: 1
 value: 3
@@ -1640,6 +1651,7 @@ Channel
     .fromFilePairs('/my/data/SRR*_{1,2}.fastq')
     .view()
 ```
+
 It will produce an output similar to the following:
 
 ```
@@ -1683,6 +1695,7 @@ rnaseq_gatk_analysis
     .map { meta, bams, bais, vcf -> [meta, vcf, bams, bais] }
     .set { grouped_vcf_bam_bai_ch }
 ```
+
 - `.groupTuple` groups tuples that contain a common first element
 - `.join` joins two channels taking the key into consideration
 - `.map` applies a function to every element of a channel
@@ -1712,11 +1725,11 @@ rnaseq_gatk_analysis
     .set { grouped_vcf_bam_bai_ch }
 ```
 
-Just keep in mind processes and channel operators are not guaranteed to emit items in the order that they were received, as they are executed concurrently. This can lead to unintended effects based if you use a operator that takes multiple inputs. For example, the using the `merge` channel operator can lead to different results upon different runs based on the order in which the processes finish. You should always use a matching key (e.g. sample ID) to merge multiple channels, so that they are combined in a deterministic way (using an operator like `join` instead). 
+Just keep in mind processes and channel operators are not guaranteed to emit items in the order that they were received, as they are executed concurrently. This can lead to unintended effects based if you use a operator that takes multiple inputs. For example, the using the `merge` channel operator can lead to different results upon different runs based on the order in which the processes finish. You should always use a matching key (e.g. sample ID) to merge multiple channels, so that they are combined in a deterministic way (using an operator like `join` instead).
 
 ### The `.view` channel operator
 
-The `view` operator prints the items emitted by a channel to the console standard output, appending a new line character to each item. 
+The `view` operator prints the items emitted by a channel to the console standard output, appending a new line character to each item.
 
 For example:
 
@@ -1734,7 +1747,7 @@ bar
 baz
 ```
 
-An optional *closure* parameter can be specified to customize how items are printed. 
+An optional _closure_ parameter can be specified to customize how items are printed.
 
 For example:
 
@@ -1750,11 +1763,11 @@ Channel
 - baz
 ```
 
-Note that the *closure* replaced the `()` brackets in the `view` operator with `{}` brackets.
+Note that the _closure_ replaced the `()` brackets in the `view` operator with `{}` brackets.
 
 ### The `.map` channel operator
 
-The `map` operator applies a function of your choosing to every item emitted by a channel and returns the items obtained as a new channel. The function applied is called the *mapping* function and is expressed with a *closure*. 
+The `map` operator applies a function of your choosing to every item emitted by a channel and returns the items obtained as a new channel. The function applied is called the _mapping_ function and is expressed with a _closure_.
 
 In the example below the groovy `reverse` method has been used to reverse the order of the characters in each string emitted by the channel.
 
@@ -1772,7 +1785,7 @@ olleh
 dlrow
 ```
 
-A `map` can associate a generic *tuple* to each element and can contain any data. 
+A `map` can associate a generic _tuple_ to each element and can contain any data.
 
 In the example below the groovy `size` method is used to return the length of each string emitted by the channel.
 
@@ -1790,9 +1803,9 @@ Outputs:
 [world, 5]
 ```
 
-### The `.first` channel operator 
+### The `.first` channel operator
 
-The `first` operator emits the first item in a source channel, or the first item that matches a condition, and outputs a **value** channel. The condition can be a regular expression, a type qualifier (i.e. Java class), or a boolean predicate. 
+The `first` operator emits the first item in a source channel, or the first item that matches a condition, and outputs a **value** channel. The condition can be a regular expression, a type qualifier (i.e. Java class), or a boolean predicate.
 
 For example:
 
@@ -1920,7 +1933,9 @@ c3 = Channel.of( 'z' )
 c1.mix(c2,c3)
     .subscribe onNext: { println it }, onComplete: { println 'Done' }
 ```
+
 Outputs:
+
 ```
 1
 2
@@ -1970,7 +1985,7 @@ The `groupTuple` operator is useful for this.
 
 The `groupTuple` operator collects tuples (or lists) of values emitted by the source channel, grouping the elements that share the same **key** into a list afterwards. Finally, it emits a new tuple object for each distinct key collected.
 
-By default, the *first* element of each tuple is used as the grouping key. The `by` option can be used to specify a different index, or list of indices. See [here](https://www.nextflow.io/docs/latest/operator.html#grouptuple) for more details.
+By default, the _first_ element of each tuple is used as the grouping key. The `by` option can be used to specify a different index, or list of indices. See [here](https://www.nextflow.io/docs/latest/operator.html#grouptuple) for more details.
 
 ```nextflow
 Channel
@@ -1989,11 +2004,11 @@ Outputs
 
 `groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
 
-**Note:** By default, `groupTuple` is a *blocking* operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
+**Note:** By default, `groupTuple` is a _blocking_ operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
 
 #### The **`groupKey()`** method
 
-By default, if you don’t specify a size, the `groupTuple` operator will not emit any groups until *all* inputs have been received. If possible, you should always try to specify the number of expected elements in each group using the `size` option, so that each group can be emitted as soon as it’s ready. In cases where the size of each group varies based on the grouping key, you can use the built-in `groupKey()` function, which allows you to define a different expected size for each group:
+By default, if you don’t specify a size, the `groupTuple` operator will not emit any groups until _all_ inputs have been received. If possible, you should always try to specify the number of expected elements in each group using the `size` option, so that each group can be emitted as soon as it’s ready. In cases where the size of each group varies based on the grouping key, you can use the built-in `groupKey()` function, which allows you to define a different expected size for each group:
 
 ```nextflow
 chr_frequency = ["chr1": 2, "chr2": 3]
@@ -2251,7 +2266,7 @@ Output
 50 is large
 ```
 
-An element is only emitted to a channel where the test condition is met. If an element does not meet any of the tests, it is not emitted to any of the output channels. You can 'catch' any such samples by specifying `true` as a condition. 
+An element is only emitted to a channel where the test condition is met. If an element does not meet any of the tests, it is not emitted to any of the output channels. You can 'catch' any such samples by specifying `true` as a condition.
 
 Example:
 
@@ -2277,7 +2292,7 @@ workflow {
 
 You can then combine this with log functions `log.warn` to warn the user there may be an error or more strictly `log.error` to halt the pipeline.
 
-You may also want to emit a slightly different element than the one passed as input. The `branch` operator can (optionally) return a *new* element to an channel. For example, to add an extra key in the meta map of the tumor samples, we add a new line under the condition and return our new element. In this example, we modify the first element of the `List` to be a new list that is the result of merging the existing meta map with a new map containing a single key:
+You may also want to emit a slightly different element than the one passed as input. The `branch` operator can (optionally) return a _new_ element to an channel. For example, to add an extra key in the meta map of the tumor samples, we add a new line under the condition and return our new element. In this example, we modify the first element of the `List` to be a new list that is the result of merging the existing meta map with a new map containing a single key:
 
 ```nextflow
 branch { meta, reads ->
@@ -2323,14 +2338,14 @@ workflow {
 
 #### **Deciding when to use `branch` or `multimap`**
 
-One way to think about this is if you have for example data in a `.csv` file. 
+One way to think about this is if you have for example data in a `.csv` file.
 
 - If you need to output two channels for every single row, use `multiMap`
 - If you need to output two channels, and you need to filter which parts of all the rows should go into which channel, use `branch`
 
 ### The `.flatMap` channel operator
 
-The `flatMap` operator allows you to modify the elements in a channel and then flatten the resulting collection. This is useful if you need to "expand" elements in a channel an incoming element can turn into zero or more elements in the output channel. 
+The `flatMap` operator allows you to modify the elements in a channel and then flatten the resulting collection. This is useful if you need to "expand" elements in a channel an incoming element can turn into zero or more elements in the output channel.
 
 For example:
 
@@ -2385,7 +2400,7 @@ Outputs:
 [3, ciao]
 ```
 
-The `by` option can be used to combine items that share a matching key. The value should be the zero-based index of the tuple, or a list of indices. 
+The `by` option can be used to combine items that share a matching key. The value should be the zero-based index of the tuple, or a list of indices.
 
 For example:
 
@@ -2410,12 +2425,10 @@ Outputs:
 This is very useful for splitting or fanning-out your data to perforom operations on multiple subgroups of your data (See [here](https://training.nextflow.io/advanced/grouping/#fanning-out-over-intervals) for more info).
 
 **Note:** The `combine` operator is similar to `cross` and `join`, making them easy to confuse. Their differences can be summarized as follows:
-- `combine` and `cross` both produce an *outer product* or *cross product*, whereas `join` produces an *inner product*.
+
+- `combine` and `cross` both produce an _outer product_ or _cross product_, whereas `join` produces an _inner product_.
 - `combine` filters pairs with a matching key only if the by option is used, whereas `cross` always filters pairs with a matching key.
 - `combine` with the by option merges and flattens each pair, whereas `cross` does not. Compare the [examples here](https://www.nextflow.io/docs/latest/operator.html#cross) for `combine` and `cross` to see this difference.
-
-
-
 
 ### The `.set` channel operator
 
@@ -2424,12 +2437,14 @@ The `set` operator assigns the channel to a variable whose name is specified as 
 ```nextflow
 Channel.of(10, 20, 30).set { my_channel }
 ```
+
 This is semantically equivalent to the following assignment:
 
 ```nextflow
 my_channel = Channel.of(10, 20, 30)
 ```
-However the set operator is more grammatical in Nextflow scripting, since it can be used at the end of a chain of operator transformations, thus resulting in a more fluent and readable operation. 
+
+However the set operator is more grammatical in Nextflow scripting, since it can be used at the end of a chain of operator transformations, thus resulting in a more fluent and readable operation.
 
 Whichever way you choose to assign a variable is up to you.
 
@@ -2439,12 +2454,9 @@ The `collectFile` operator allows you to write one or more new files based on th
 
 More information on how this works can be found [here](https://training.nextflow.io/advanced/operators/#collectfile).
 
-
 ### Channel operators for text files
 
 Nextflow also offers a lot of channel operators for working with common text file formats (e.g. `.txt`, `.csv`, `.json`). More information on these and how they work can be found [here](https://training.nextflow.io/basic_training/operators/#text-files).
-
-
 
 ### The `file` method for creating file paths
 
@@ -2455,13 +2467,13 @@ Turning your file path into a path object is important because it helps Nextflow
 Example:
 
 ```nextflow
-SOME_PROCESS.out.view() 
+SOME_PROCESS.out.view()
 // outputs path/to/some/file
 
-SOME_PROCESS.out.view{ it.getClass() } 
+SOME_PROCESS.out.view{ it.getClass() }
 // outputs java.lang.string
 
-SOME_PROCESS.out.view{ file(it).getClass() } 
+SOME_PROCESS.out.view{ file(it).getClass() }
 // outputs sun.nio.fs.UnixPath
 ```
 
@@ -2483,7 +2495,7 @@ workflow {
 }
 ```
 
-### Range Expansion 
+### Range Expansion
 
 Ranges of values are expanded accordingly:
 
@@ -2492,6 +2504,7 @@ Channel
     .of(1..23, 'X', 'Y')
     .view()
 ```
+
 Prints:
 
 ```nextflow
@@ -2534,7 +2547,7 @@ Value channels allow processes to consume elements infinite times.
 
 Elements in the queue channel are consumed. You cannot consume the same element for the same process twice.
 
-One common use case of a value channel is when you're working with a **reference genome**. Often times you'll want to map many reads back to the reference genome but you don't want the reference genome to get consumed on the first mapping. Therefore be aware of what inputs you want to reuse over and over again and which inputs you want to consume. 
+One common use case of a value channel is when you're working with a **reference genome**. Often times you'll want to map many reads back to the reference genome but you don't want the reference genome to get consumed on the first mapping. Therefore be aware of what inputs you want to reuse over and over again and which inputs you want to consume.
 
 For more information, see [here](https://training.nextflow.io/basic_training/channels/#channel-types).
 
@@ -2546,13 +2559,13 @@ Example
 
 ```nextflow
 /*
- * Define the default parameters 
+ * Define the default parameters
  */
 
-params.genome     = "${baseDir}/data/genome.fa" 
+params.genome     = "${baseDir}/data/genome.fa"
 params.variants   = "${baseDir}/data/known_variants.vcf.gz"
 params.blacklist  = "${baseDir}/data/blacklist.bed"
-params.reads      = "${baseDir}/data/reads/ENCSR000COQ1_{1,2}.fastq.gz" 
+params.reads      = "${baseDir}/data/reads/ENCSR000COQ1_{1,2}.fastq.gz"
 params.results    = "results"
 
 /*
@@ -2563,10 +2576,10 @@ process prepare_genome_samtools {
     container 'quay.io/biocontainers/samtools:1.3.1--h0cf4675_11'
 
     input:
-    path genome 
+    path genome
 
     output:
-    path "${genome}.fai" 
+    path "${genome}.fai"
 
     script:
     """
@@ -2577,15 +2590,15 @@ process prepare_genome_samtools {
 workflow {
     reads_ch = Channel.fromFilePairs(params.reads)
 
-    prepare_genome_samtools(params.genome) 
+    prepare_genome_samtools(params.genome)
 }
 ```
 
-The `prepare_genome_samtools(params.genome)` is a  valid call to a process because `params.genome` will be converted from a string into a value channel.
+The `prepare_genome_samtools(params.genome)` is a valid call to a process because `params.genome` will be converted from a string into a value channel.
 
 ## The Working Directory and the `publishDir` directive
 
-By default, the task work directories are created in the directory from where the pipeline is launched. This is often a scratch storage area that can be cleaned up once the computation is completed. A different location for the execution work directory can be specified using the command line option `-w` 
+By default, the task work directories are created in the directory from where the pipeline is launched. This is often a scratch storage area that can be cleaned up once the computation is completed. A different location for the execution work directory can be specified using the command line option `-w`
 
 Example
 
@@ -2694,7 +2707,7 @@ The snippet above defines a `workflow` named `my_workflow`, that is invoked via 
 
 ### Workflow inputs
 
-A `workflow` component can declare one or more input channels using the `take` statement. 
+A `workflow` component can declare one or more input channels using the `take` statement.
 
 For example:
 
@@ -2727,7 +2740,7 @@ workflow {
 
 ### Workflow outputs
 
-A `workflow` can declare one or more output channels using the `emit` statement. 
+A `workflow` can declare one or more output channels using the `emit` statement.
 
 For example:
 
@@ -2893,9 +2906,9 @@ Finally, the `-with-dag` option enables the rendering of the workflow execution 
 
 If you just try to install your dependencies using conda or mamba, there's no guarantee that the dependency graph will be solved the same way forever, therefore there is a chance your programs will work slightly different if you try to reinstall your dependencies sometime in the future.
 
-That is why the golden rule for dependencies is to use a program like conda or mamba to intall them, but to do so inside a container image. 
+That is why the golden rule for dependencies is to use a program like conda or mamba to intall them, but to do so inside a container image.
 
-The container images are supposed to work the same way forever so doing so in this way each programs should install the same dependencies and produce the exact same enviroment for better reproducibility. 
+The container images are supposed to work the same way forever so doing so in this way each programs should install the same dependencies and produce the exact same enviroment for better reproducibility.
 
 E.g.
 
@@ -2904,17 +2917,18 @@ E.g.
 ```yml
 name: nf-tutorial
 channels:
-    - conda-forge
-    - defaults
-    - bioconda
+  - conda-forge
+  - defaults
+  - bioconda
 dependencies:
-    - bioconda::salmon=1.5.1
-    - bioconda::fastqc=0.11.9
-    - bioconda::multiqc=1.12
-    - conda-forge::tbb=2020.2
+  - bioconda::salmon=1.5.1
+  - bioconda::fastqc=0.11.9
+  - bioconda::multiqc=1.12
+  - conda-forge::tbb=2020.2
 ```
 
 `Dockerfile`
+
 ```docker
 FROM mambaorg/micromamba:0.25.1
 
@@ -2944,13 +2958,11 @@ docker.runOptions = '-u $(id -u):$(id -g)'
 
 Because you are not providing any container repository or container registry for the script to use, by default Nextflow will try to pull the container from Docker Hub.
 
-However, it will only try to pull the container *if you tell Nextflow to run the pipeline with containers*. If you want to run it with docker for example, you can run the script as follows:
+However, it will only try to pull the container _if you tell Nextflow to run the pipeline with containers_. If you want to run it with docker for example, you can run the script as follows:
 
 ```bash
 nextflow run main.nf -with-docker
 ```
-
-
 
 ## Biocontainers
 
@@ -2960,7 +2972,7 @@ Run only one process per container: In almost all cases, you should only run a s
 
 Biocontainers is a project to create a docker container for every recipe (package and version) they have in bioconda.
 
-Sometimes you'll need to have a container with more than one tool, in this case there is a *mulled* container. 
+Sometimes you'll need to have a container with more than one tool, in this case there is a _mulled_ container.
 
 You can request a multi-package container here: https://biocontainers.pro/multipackage
 
@@ -2981,6 +2993,7 @@ mulled-search --destination quay singularity --channel bioconda --search bowtie 
 An even better solution than using Biocontainers is to use the Seqera labs Wave containers service. Wave is an open source software and a service that builds containers on the fly for you. You can just give your conda directives on Nextflow on a conda environment file and remotely Wave is going to build your container image on the fly during the execution of your pipeline and provide it back to you very quickly.
 
 You can see more about what Wave containers can do with the following resrouces:
+
 - [Wave Showcase](https://github.com/seqeralabs/wave-showcase)
 - [Wave Documentation](https://www.nextflow.io/docs/latest/wave.html)
 - [Wave Video Demo](https://www.youtube.com/watch?v=u2ybsPe1O8o)
@@ -2991,14 +3004,14 @@ You can see more about what Wave containers can do with the following resrouces:
 
 ### Building Docker containers for conda packages with Wave
 
-### Wavelit 
+### Wavelit
 
 Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
 
 You can find more information on Wavelit with the following resources:
+
 - [Wavelit Github Repository](https://github.com/seqeralabs/wave-cli)
 - [Wavelit Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068)
-
 
 ## Important functions for file attributes and paths
 
@@ -3044,9 +3057,9 @@ process prepare_star_genome_index {
     path genome
 
     output:
-    path 'genome_dir' 
+    path 'genome_dir'
 
-    script: 
+    script:
     """
     mkdir -p genome_dir
 
@@ -3060,7 +3073,7 @@ process prepare_star_genome_index {
 
 The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
 
-Process directives can be accessed for a specific task using the `task.` implicit variable. In the context of Nextflow, an implicit variable refers to a special type of variable that holds information about the execution context of a process. 
+Process directives can be accessed for a specific task using the `task.` implicit variable. In the context of Nextflow, an implicit variable refers to a special type of variable that holds information about the execution context of a process.
 
 Process directives can also be defaults and invisible. For example. The default number of CPUs to run a task is 1. You can pass this into a process parameter by using `tasks.cpus`. If you want to change this however, you can write at the top of your process block
 
@@ -3089,13 +3102,11 @@ Outputs (in the shell terminal):
 Hello
 ```
 
-
-
 ### The `.tag` process directive
 
 Whenever you have multiple samples being processed in a process, it's useful to use the `.tag` process directive.
 
-The `.tag` process directive doesn't change anything in the analysis, but it allows you to associate each process execution with a custom label to make it easier to identify them in the log file or the trace execution report. This is useful if you want to know more information about multiple samples that are being run (which ones passed and which ones failed). 
+The `.tag` process directive doesn't change anything in the analysis, but it allows you to associate each process execution with a custom label to make it easier to identify them in the log file or the trace execution report. This is useful if you want to know more information about multiple samples that are being run (which ones passed and which ones failed).
 
 Example
 
@@ -3106,16 +3117,16 @@ Example
 
 process rnaseq_gatk_splitNcigar {
     container 'quay.io/broadinstitute/gotc-prod-gatk:1.0.0-4.1.8.0-1626439571'
-    tag "${replicateId}" 
+    tag "${replicateId}"
 
     input:
-    path genome 
-    path index 
-    path genome_dict 
-    tuple val(replicateId), path(bam), path(bai) 
+    path genome
+    path index
+    path genome_dict
+    tuple val(replicateId), path(bam), path(bai)
 
     output:
-    tuple val(replicateId), path('split.bam'), path('split.bai') 
+    tuple val(replicateId), path('split.bam'), path('split.bai')
 
     script:
     """
@@ -3132,7 +3143,7 @@ process rnaseq_gatk_splitNcigar {
 
 Will give you detials on every replicate ID that is being processed.
 
-## Only Use Positional Arguments 
+## Only Use Positional Arguments
 
 As of December 2023, Nextflow does not allow for keyword arguments. Therefore if you're trying to for example pass in 2 inputs, you look at the process block and the first input will be the first positional argument and the second input will be the second positional argument (and so on and so forth if there are more inputs)
 
@@ -3150,7 +3161,7 @@ process prepare_vcf_file {
     path variantsFile
     path blacklisted
 
-    output: 
+    output:
     tuple path("${variantsFile.baseName}.filtered.recode.vcf.gz"),
           path("${variantsFile.baseName}.filtered.recode.vcf.gz.tbi")
 
@@ -3172,9 +3183,9 @@ workflow {
     prepare_genome_picard(params.genome)
     prepare_star_genome_index(params.genome)
     // CORRECT
-    prepare_vcf_file(params.variants, params.blacklist) 
+    prepare_vcf_file(params.variants, params.blacklist)
     // INCORRECT
-    prepare_vcf_file(variantsFile = params.variants, blacklisted = params.blacklist) 
+    prepare_vcf_file(variantsFile = params.variants, blacklisted = params.blacklist)
 }
 ```
 
@@ -3195,18 +3206,18 @@ process rnaseq_gatk_recalibrate {
     path genome
     path index
     path dict
-    tuple val(replicateId), path(bam), path(bai) 
+    tuple val(replicateId), path(bam), path(bai)
     tuple path(prepared_variants_file),
-          path(prepared_variants_file_index) 
+          path(prepared_variants_file_index)
 
-    output: 
+    output:
     tuple val(sampleId),
           path("${replicateId}.final.uniq.bam"),
           path("${replicateId}.final.uniq.bam.bai")
 
     script:
     // Notice how the sampleID is modified with a regular expression before the script is executed
-    sampleId = replicateId.replaceAll(/[12]$/,'') 
+    sampleId = replicateId.replaceAll(/[12]$/,'')
     """
     gatk3 -T BaseRecalibrator \
           --default_platform illumina \
@@ -3243,11 +3254,11 @@ Example
 ```nextflow
 workflow {
     reads_ch =  Channel.fromFilePairs(params.reads)
-    // The return keyword helps you troubleshoot. 
+    // The return keyword helps you troubleshoot.
     // Here you want to check what the read ares
     // The return keyword ensures the rest of the workflow doesn't get run
     reads.view()
-    return 
+    return
 
 
     prepare_genome_samtools(params.genome)
@@ -3414,11 +3425,9 @@ EOF
 
 - It is **strongly** recommended to use `#!/usr/bin/env` when setting the shebang for scripts in the `bin` directory to ensure maximum portability.
 
-
 ### The `./templates` directory
 
 If a process script block is becoming too long, it can be moved to a template file. The template file can then be imported into the process script block using the `template` method. This is useful for keeping the process block tidy and readable. Nextflow's use of `$` to indicate variables also allows for directly testing the template file by running it as a script.
-
 
 For example, let's say you want to run a python script inside a Nextflow process. You can set up your process like this:
 
@@ -3426,10 +3435,10 @@ For example, let's say you want to run a python script inside a Nextflow process
 process SayHi {
     debug true
 
-    input: 
+    input:
     val(name)
 
-    script: 
+    script:
     template 'adder.py'
 }
 ```
@@ -3443,25 +3452,24 @@ print("Hello $name!")
 print("Process completed")
 ```
 
-**Note:** Notice how this script is *not quite python* because it's using `$` string interpolation. This is as if you had written the script block like this instead:
+**Note:** Notice how this script is _not quite python_ because it's using `$` string interpolation. This is as if you had written the script block like this instead:
 
 ```nextflow
 process SayHi {
     debug true
 
-    input: 
+    input:
     val(name)
 
-    script: 
+    script:
     """
     #!/usr/bin/env python3
-    
+
     print("Hello $name!")
     print("Process completed")
     """
 }
 ```
-
 
 ### The `./lib` directory
 
@@ -3596,6 +3604,7 @@ process UseMeta {
 ```
 
 **Note:** When we start passing custom classes through the workflow, it's important to understand a little about the Nextflow caching mechanism. When a task is run, a unique hash is calculated based on the task name, the input files/values, and the input parameters. Our class extends from `HashMap`, which means that the hash will be calculated based on the contents of the `HashMap`. If we add a new method to the class, or amend a class method, this does not change the value of the objects in the hash, which means that the hash will not change. Example:
+
 - We might increase the length of the adapter prefix to 5 characters:
 
 ```groovy
@@ -3638,7 +3647,6 @@ workflow {
 
 If we try to use this new class in a resumed process, no caches will be used.
 
-
 #### **Making a ValueObject**
 
 Nextflow has provided a decorator to help serialize your custom classes. By adding `@ValueObject` to the class definition, Nextflow will automatically serialize the class and cache it. This is useful if you want to pass a custom class through a channel, or if you want to use the class in a resumed workflow.
@@ -3671,7 +3679,7 @@ Now the `Dog` class can now be used in processes and cached correctly.
 
 ### Never perform in-place operations on objects in Nextflow.
 
-Because Nextflow is a deeply asyncronous system, modifying data in place can affect the results of another process that may be trying to access the same memory. Whenever you need to modify data, make sure to perform operations that create a *copy* or *new object* for the data.
+Because Nextflow is a deeply asyncronous system, modifying data in place can affect the results of another process that may be trying to access the same memory. Whenever you need to modify data, make sure to perform operations that create a _copy_ or _new object_ for the data.
 
 For example, this code intentionally performs data modifications in-place:
 
@@ -3704,21 +3712,21 @@ workflow {
 What you would expect is to have outputs from two channels, one with the data as was (unmodified) and one with the data modified. This is what you get as output instead.
 
 ```
-Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN] 
-Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN] 
-Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN]
+Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN]
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN]
 Should be unmodified: [id:sampleA, repeat:1, type: BROKEN]
-Should be unmodified: [id:sampleA, repeat:1, type: BROKEN] 
-Should be unmodified: [id:sampleA, repeat:2, type: BROKEN] 
-Should be unmodified: [id:sampleA, repeat:2, type: BROKEN] 
-Should be unmodified: [id:sampleB, repeat:1, type: BROKEN] 
-Should be unmodified: [id:sampleB, repeat:1, type: BROKEN] 
-Should be unmodified: [id:sampleC, repeat:1, type: BROKEN] 
+Should be unmodified: [id:sampleA, repeat:1, type: BROKEN]
+Should be unmodified: [id:sampleA, repeat:2, type: BROKEN]
+Should be unmodified: [id:sampleA, repeat:2, type: BROKEN]
+Should be unmodified: [id:sampleB, repeat:1, type: BROKEN]
+Should be unmodified: [id:sampleB, repeat:1, type: BROKEN]
+Should be unmodified: [id:sampleC, repeat:1, type: BROKEN]
 Should be unmodified: [id:sampleC, repeat:1, type: BROKEN]
 ```
 
@@ -3756,28 +3764,27 @@ workflow {
 Outputs:
 
 ```
-Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN] 
-Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN] 
-Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN] 
-Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
-Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN] 
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:2, type:BROKEN]
+Should be MODIFIED: [id:sampleA, repeat:2, type: BROKEN]
+Should be MODIFIED: [id:sampleB, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleB, repeat:1, type:BROKEN]
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN]
+Should be MODIFIED: [id:sampleC, repeat:1, type: BROKEN]
 Should be unmodified: [id:sampleA, repeat:1, type: normal]
-Should be unmodified: [id:sampleA, repeat:1, type: tumor] 
-Should be unmodified: [id:sampleA, repeat:2, type: normal] 
-Should be unmodified: [id:sampleA, repeat:2, type: tumor] 
-Should be unmodified: [id:sampleB, repeat:1, type: normal] 
-Should be unmodified: [id:sampleB, repeat:1, type: tumor] 
-Should be unmodified: [id:sampleC, repeat:1, type: normal] 
+Should be unmodified: [id:sampleA, repeat:1, type: tumor]
+Should be unmodified: [id:sampleA, repeat:2, type: normal]
+Should be unmodified: [id:sampleA, repeat:2, type: tumor]
+Should be unmodified: [id:sampleB, repeat:1, type: normal]
+Should be unmodified: [id:sampleB, repeat:1, type: tumor]
+Should be unmodified: [id:sampleC, repeat:1, type: normal]
 Should be unmodified: [id:sampleC, repeat:1, type: tumor]
 ```
 
-
 ### Keeping track of metadata
 
-In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again. 
+In Nextflow, it's recommended to keep all your flowing through your pipeline for as long as possible, even if you don't need it. There's very little cost to holding onto your metadata and keeping if flowing through the directed acyclic graph. You may never know when you'll need that data and once it becomes discociated from the grouped data it's very hard to join it back up again.
 
 An extremely common channel "shape" or cardinality in nf-core modules and subworkflows is the `tuple val(meta), path(reads)` structure.
 
@@ -3827,17 +3834,17 @@ Most Nextflow users prefer the `set` notation rather than the `=` notation
 Example:
 
 ```nextflow
-workflow { 
+workflow {
     // Create a channel with all the fastq files in the data directory
     Channel.fromPath("${params.dataDir}/**/*.fastq.gz")
     | map { path ->
             // Extract the part of the path that is to the right of params.dataDir
-            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])    
+            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])
             // Create a tuple with the relative path and the file path
             Tuple.tuple(relativePath, path)
     }
     | set { fastqFiles_ch }
-    
+
     // Subset the fastq files
     SUBSET_FASTQ(fastqFiles_ch)
     | set { fastqFilesSubsetted_ch }
@@ -3847,24 +3854,24 @@ workflow {
 Instead of:
 
 ```nextflow
-workflow { 
+workflow {
     // Create a channel with all the fastq files in the data directory
     fastqFiles_ch = Channel.fromPath("${params.dataDir}/**/*.fastq.gz")
     | map { path ->
             // Extract the part of the path that is to the right of params.dataDir
-            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])    
+            def relativePath = file(path.getParent().toString().split(params.dataDir)[1])
             // Create a tuple with the relative path and the file path
             Tuple.tuple(relativePath, path)
     }
-    
+
     // Subset the fastq files
     fastqFilesSubsetted_ch = SUBSET_FASTQ(fastqFiles_ch)
-    
+
     fastqFilesSubsetted_ch.view()
 }
 ```
 
-### Organizing your *in-silico* experiments 
+### Organizing your _in-silico_ experiments
 
 It’s good practice to organize each **experiment** in its own folder. The main experiment input parameters should be specified using a Nextflow config file. This makes it simple to track and replicate an experiment over time.
 
@@ -3892,7 +3899,6 @@ nextflow run rnaseq-nf -resume mighty_boyd
 
 More information can be found [here](https://training.nextflow.io/basic_training/cache_and_resume/#how-to-organize-in-silico-experiments).
 
-
 ## Getting Syntax Examples using nf-core
 
 When you don't know how a specific nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
@@ -3901,13 +3907,13 @@ When you don't know how a specific nextflow function or element works, a really 
 
 Seqera Platform (formerly known as Nextflow tower) provides a useful tool to monitor your pipelines and work on teams. It offered through a web app and a CLI. To learn more about how to use it you can click here:
 
-- Web app:  
-    
-    - https://youtu.be/ERbTqLtAkps?feature=shared&t=5852
+- Web app:
+
+  - https://youtu.be/ERbTqLtAkps?feature=shared&t=5852
 
 - CLI:
 
-    - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
+  - https://youtu.be/ERbTqLtAkps?feature=shared&t=6556
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
@@ -3934,6 +3940,7 @@ To define a local variable, use the `def` keyword:
 ```groovy
 def x = 1
 ```
+
 The `def` should be always used when defining variables local to a function or a closure.
 
 ### The Ternary Operator
@@ -3951,7 +3958,7 @@ Groovy supports the use of the Elvis operator (`?:`).
 ```groovy
 somethingThatMightBeFalsey ?: somethingElse
 
-// ^This is equivalent to 
+// ^This is equivalent to
 somethingThatMightBeFalsey ? somethingThatMightBeFalsey : somethingElse
 ```
 
@@ -3990,7 +3997,7 @@ ERROR ~ assert list[0] == 20
 String literals can be defined by enclosing them with either single- (`''`) or double- (`""`) quotation marks.
 
 - Strings enclosed in single quotes are treated literally, meaning they are not subject to string interpolation.
-    - This includes escape characters such as `\n`, `\t`, `\\`, etc. They will be treated literally.
+  - This includes escape characters such as `\n`, `\t`, `\\`, etc. They will be treated literally.
 - Strings enclosed in double quotes allow string interpolation, meaning variables and expressions within the string are evaluated and replaced with their values.
 
 Example:
@@ -4037,7 +4044,7 @@ demo = "one two three"
 assertEquals(demo - ~/t.o ?/, "one three")
 ```
 
-**Note:** In Groovy, `-` is just a shorthand notation for the `minus` method. 
+**Note:** In Groovy, `-` is just a shorthand notation for the `minus` method.
 
 #### **Tokenizing**
 
@@ -4065,8 +4072,8 @@ println(type)
 /* Outputs:
 sampleA
 rep1
-tumor 
-*/ 
+tumor
+*/
 ```
 
 **Note:** Be aware of an important difference between the `tokenize` and `split` methods in Groovy. The `tokenize()` method uses each character of a string as a delimiter whereas `split()` takes the entire string as a delimiter.
@@ -4092,9 +4099,9 @@ Maps can be accessed in a conventional square-bracket syntax or as if the key wa
 ```groovy
 map = [a: 0, b: 1, c: 2]
 
-assert map['a'] == 0 
-assert map.b == 1 
-assert map.get('c') == 2 
+assert map['a'] == 0
+assert map.b == 1
+assert map.get('c') == 2
 ```
 
 To add data or to modify a map, the syntax is similar to adding values to a list:
@@ -4102,20 +4109,19 @@ To add data or to modify a map, the syntax is similar to adding values to a list
 ```groovy
 map = [a: 0, b: 1, c: 2]
 
-map['a'] = 'x' 
-map.b = 'y' 
-map.put('c', 'z') 
+map['a'] = 'x'
+map.b = 'y'
+map.put('c', 'z')
 assert map == [a: 'x', b: 'y', c: 'z']
 ```
 
 Map objects implement all methods provided by the [java.util.Map](https://docs.oracle.com/javase/8/docs/api/java/util/Map.html) interface, plus the extension methods provided by [Groovy](http://docs.groovy-lang.org/latest/html/groovy-jdk/java/util/Map.html).
 
-
-#### **The `.keySet()` method** 
+#### **The `.keySet()` method**
 
 The `keySet()` method is a Java method (not a Groovy method), but it's still very useful when working with map objects in Groovy and Nextflow. It is part of the `Map` interface, which is implemented by classes like `HashMap`, `TreeMap`, etc. This method returns a `Set` containing all the keys present in the map.
 
-Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be very convienient. 
+Often in Nextflow you'll have your metadata being contained in a map. If you want to extract the names of the keys this method turns out to be very convienient.
 
 Example:
 
@@ -4149,7 +4155,7 @@ assert fact(5) == 120
 
 ### Closures
 
-In Groovy, closures are blocks of code that can take arguments, execute code, and return a value. These blocks of code can be  passed as an argument to a function. They are similar to anonymous functions or lambda expressions in other programming languages. 
+In Groovy, closures are blocks of code that can take arguments, execute code, and return a value. These blocks of code can be passed as an argument to a function. They are similar to anonymous functions or lambda expressions in other programming languages.
 
 More formally, a closure allows the definition of functions as first-class objects.
 
@@ -4188,13 +4194,13 @@ square = { num -> num * num }
 
 It’s also possible to define closures with multiple, custom-named parameters.
 
-For example, when the method `each()` is applied to a map it can take a closure with two arguments, to which it passes the *key-value* pair for each entry in the map object. 
+For example, when the method `each()` is applied to a map it can take a closure with two arguments, to which it passes the _key-value_ pair for each entry in the map object.
 
 Example:
 
 ```groovy
-printMap = { a, b -> println "$a with value $b" } 
-values = ["Yue": "Wu", "Mark": "Williams", "Sudha": "Kumari"] 
+printMap = { a, b -> println "$a with value $b" }
+values = ["Yue": "Wu", "Mark": "Williams", "Sudha": "Kumari"]
 values.each(printMap) /* Outputs
 
 Yue with value Wu
@@ -4206,16 +4212,16 @@ Sudha with value Kumari
 
 A closure has two other important features.
 
-1. It can access and *modify* variables in the scope where it is defined.
+1. It can access and _modify_ variables in the scope where it is defined.
 
-2. A closure can be defined in an *anonymous* manner, meaning that it is not given a name, and is only defined in the place where it needs to be used.
+2. A closure can be defined in an _anonymous_ manner, meaning that it is not given a name, and is only defined in the place where it needs to be used.
 
 As an example showing both these features, see the following code fragment:
 
 ```groovy
-result = 0 
-values = ["China": 1, "India": 2, "USA": 3] 
-values.keySet().each { result += values[it] } 
+result = 0
+values = ["China": 1, "India": 2, "USA": 3]
+values.keySet().each { result += values[it] }
 println result // Outputs 6
 ```
 
@@ -4234,7 +4240,7 @@ map { id, reads ->
     reads.collect { it.getParent() }
 }
 
-// Is equivalent to 
+// Is equivalent to
 
 map { id, reads ->
     reads*.getParent()
@@ -4250,7 +4256,7 @@ For example, the following 4 lines in the map are equivalent.
 ```nextflow
 workflow {
     Channel.fromFilePairs("data/reads/*/*_R{1,2}.fastq.gz")
-    | map { id, reads -> 
+    | map { id, reads ->
         reads.collect { it.getParent() }.collect { it.getName() }
         reads.collect { it.parent }.collect { it.name }
         reads*.getParent()*.getName()
@@ -4260,7 +4266,7 @@ workflow {
 }
 ```
 
-### Groovy Imports 
+### Groovy Imports
 
 There exists in Groovy and the JVM ecosystem a wealth of helper classes that can be imported into Nextflow scripts to help you accomplish some small tasks and helpful bits and pieces inside your Nextflow workflow.
 
@@ -4293,9 +4299,9 @@ FASTP.out.json
 | view
 ```
 
-### The safe navigation operator 
+### The safe navigation operator
 
-Groovy has a safe navigation operator `?.`.  It's used to safely access properties or methods of an object without throwing a `NullPointerException` if the object itself is null (Similar to optional chaining in JavaScript).
+Groovy has a safe navigation operator `?.`. It's used to safely access properties or methods of an object without throwing a `NullPointerException` if the object itself is null (Similar to optional chaining in JavaScript).
 
 For example:
 
@@ -4314,4 +4320,3 @@ This code is safeguarded in case the `summary` or `after_filtering` objects don'
 ### Groovy web console
 
 A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
-
