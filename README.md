@@ -2980,7 +2980,24 @@ mulled-search --destination quay singularity --channel bioconda --search bowtie 
 
 An even better solution than using Biocontainers is to use the Seqera labs Wave containers service. Wave is an open source software and a service that builds containers on the fly for you. You can just give your conda directives on Nextflow on a conda environment file and remotely Wave is going to build your container image on the fly during the execution of your pipeline and provide it back to you very quickly.
 
-You can see more about what Wave containers can do [here](https://github.com/seqeralabs/wave-showcase).
+You can see more about what Wave containers can do with the following resrouces:
+- [Wave Showcase](https://github.com/seqeralabs/wave-showcase).
+- [Wave Documentation](https://www.nextflow.io/docs/latest/wave.html).
+- [Wave Video Demo](https://www.youtube.com/watch?v=u2ybsPe1O8o).
+
+### Bypassing container provider service rate limits with Wave
+
+### Building Docker containers for non-conda packages with Wave
+
+### Building Docker containers for conda packages with Wave
+
+### Wavelit 
+
+Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
+
+You can find more information on Wavelit with the following resources:
+- [Wavelit Github Repository](https://github.com/seqeralabs/wave-cli)
+- [Wavelit Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068).
 
 
 ## Important functions for file attributes and paths
