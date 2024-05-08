@@ -3899,6 +3899,31 @@ nextflow run rnaseq-nf -resume mighty_boyd
 
 More information can be found [here](https://training.nextflow.io/basic_training/cache_and_resume/#how-to-organize-in-silico-experiments).
 
+## Visualizing the Nextflow execution DAG
+
+A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The vertices in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
+
+To render the workflow DAG, run your pipeline with the `-with-dag` option. 
+
+By default, it creates a file named `dag-<timestamp>.html` with the workflow DAG rendered as a [Mermaid](https://mermaid.js.org/) diagram.
+
+```mermaid
+flowchart TB
+    subgraph " "
+    v0["Channel.fromPath"]
+    end
+    v2([SUBSET_FASTQ])
+    subgraph " "
+    v4["fastqFilesSubsetted_ch"]
+    end
+    v1(( ))
+    v3(( ))
+    v0 --> v1
+    v1 --> v2
+    v2 --> v3
+    v3 --> v4
+```
+
 ## Getting Syntax Examples using nf-core
 
 When you don't know how a specific nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
