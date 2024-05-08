@@ -4014,6 +4014,8 @@ workflow {
 nextflow run main.nf -with-wave -resume --devMode false
 ```
 
+**Note:** For more information on conditional workflow execution, [see here](https://nextflow-io.github.io/patterns/conditional-process/).
+
 ## Visualizing the Nextflow execution DAG
 
 A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The nodes in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
