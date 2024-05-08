@@ -3903,9 +3903,34 @@ More information can be found [here](https://training.nextflow.io/basic_training
 
 A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The vertices in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
 
-To render the workflow DAG, run your pipeline with the `-with-dag` option. 
+To render the workflow DAG, run your pipeline with the `-with-dag` option. You can use the `-preview` option with `-with-dag` to render the workflow DAG **without** executing any tasks.
 
-By default, it creates a file named `dag-<timestamp>.html` with the workflow DAG rendered as a [Mermaid](https://mermaid.js.org/) diagram.
+By default, it creates a file named `dag-<timestamp>.html` with the workflow DAG rendered as a [Mermaid](https://mermaid.js.org/) diagram. For example:
+
+```bash
+nextflow run main.nf -with-dag -preview
+```
+
+Will output something like `dag-20240507-85496265.html`.
+
+To change the output file format, you can pass a filename after the `with-dag` option. The supported file types for DAG visualization are:
+- `.dot`: Creates a Graphviz [DOT](http://www.graphviz.org/content/dot-language) file
+- `.gexf`: Creates a Graph Exchange XML file (Gephi) file
+- `.html`: (**_default_**) Creates a HTML file with Mermaid diagram
+- `.mmd`: Creates mermaid diagram file (**_compatible with markdown_**)
+- `.pdf`: Creates a Graphviz PDF file (_Requires Graphviz to be installed_)
+- `.png`: Creates a Graphviz PNG file (_Requires Graphviz to be installed_)
+- `.svg`: Creates a Graphviz SVG file (_Requires Graphviz to be installed_)
+
+However, the default filename (`dag-<timestamp>.html`) is dynamically generated to generate a timestamp. If you naively change the filename in order to try to change the output file type, there's a good chance you'll hardcode the filename and lose the dynamic timestamp generation, in order to get around this, you can leverage the shell command `date`. Rename the file to be `"dag-$(date +"%Y%m%d-%H%M%S").FILETYPE"`
+
+For example, to create a mermaid diagram on a simple workflow I wrote, you can use:
+
+```bash
+nextflow run main.nf -with-wave -with-dag "dag-$(date +"%Y%m%d-%H%M%S").mmd" -preview
+```
+
+This will output:
 
 ```mermaid
 flowchart TB
