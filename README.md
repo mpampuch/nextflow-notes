@@ -2545,11 +2545,13 @@ process example_process {
 
 Value channels allow processes to consume elements infinite times.
 
-Elements in the queue channel are consumed. You cannot consume the same element for the same process twice.
+Elements in the queue channel are consumed. You cannot consume the same element **for the same process** twice.
 
 One common use case of a value channel is when you're working with a **reference genome**. Often times you'll want to map many reads back to the reference genome but you don't want the reference genome to get consumed on the first mapping. Therefore be aware of what inputs you want to reuse over and over again and which inputs you want to consume.
 
 For more information, see [here](https://training.nextflow.io/basic_training/channels/#channel-types).
+
+**Note:** If two different processes require the same input, the channel is automatically duplicated if you provide it as input for multiple processes. This is a new feature of the DSL2 language update. Earlier you indeed had to manually duplicate the queue channel in such cases. The distinction between value and queue channels now is mostly relevant for processes with multiple input channels.
 
 ## Single Value Coersion to Value Channels
 
