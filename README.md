@@ -3358,13 +3358,13 @@ In vscode you can make use this code to make this a custom user snippet
 
 ```json
 {
-	"Nextflow debug snippet": {
-		"scope": "nf,groovy",
-		"prefix": "vv",
-		"body": [
-				"| view { it }; return; //"
-		],
-		"description": "Inserts | view { it }; return; // for debugging"
+  "Nextflow debug snippet": {
+    "scope": "nf,groovy",
+    "prefix": "vv",
+    "body": [
+            "| view { it }; return; //"
+    ],
+    "description": "Inserts | view { it }; return; // for debugging"
 }
 ```
 
