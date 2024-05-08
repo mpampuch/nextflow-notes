@@ -3941,6 +3941,79 @@ nextflow run rnaseq-nf -resume mighty_boyd
 
 More information can be found [here](https://training.nextflow.io/basic_training/cache_and_resume/#how-to-organize-in-silico-experiments).
 
+## Building a pipeline with development data
+
+Most times it's much easier to build a pipeline with a subset of your data. Here are some tips for how I would structure your data for building a pipeline.
+
+1. Copy _all_ of your data into your Nextflow project and give it the directory name `data`.
+2. In a `README.md` file, provide a path for where a backup of all the data can be found in case something goes wrong. 
+    - (usually all the data will be really big so copying it all in the directory for backup will waste a lot of space).
+3. Create a subset of your data into your Nextflow project and give it the directory name `data_for-pipeline-dev`.
+    - Take your time with this. The development data architecture should exactly match the architecutre of the data in the `data` folder. This development data should be like if you just shrunk the data into the minimum usable data to get the processes in your pipeline working.
+4. Create a copy of your subsetted data and call it `data_for-pipeline-dev_BACKUP`. **Don't touch this file**. Copy it back to `data_for-pipeline-dev` if you mess up your data.
+5. Inside your `nextflow.config` file, add the following code:
+
+```nextflow
+params.devMode = true
+params.dataDir = params.devMode ? 'data_for-pipeline-dev' : 'data'
+```
+6. (**_Optional_**) If you wish to further modify your development data only, you can perform conditional execution in your workflow using `if/else` and the `params.devMode` parameter. For example, take a look at the following `main.nf` file:
+
+```nextflow
+#!/usr/bin/env nextflow
+
+include { SUBSET_FASTQ } from './modules/local/subset_fastq/main.nf'
+
+workflow {
+    // Create a channel with all the file metadata
+    Channel.fromPath("${params.dataDir}/**/*.fastq.gz")
+    | map { path ->
+            def experimentName = path.getParent().getParent().getParent().getParent().getBaseName()
+            (date, strain, replicate, extractionMethod) = experimentName.tokenize('_')
+            def extras = experimentName.split('--').size() == 2 ? experimentName.split('--')[1] : null
+            def readsPassOrFail = path.getParent().getBaseName() - 'fastq_'
+            def meta = [
+                date: date,
+                strain: strain,
+                replicate: replicate,
+                extractionMethod: extractionMethod,
+                extras: extras,
+                readsPassOrFail: readsPassOrFail
+                ]
+        return [meta, path]
+    }
+    | set { fastqFiles_ch }
+
+    // Subset the fastq files if in dev mode
+    if (params.devMode) {
+    SUBSET_FASTQ(fastqFiles_ch)
+    | map { meta, fastqFile ->
+            def subsetted = true
+            def numReadsInSubset = fastqFile.getBaseName().split('_')[0]
+            meta += [subsetted: subsetted, numReadsInSubset: numReadsInSubset]
+        return [meta, fastqFile]
+    }
+    | set { fastqFilesPostSubsetting_ch }
+    }
+    else {
+        fastqFiles_ch
+        | map { meta, fastqFile ->
+                def subsetted = false
+                def numReadsInSubset = null
+                meta += [subsetted: subsetted, numReadsInSubset: numReadsInSubset]
+            return [meta, fastqFile]
+        }
+        | set { fastqFilesPostSubsetting_ch }
+    }
+}
+```
+
+7. When you want to run your actual pipeline, turn off development mode with `--devMode false`
+
+```bash
+nextflow run main.nf -with-wave -resume --devMode false
+```
+
 ## Visualizing the Nextflow execution DAG
 
 A Nextflow pipeline can be represented as a direct acyclic graph (DAG). The nodes in the graph represent the pipeline’s processes and operators, while the edges represent the data dependencies (i.e. channels) between them.
