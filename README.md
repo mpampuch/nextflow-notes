@@ -3367,7 +3367,7 @@ In vscode you can make use this code to make this a custom user snippet
 }
 ```
 
-## Nextflow special directorys
+## Nextflow special directories
 
 Inside a Nextflow workflow repository there are a couple special directories that are treated differently to other directories. These are the `./bin`, `./templates`, and the `./lib` directory.
 
