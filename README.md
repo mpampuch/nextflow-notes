@@ -3539,7 +3539,7 @@ class Metadata extends HashMap {
 }
 ```
 
-We can then use the new hi method in the workflow:
+We can then use the new `hi` method in the workflow:
 
 ```nextflow
 workflow {
