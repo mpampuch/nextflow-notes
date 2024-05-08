@@ -3986,14 +3986,14 @@ workflow {
 
     // Subset the fastq files if in dev mode
     if (params.devMode) {
-    SUBSET_FASTQ(fastqFiles_ch)
-    | map { meta, fastqFile ->
-            def subsetted = true
-            def numReadsInSubset = fastqFile.getBaseName().split('_')[0]
-            meta += [subsetted: subsetted, numReadsInSubset: numReadsInSubset]
-        return [meta, fastqFile]
-    }
-    | set { fastqFilesPostSubsetting_ch }
+        SUBSET_FASTQ(fastqFiles_ch)
+        | map { meta, fastqFile ->
+                def subsetted = true
+                def numReadsInSubset = fastqFile.getBaseName().split('_')[0]
+                meta += [subsetted: subsetted, numReadsInSubset: numReadsInSubset]
+            return [meta, fastqFile]
+        }
+        | set { fastqFilesPostSubsetting_ch }
     }
     else {
         fastqFiles_ch
