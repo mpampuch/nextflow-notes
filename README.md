@@ -3351,21 +3351,30 @@ workflow {
 You can also use this simple one liner that employs `;` to be treated as a multiline expression which is very useful for debugging
 
 ```nextflow
-| view(); return; //
+| view { it }; return; //
 ```
 
 In vscode you can make use this code to make this a custom user snippet
 
 ```json
-"Nextflow debug snippet": {
+{
+	"Nextflow debug snippet": {
 		"scope": "nf,groovy",
 		"prefix": "vv",
 		"body": [
-				"| view(); return; //"
+				"| view { it }; return; //"
 		],
-		"description": "Inserts | view(); return; //"
+		"description": "Inserts | view { it }; return; // for debugging"
 }
 ```
+
+Because this returns the `view` command with a closure, you can easily modify input of the view command by modifying `it`. For example:
+
+```nextflow
+| view { it.class }; return; //
+```
+
+^ This will tell you what the class is of the elements in your workflow.
 
 ## Nextflow special directories
 
@@ -4014,7 +4023,7 @@ workflow {
 nextflow run main.nf -with-wave -resume --devMode false
 ```
 
-**Note:** For more information on conditional workflow execution, [see here](https://nextflow-io.github.io/patterns/conditional-process/).
+**Note:** For more information on conditional workflow execution, [seev here](https://nextflow-io.github.io/patterns/conditional-process/).
 
 ## Visualizing the Nextflow execution DAG
 
