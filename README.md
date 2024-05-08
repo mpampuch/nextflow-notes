@@ -3019,7 +3019,7 @@ wave {
 }
 ```
 
-2. In your `process` block, add a `conda` directive:
+2. In your `process` block, add a `conda` directive. Example:
 
 ```nextflow
 process SUBSET_FASTQ {
