@@ -127,6 +127,40 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
+## Nextflow overall structure
+
+An basic, overall professional Nextflow pipeline structure should look like this:
+
+```
+.
+├── main.nf
+├── modules
+│   ├── local
+│   └── nf-core
+├── subworkflows
+│   ├── local
+│   └── nf-core
+└── workflows
+    ├── illumina.nf
+    ├── nanopore.nf
+    └── sra_download.nf
+```
+
+Terminology:
+- Module:
+    - An atomic process
+        - e.g. a module containing a single tool such as FastQC
+- Subworkflow:
+    - A chain of multiple modules with a higher-level of functionality
+        - e.g. a subworkflow to run multiple QC tools on FastQ files
+- Workflows:
+    - An end-to-end pipeline
+    - DSL1: A large monolithic script
+    - DSL2: A combination of individual modules and subworkflows
+        - e.g. a pipeline to produce a series of final outputs from one or more inputs.
+
+**Note:** DSL1 and DSL2 refer to two versions of the Nextflow Domain Specific Language (DSL).
+
 ## Configuring Nextflow
 
 The first thing that nextflow looks for when a workflow is run is configuration files in multiple locations. Since each configuration file can contain conflicting settings, the sources are ranked to determine which settings are applied. Possible configuration sources, in order of priority:
@@ -2677,6 +2711,31 @@ include { FASTP } from './modules/local/fastp/main.nf'
 ```
 
 More information can be found [here](https://training.nextflow.io/basic_training/modules/#modules) (Take careful note of the Module aliases section. This section talks about how to invoke processes multiple times after importing).
+
+### nf-core Modules
+
+nf-core provides some pre-built modules that can be useful ([see here](https://nf-co.re/modules)).
+
+These can also be viewed from the command line if you have nf-core installed.
+
+```bash
+# If you don't have it installed
+conda activate mamba
+mamba install nf-core
+
+# View the available modules
+nf-core modules
+
+# Get help installing a module
+nf-core modules install --help
+
+# Example: Install FASTQC to your pipeline directory
+nfcore modules install . fastqc
+```
+
+To use a nf-core module (and a local one too), you should update the `conf/modules.config` file.
+
+More information on nf-core can be found in this [video tutorial](https://www.youtube.com/watch?v=tWvou0xj9wA&list=PL3xpfTVZLcNiSvvPWORbO32S1WDJqKp1e&index=6).
 
 ## Workflow definitions
 
