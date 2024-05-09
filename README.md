@@ -2736,7 +2736,10 @@ nf-core modules install --help
 nfcore modules install . fastqc
 ```
 
-To use a nf-core module (and a local one too), you should update the `conf/modules.config` file.
+To use a nf-core module (and a local one too), you should:
+1. Update the `conf/modules.config` file.
+2. Add `includeConfig 'conf/modules.config'` to `nextflow.config`.
+3. Include module into workflows and/or subworkflows.
 
 More information on nf-core can be found in this [video tutorial](https://www.youtube.com/watch?v=tWvou0xj9wA&list=PL3xpfTVZLcNiSvvPWORbO32S1WDJqKp1e&index=6).
 
