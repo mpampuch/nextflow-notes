@@ -158,6 +158,9 @@ Terminology:
     - DSL1: A large monolithic script
     - DSL2: A combination of individual modules and subworkflows
         - e.g. a pipeline to produce a series of final outputs from one or more inputs.
+- `main.nf`: 
+    - The entry point for Nextflow 
+    - Where all the workflows will be called from 
 
 **Note:** DSL1 and DSL2 refer to two versions of the Nextflow Domain Specific Language (DSL).
 
