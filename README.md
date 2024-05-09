@@ -1968,7 +1968,7 @@ c2 = Channel.of( 'a', 'b' )
 c3 = Channel.of( 'z' )
 
 c1.mix(c2,c3)
-    .subscribe onNext: { println it }, onComplete: { println 'Done' }
+  .subscribe onNext: { println it }, onComplete: { println 'Done' }
 ```
 
 Outputs:
@@ -1981,13 +1981,6 @@ Outputs:
 'b'
 'z'
 ```
-
-1
-2
-3
-'a'
-'b'
-'z'
 
 **Note**: The items emitted by the resulting mixed channel may appear in any order, regardless of which source channel they came from. Thus, the following example could also be a possible result of the above example:
 
