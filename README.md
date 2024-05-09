@@ -4115,11 +4115,12 @@ workflow {
             def experimentName = path.getParent().getParent().getParent().getParent().getBaseName()
             (date, strain, replicate, extractionMethod) = experimentName.tokenize('_')
             def extras = experimentName.split('--').size() == 2 ? experimentName.split('--')[1] : null
+            if (extras) {extractionMethod = extractionMethod.split('--')[0]}
             def readsPassOrFail = path.getParent().getBaseName() - 'fastq_'
             def meta = [
                 date: date,
                 strain: strain,
-                replicate: replicate,
+                replicate: replicate - 'rep-',
                 extractionMethod: extractionMethod,
                 extras: extras,
                 readsPassOrFail: readsPassOrFail
