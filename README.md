@@ -1917,6 +1917,31 @@ Outputs
 [1,2,3,4]
 ```
 
+By default, `.collect` will flatten nested list objects and collect their items individually. To change this behaviour, set the `flat` option to `false`.
+
+Example:
+
+```Groovy
+Channel
+    .of( [1, 2], [3, 4] )
+    .collect()
+    .view()
+
+// Outputs
+// [1,2,3,4]
+
+Channel
+    .of( [1, 2], [3, 4] )
+    .collect(flat: false)
+    .view()
+
+// Outputs
+// [[1,2],[3,4]]
+```
+
+The `.collect` operator also can take a `sort` option (`false` by default). sort
+When `true`, the collected items are sorted by their natural ordering. Can also be a [closure](https://www.nextflow.io/docs/latest/script.html#script-closure) or a [Comparator](https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html) which defines how items are compared during sorting.
+
 ### The `.buffer` channel operator
 
 The `.buffer` channel operator gathers the items emitted by the source channel into subsets and emits these subsets separately.
@@ -4520,6 +4545,62 @@ You can learn more about closures in the [Groovy documentation](http://groovy-la
 ### `get*()` in Groovy
 
 In Groovy, any gettersmethod that looks like `get*()` can also be accessed as a field (aka in property-style notation). For example, `myFile.getName()` is equivalent to `myFile.name`, `myFile.getBaseName()` is equivalent to `myFile.baseName`, and so on.
+
+### The `.transpose()` method on Groovy Collections
+
+The [`transpose`](https://docs.groovy-lang.org/latest/html/api/groovy/util/GroovyCollections.html#transpose(java.util.List)) method is really useful when working with collections in Groovy.
+
+It transposes the given lists. For example:
+- `transpose([['a', 'b'], [1, 2]])`
+  - returns `[['a', 1], ['b', 2]]`
+- `transpose([['a', 'b', 'c']])` 
+  - returns `[['a'], ['b'], ['c']]`
+
+The reason this is very useful in Nextflow is that many modules require inputs in the form of `tuple val(meta), path(file)`
+
+In cases where you have to combine the output of many different tasks and amalgamate them into a single input for a process (E.g. Think about doing a lot a QC tasks on individual read files and then needing all those read files as input to perform a single genome assembly task), the input for that task might look like `tuple val(metas), path(files)`. Notice how the basic input structure is still the same, just now there are a collection of meta maps and paths inside the collection.
+
+So for example, let's say you have a process that outputs a channel that is something like this:
+
+```nextflow
+fastqFiles_ch
+  | view
+
+/* Outputs
+[[file: 1, meta: map], /path/to/file1.fastq]
+[[file: 2, meta: map], /path/to/file2.fastq]
+// The rest of the data (14 out of 16 [meta, path] collections not shown)
+*/
+```
+
+Then you can create a collection of collections with `collect(flat: false)`:
+
+```nextflow
+fastqFiles_ch
+  | collect(flat: false)
+  | view
+
+/* Outputs
+[[[file: 1, meta: map], /path/to/file1.fastq], [[file: 2, meta: map], /path/to/file2.fastq], ... 14 out of 16 [meta, path] collections not shown]
+*/
+```
+
+And then you can split these collections into a `metas` collection and a `files` collection with Groovy's `transpose` method:
+
+```nextflow
+fastqFiles_ch
+  | collect(flat: false)
+  | map { it.transpose() }
+  | view
+
+/* Outputs
+[[[file: 1, meta: map], [file: 2, meta: map], ... 14 out of 16 metaMaps not shown], [/path/to/file1.fastq, /path/to/file2.fastq, ... 14 out of 16 file paths not shown]]
+*/
+```
+
+Now this channel is ready to get passed into a process that takes a `tuple val(metas), path(files)` input shape.
+
+**Note:** The Groovy `transpose` method and the Nextflow `transpose` channel operator are two different things and will give you different results. Be aware of which one you need and when.
 
 ### Spread-dot notation
 
