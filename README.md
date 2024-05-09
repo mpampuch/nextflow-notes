@@ -2743,6 +2743,22 @@ To use a nf-core module (and a local one too), you should:
 
 More information on nf-core can be found in this [video tutorial](https://www.youtube.com/watch?v=tWvou0xj9wA&list=PL3xpfTVZLcNiSvvPWORbO32S1WDJqKp1e&index=6).
 
+### The `MultiQC` module
+
+MultiQC is a tool used for the aggregation and summarization of bioinformatics analysis results. 
+
+MultiQC simplifies the process of managing and interpreting the results from various bioinformatics analysis tools by automatically collecting and summarizing the outputs from multiple tools into a single, easy-to-read HTML report. It identifies common metrics and trends across different analysis tools, providing a comprehensive overview of the data analysis process.
+
+However as a module, `MULTIQC` is special because it has to be made `local`. You have to customize it for all the tools and modules you used for your workflows and subworkflows.
+
+[See here for a tutorial](https://youtu.be/tWvou0xj9wA?feature=shared&t=704)
+
+### Emitting software versions in Modules
+
+Each module should (and *must* if in the context of nf-core) **emit the software versions of their tools**. 
+
+[See here for a tutorial](https://youtu.be/tWvou0xj9wA?feature=shared&t=737)
+
 ## Workflow definitions
 
 The `workflow` scope allows the definition of components that define the invocation of one or more processes or operators.
