@@ -19,7 +19,7 @@ Nextflow pipelines need to be written into files with the `.nf` extension.
 Example, create a file called `main.nf` and provide it the following code:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 process FASTQC {
     input:
@@ -40,7 +40,7 @@ workflow {
 ```
 
 > [!NOTE]
-> The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
+> The shebang (`#!/usr/bin/env Nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
 
 Nextflow can then run by using the following command
 
@@ -50,7 +50,7 @@ nextflow run main.nf
 
 Only run it like this the first time. If you run it again it will begin running the entire workflow over again. It's better to not rerun processes that don't need to be rerun to save a lot of time.
 
-When you run a nextflow pipeline, you will get an output like this in your terminal
+When you run a Nextflow pipeline, you will get an output like this in your terminal
 
 ```
 N E X T F L O W  ~  version 23.10.0
@@ -168,7 +168,7 @@ Terminology:
 
 ## Configuring Nextflow
 
-The first thing that nextflow looks for when a workflow is run is configuration files in multiple locations. Since each configuration file can contain conflicting settings, the sources are ranked to determine which settings are applied. Possible configuration sources, in order of priority:
+The first thing that Nextflow looks for when a workflow is run is configuration files in multiple locations. Since each configuration file can contain conflicting settings, the sources are ranked to determine which settings are applied. Possible configuration sources, in order of priority:
 
 1. Parameters specified on the command line (`--something value`)
 
@@ -189,7 +189,7 @@ The first thing that nextflow looks for when a workflow is run is configuration 
 
 When more than one of these options for specifying configurations are used, they are merged, so that the settings in the first override the same settings appearing in the second, and so on.
 
-This is an example of a nextflow configuration in a file called `nextflow.config`
+This is an example of a Nextflow configuration in a file called `nextflow.config`
 
 ```nextflow
 propertyOne = 'world'
@@ -246,9 +246,9 @@ nextflow run snippet.nf -resume --foo "Bye"
 ```
 
 > [!NOTE]
-> In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
+> In Nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
 
-> [!Also-NOTE] 
+> [!NOTE] 
 > Values assigned to a the config params `params.` will be treated as _value channels_ (see more information below on value channels)
 
 ### Config env
@@ -361,13 +361,13 @@ If you add the following code to the `nextflow.config` file
 process.executor = 'slurm'
 ```
 
-Then nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
+Then Nextflow will write the SLURM job script for every file for you. Nextflow will manage each process as a separate job that is submitted to the cluster using the `sbatch` command.
 
 More information on how to configure this further can be found here https://www.nextflow.io/docs/latest/executor.html#slurm
 
 ### Running Nextflow workflows on SLURM / HPC's
 
-When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your nextflow jobs.
+When running Nextflow on a HPC, it's recommended to run it as a job on a compute node. This is because a lot of computing clusters have strict rules on running processes on login nodes. Therefore, it's always advisable to create jobscripts like this for all your Nextflow jobs.
 
 `launch_nf.sh`
 
@@ -383,7 +383,7 @@ CONFIG=$2
 
 # Use a conda environment where you have installed Nextflow
 # (may not be needed if you have installed it in a different way)
-conda activate nextflow
+conda activate Nextflow
 
 nextflow -C ${CONFIG} run ${WORKFLOW}
 ```
@@ -689,7 +689,7 @@ process < name > {
 
 ## Task directories
 
-Take a look at the last part of the output when you run a nextflow pipeline
+Take a look at the last part of the output when you run a Nextflow pipeline
 
 ```
 # YOUR PROCESSES AND OUTPUTS
@@ -741,7 +741,8 @@ process > CONVERTTOUPPER
 
 The hexadecimal numbers, like `18/f6351b`, identify the unique process execution, that is called a task. These numbers are also the prefix of the directories where each task is executed. You can inspect the files produced by changing to the directory `$PWD/work` and using these numbers to find the task-specific execution path (e.g. Go to `$PWD/work/18/f6351b46bb9f65521ea61baaaa9eff` to find all the information on the task performed using the `SPLITLETTERS` process).
 
-**Note**: Inside the work directory for the specific task, you will also find the **_Symbolic links_** used as inputs for the specific task, not copies of the files themselves.
+> [!NOTE] 
+> Inside the work directory for the specific task, you will also find the **_Symbolic links_** used as inputs for the specific task, not copies of the files themselves.
 
 ### The ANSI log
 
@@ -796,7 +797,7 @@ This file contains anything that was printed to your screen (the standard output
 
 This file shows you the jobscript that Nextflow created to run the script (e.g. If you are running your scripts with SLURM, it will show you the SLURM job script Nextflow created and that was subsequently called with `sbatch`).
 
-This script contains all the functions nextflow needs to make sure your script runs on whatever executor you configured (e.g. locally, in the cloud, on a HPC, with or withouth container, etc.)
+This script contains all the functions Nextflow needs to make sure your script runs on whatever executor you configured (e.g. locally, in the cloud, on a HPC, with or withouth container, etc.)
 
 You're not really supposed to meddle with this file but sometimes you may want to see what's in it. (E.g. To see what Docker command was used to start the container etc.)
 
@@ -1378,13 +1379,14 @@ process rnaseq_call_variants {
 
 This won't create a name conflict for every sample that gets processed.
 
-This is because nextflow creates a new directory for every task a process performs. So if you're trying to process 10 samples (run 10 tasks from a single process), you're going to have 10 isolated folders.
+This is because Nextflow creates a new directory for every task a process performs. So if you're trying to process 10 samples (run 10 tasks from a single process), you're going to have 10 isolated folders.
 
 If you only had the `path` variable defined and not the `tuple` with the `sampleId` then it may have caused an issue but the way it's defined here file conflicts won't be an issue because every sample will get it's own folder.
 
 ## Processing things in order / the `fair` directive
 
-**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
+> [!NOTE] 
+> The Nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
 
 While channels do emit items in the order that they are received (FIFO structure), **_processes do not necessarily process items in the order that they are received_** (because of implicit parallelization and later processes ending before earlier ones). While this isn't an issue in most cases, it is important to know.
 
@@ -1416,7 +1418,8 @@ Notice in the above example that the value `3` was processed before the others.
 
 The `fair` directive (new in version 22.12.0-edge), when enabled, guarantees that process outputs will be emitted in the order in which they were received. This is because the `fair` process directive distributes computing resources in a "fair" way (comes from fair-threading) to ensure the first one finishes first and so on.
 
-**NOTE:** The nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
+> [!NOTE] 
+> The Nextflow team suggests using a tuple with the ID attached to the sample instead of using the `fair` directive. You may experience some performance hits and less parallelism using the `fair` directive.
 
 Example:
 
@@ -1468,7 +1471,7 @@ process CONVERTTOUPPER {
 }
 ```
 
-By default, nextflow expects a shell script in the script block.
+By default, Nextflow expects a shell script in the script block.
 
 > [!NOTE] 
 > Since Nextflow uses the same Bash syntax for variable substitutions in strings, Bash environment variables need to be escaped using the `\` character. The escaped version will be resolved later, returning the task directory (e.g. `work/7f/f285b80022d9f61e82cd7f90436aa4/`), while `$PWD` would show the directory where you're running Nextflow.
@@ -1811,7 +1814,8 @@ Channel
 - baz
 ```
 
-Note that the _closure_ replaced the `()` brackets in the `view` operator with `{}` brackets.
+> [!NOTE] 
+> The _closure_ replaced the `()` brackets in the `view` operator with `{}` brackets.
 
 ### The `.map` channel operator
 
@@ -2019,7 +2023,8 @@ Outputs:
 'z'
 ```
 
-**Note**: The items emitted by the resulting mixed channel may appear in any order, regardless of which source channel they came from. Thus, the following example could also be a possible result of the above example:
+> [!NOTE] 
+> The items emitted by the resulting mixed channel may appear in any order, regardless of which source channel they came from. Thus, the following example could also be a possible result of the above example:
 
 ```
 'z'
@@ -2142,7 +2147,7 @@ MapReads( samples, reference )
 | view
 ```
 
-This is easy enough, but the `groupTuple` operator has to wait until all items are emitted from the incoming queue before it is able to reassemble the output queue. If even one read mapping job takes a long time, the processing of all other samples is held up. You need a way of signalling to nextflow how many items are in a given group so that items can be emitted as early as possible.
+This is easy enough, but the `groupTuple` operator has to wait until all items are emitted from the incoming queue before it is able to reassemble the output queue. If even one read mapping job takes a long time, the processing of all other samples is held up. You need a way of signalling to Nextflow how many items are in a given group so that items can be emitted as early as possible.
 
 By default, the `groupTuple` operator groups on the first item in the element, which at the moment is a `Map`. You can turn this map into a special class using the `groupKey` method, which takes our grouping object as a first parameter and the number of expected elements in the second parameter.
 
@@ -2592,7 +2597,7 @@ Y
 
 ## Tuples
 
-Inputs and outputs in nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
+Inputs and outputs in Nextflow need to a data type assigned before a variable name. If the data type is a tuple, all the items in the tuple need a data type as well.
 
 Example
 
@@ -2628,7 +2633,7 @@ For more information, see [here](https://training.nextflow.io/basic_training/cha
 
 ## Single Value Coersion to Value Channels
 
-Processes can only take channels as inputs. That being said, if you pass in a regular variable that has a single value (e.g. string, number, etc), nextflow will implicitly create a value channel containing that value that you are providing. Therefore you can pass a regular value (i.e. string, number) into a process, but just be aware that this is what is going on behind the scenes
+Processes can only take channels as inputs. That being said, if you pass in a regular variable that has a single value (e.g. string, number, etc), Nextflow will implicitly create a value channel containing that value that you are providing. Therefore you can pass a regular value (i.e. string, number) into a process, but just be aware that this is what is going on behind the scenes
 
 Example
 
@@ -2681,9 +2686,11 @@ Example
 nextflow run <script> -w /some/scratch/dir
 ```
 
-Note that if you delete or move the pipeline work directory, this will prevent to use the resume feature in subsequent runs.
+> [!NOTE] 
+> If you delete or move the pipeline work directory, this will prevent to use the resume feature in subsequent runs.
 
-Also note that the pipeline work directory is intended to be used as a temporary scratch area. The final workflow outputs are expected to be stored in a different location specified using the `publishDir` directive.
+> [!NOTE] 
+> The pipeline work directory is intended to be used as a temporary scratch area. The final workflow outputs are expected to be stored in a different location specified using the `publishDir` directive.
 
 ### Using the `publishDir` process directive
 
@@ -2802,7 +2809,7 @@ The `workflow` scope allows the definition of components that define the invocat
 Example:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 params.greeting = 'Hello world!'
 
@@ -2831,7 +2838,7 @@ A `workflow` component can declare one or more input channels using the `take` s
 For example:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 params.greeting = 'Hello world!'
 
@@ -2864,7 +2871,7 @@ A `workflow` can declare one or more output channels using the `emit` statement.
 For example:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 params.greeting = 'Hello world!'
 greeting_ch = Channel.of(params.greeting)
@@ -2918,7 +2925,7 @@ You can also declare named outputs within the emit block.
 Example:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 params.greeting = 'Hello world!'
 greeting_ch = Channel.of(params.greeting)
@@ -2974,7 +2981,7 @@ Within a `main.nf` script you can also have multiple workflows. In which case yo
 The following snippet has two named workflows (`my_workflow_one` and `my_workflow_two`):
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 params.greeting = 'Hello world!'
 
@@ -3235,7 +3242,7 @@ process prepare_star_genome_index {
 }
 ```
 
-The `container ` process directive tells nextflow that if it is using docker, then to use that specific container for this specific task.
+The `container ` process directive tells Nextflow that if it is using docker, then to use that specific container for this specific task.
 
 Process directives can be accessed for a specific task using the `task.` implicit variable. In the context of Nextflow, an implicit variable refers to a special type of variable that holds information about the execution context of a process.
 
@@ -3598,7 +3605,7 @@ chmod +x bin/cars.R
 Let's run the script and see what Nextflow is doing for us behind the scenes:
 
 ```bash
-cat << EOF > nextflow.config
+cat << EOF > Nextflow.config
 profiles {
     docker {
         docker.enabled = true
@@ -3866,7 +3873,7 @@ Nextflow has provided a decorator to help serialize your custom classes. By addi
 To do this, we first add the decorator to the desired class:
 
 ```groovy
-import nextflow.io.ValueObject
+import Nextflow.io.ValueObject
 
 @ValueObject
 class Dog {
@@ -3880,7 +3887,7 @@ By adding the `@ValueObject` decorator to the `Dog` class, Nextflow will now use
 Lastly, we will need to register the class with Kryo, the Java serialization framework. Again, Nextflow provides a helper method to do this. We can add the following to the `main.nf` file:
 
 ```nextflow
-import nextflow.util.KryoHelper
+import Nextflow.util.KryoHelper
 
 KryoHelper.register(Dog)
 ```
@@ -4097,10 +4104,10 @@ Ouputs:
 
 ```
 TIMESTAMP            DURATION  RUN NAME          STATUS  REVISION ID  SESSION ID                            COMMAND
-2019-05-06 12:07:32  1.2s      focused_carson    ERR     a9012339ce   7363b3f0-09ac-495b-a947-28cf430d0b85  nextflow run hello
-2019-05-06 12:08:33  21.1s     mighty_boyd       OK      a9012339ce   7363b3f0-09ac-495b-a947-28cf430d0b85  nextflow run rnaseq-nf -with-docker
-2019-05-06 12:31:15  1.2s      insane_celsius    ERR     b9aefc67b4   4dc656d2-c410-44c8-bc32-7dd0ea87bebf  nextflow run rnaseq-nf
-2019-05-06 12:31:24  17s       stupefied_euclid  OK      b9aefc67b4   4dc656d2-c410-44c8-bc32-7dd0ea87bebf  nextflow run rnaseq-nf -resume -with-docker
+2019-05-06 12:07:32  1.2s      focused_carson    ERR     a9012339ce   7363b3f0-09ac-495b-a947-28cf430d0b85  Nextflow run hello
+2019-05-06 12:08:33  21.1s     mighty_boyd       OK      a9012339ce   7363b3f0-09ac-495b-a947-28cf430d0b85  Nextflow run rnaseq-nf -with-docker
+2019-05-06 12:31:15  1.2s      insane_celsius    ERR     b9aefc67b4   4dc656d2-c410-44c8-bc32-7dd0ea87bebf  Nextflow run rnaseq-nf
+2019-05-06 12:31:24  17s       stupefied_euclid  OK      b9aefc67b4   4dc656d2-c410-44c8-bc32-7dd0ea87bebf  Nextflow run rnaseq-nf -resume -with-docker
 ```
 
 You can use either the **session ID** or the **run name** to recover a specific execution:
@@ -4130,7 +4137,7 @@ params.dataDir = params.devMode ? 'data_for-pipeline-dev' : 'data'
 6. (**_Optional_**) If you wish to further modify your development data only, you can perform conditional execution in your workflow using `if/else` and the `params.devMode` parameter. For example, take a look at the following `main.nf` file:
 
 ```nextflow
-#!/usr/bin/env nextflow
+#!/usr/bin/env Nextflow
 
 include { SUBSET_FASTQ } from './modules/local/subset_fastq/main.nf'
 
@@ -4211,7 +4218,8 @@ To change the output file format, you can pass a filename after the `with-dag` o
 - `.png`: Creates a Graphviz PNG file (_Requires Graphviz to be installed_)
 - `.svg`: Creates a Graphviz SVG file (_Requires Graphviz to be installed_)
 
-**Note (As of April 2024):** The `nf-core` package (v2.13.1) from bioconda may be incompatible with the `graphviz` package (v9.0.0) from conda-forge. Be aware of having these both in the same conda environment.
+> [!NOTE] 
+> (As of April 2024) The `nf-core` package (v2.13.1) from bioconda may be incompatible with the `graphviz` package (v9.0.0) from conda-forge. Be aware of having these both in the same conda environment.
 
 However, the default filename (`dag-<timestamp>.html`) is dynamically generated to generate a timestamp. If you naively change the filename in order to try to change the output file type, there's a good chance you'll hardcode the filename and lose the dynamic timestamp generation, in order to get around this, you can leverage the shell command `date`. Rename the file to be `"dag-$(date +"%Y%m%d-%H%M%S").FILETYPE"`.
 
@@ -4245,7 +4253,7 @@ flowchart TB
 
 ## Getting Syntax Examples using nf-core
 
-When you don't know how a specific nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
+When you don't know how a specific Nextflow function or element works, a really good resource is seeing how it was implemented in nf-core. The nf-core repository contains dozens of professional and expertly curated pipelines. By going to https://github.com/nf-core and typing into the search bar a specific function or operator, you can get tons and tons of examples of how it is supposed to be used.
 
 ### Seqera Platform
 
@@ -4528,7 +4536,8 @@ println x
 // Outputs: [1, 4, 9, 16]
 ```
 
-(**Note**: This `collect` method in groovy is different than the `collect` operator in Nextflow. This groovy `collect` method does something to each element of the list. In Nextflow there is a `map` operator that performs the same function.)
+> [!NOTE] 
+> This `collect` method in groovy is different than the `collect` operator in Nextflow. This groovy `collect` method does something to each element of the list. In Nextflow there is a `map` operator that performs the same function.)
 
 By default, closures take a single parameter called `it`.
 
