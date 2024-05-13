@@ -162,7 +162,8 @@ Terminology:
     - The entry point for Nextflow 
     - Where all the workflows will be called from 
 
-**Note:** DSL1 and DSL2 refer to two versions of the Nextflow Domain Specific Language (DSL).
+> [!NOTE] 
+> DSL1 and DSL2 refer to two versions of the Nextflow Domain Specific Language (DSL).
 
 ## Configuring Nextflow
 
@@ -553,7 +554,8 @@ process {
 }
 ```
 
-**Note:** `MemoryUnit` is a Nextflow built-in class for turning strings and integers into human-readable memory units.
+> [!NOTE] 
+> `MemoryUnit` is a Nextflow built-in class for turning strings and integers into human-readable memory units.
 
 When we run this:
 
@@ -575,7 +577,8 @@ executor >  local (4)
 Done! Open the following report in your browser --> results/multiqc_report.html
 ```
 
-**Note:** Dynamic directives need to be supplied as closures encases in _curly braces_.
+> [!NOTE] 
+> Dynamic directives need to be supplied as closures encases in _curly braces_.
 
 #### **Retry Strategies**
 
@@ -610,7 +613,8 @@ process {
 }
 ```
 
-**Note:** Be aware of the differences between configuration and process syntax differences.
+> [!NOTE] 
+> Be aware of the differences between configuration and process syntax differences.
 
 - When defining values inside configuration, an equals sign `=` is **required** as shown above.
 - When specifying process directives inside the process (in a `.nf` file), no `=` is required:
@@ -758,7 +762,8 @@ WORLD!
 
 Now you can find out in which directory everything related to every task performed is stored straight from the console.
 
-**Note:** Even if you don't use the `-ansi-log false` flag, you can still see the hashes/directories all the tasks are stored in using the `.nextflow.log` file. The task directories can be found in the `[Task monitor]` logs.
+> [!NOTE] 
+> Even if you don't use the `-ansi-log false` flag, you can still see the hashes/directories all the tasks are stored in using the `.nextflow.log` file. The task directories can be found in the `[Task monitor]` logs.
 
 ### Nextflow `.command` files
 
@@ -1460,7 +1465,8 @@ process CONVERTTOUPPER {
 
 By default, nextflow expects a shell script in the script block.
 
-**Note:** Since Nextflow uses the same Bash syntax for variable substitutions in strings, Bash environment variables need to be escaped using the `\` character. The escaped version will be resolved later, returning the task directory (e.g. `work/7f/f285b80022d9f61e82cd7f90436aa4/`), while `$PWD` would show the directory where you're running Nextflow.
+> [!NOTE] 
+> Since Nextflow uses the same Bash syntax for variable substitutions in strings, Bash environment variables need to be escaped using the `\` character. The escaped version will be resolved later, returning the task directory (e.g. `work/7f/f285b80022d9f61e82cd7f90436aa4/`), while `$PWD` would show the directory where you're running Nextflow.
 
 Example:
 
@@ -1898,7 +1904,8 @@ Outputs
 6
 ```
 
-**Note:** This is different to `.mix` because `.mix` operates on items emitted from channels, not `Collection` or `Array` objects.
+> [!NOTE] 
+> This is different to `.mix` because `.mix` operates on items emitted from channels, not `Collection` or `Array` objects.
 
 ### The `.collect` channel operator
 
@@ -2028,7 +2035,8 @@ MULTIQC(quant_ch.mix(fastqc_ch).collect())
 
 You will only want one task of `MultiQC` to be executed to produce one report. Therefore, you can use the `mix` channel operator to combine the `quant_ch` and the `fastqc_ch` channels, followed by the `collect` operator, to return the complete channel contents as a single element.
 
-**Note:** `mix` is different to `.flatten` because `flatten` operates on `Collection` or `Array` objects, not individual items.
+> [!NOTE] 
+> `mix` is different to `.flatten` because `flatten` operates on `Collection` or `Array` objects, not individual items.
 
 ### The `.groupTuple` channel operator
 
@@ -2059,7 +2067,8 @@ Outputs
 
 `groupTuple` is very useful alongside 'meta maps' ([see here for example](https://youtu.be/nPAH9owvKvI?feature=shared&t=3593))
 
-**Note:** By default, `groupTuple` is a _blocking_ operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
+> [!NOTE] 
+> By default, `groupTuple` is a _blocking_ operator, meanining it won't emit anything until all the inputs have been adjusted (see example above for further explaination).
 
 #### The **`groupKey()`** method
 
@@ -2200,7 +2209,8 @@ MapReads( samples, reference )
 
 So because here `groupKey` is being used, the elements from `groupTuple` were emitted much faster than they would otherwise have been because you don't have to wait for all of the mapping operations to complete before your `groupTuple` operation starts to emit items. The `groupTuple` operator already knows that some of these samples are ready because as soon as the second argument of `groupKey` is satisfied (in this case the length of the `meta.repeatcount` value) it knows that the tuple is ready to be emitted and will emit it immediately instead of having to wait for all the samples. This is very useful for when you have large runs with tens to hundreds of samples and will save lots of time by emitting ready items as soon as possible for downstream process to begin working on them.
 
-**Note:** The class of a `groupKey` object is `nextflow.extension.GroupKey`. If you need the raw contents of the `groupKey` object (e.g. the metadata map), you can use the `.getGroupTarget()` method to extract those. [See here for more information](https://youtu.be/nPAH9owvKvI?feature=shared&t=9538).
+> [!NOTE] 
+> The class of a `groupKey` object is `nextflow.extension.GroupKey`. If you need the raw contents of the `groupKey` object (e.g. the metadata map), you can use the `.getGroupTarget()` method to extract those. [See here for more information](https://youtu.be/nPAH9owvKvI?feature=shared&t=9538).
 
 ### The `.transpose` channel operator
 
@@ -2287,7 +2297,8 @@ Output
 [X, 1, 4]
 ```
 
-**Note:** by default, `join` drops elements that don't have a match (Notice the `P` key and its corresponding list elements in the above example is missing from the output). This behaviour can be changed with the `remainder` option. See [here](https://www.nextflow.io/docs/latest/operator.html#join) for more details.
+> [!NOTE] 
+> by default, `join` drops elements that don't have a match (Notice the `P` key and its corresponding list elements in the above example is missing from the output). This behaviour can be changed with the `remainder` option. See [here](https://www.nextflow.io/docs/latest/operator.html#join) for more details.
 
 ### The `.branch` channel operator
 
@@ -2479,7 +2490,8 @@ Outputs:
 
 This is very useful for splitting or fanning-out your data to perforom operations on multiple subgroups of your data (See [here](https://training.nextflow.io/advanced/grouping/#fanning-out-over-intervals) for more info).
 
-**Note:** The `combine` operator is similar to `cross` and `join`, making them easy to confuse. Their differences can be summarized as follows:
+> [!NOTE] 
+> The `combine` operator is similar to `cross` and `join`, making them easy to confuse. Their differences can be summarized as follows:
 
 - `combine` and `cross` both produce an _outer product_ or _cross product_, whereas `join` produces an _inner product_.
 - `combine` filters pairs with a matching key only if the by option is used, whereas `cross` always filters pairs with a matching key.
@@ -2606,7 +2618,8 @@ One common use case of a value channel is when you're working with a **reference
 
 For more information, see [here](https://training.nextflow.io/basic_training/channels/#channel-types).
 
-**Note:** If two different processes require the same input, the channel is automatically duplicated if you provide it as input for multiple processes. This is a new feature of the DSL2 language update. Earlier you indeed had to manually duplicate the queue channel in such cases. The distinction between value and queue channels now is mostly relevant for processes with multiple input channels.
+> [!NOTE] 
+> If two different processes require the same input, the channel is automatically duplicated if you provide it as input for multiple processes. This is a new feature of the DSL2 language update. Earlier you indeed had to manually duplicate the queue channel in such cases. The distinction between value and queue channels now is mostly relevant for processes with multiple input channels.
 
 ## Single Value Coersion to Value Channels
 
@@ -3556,7 +3569,8 @@ workflow {
 }
 ```
 
-**Note:** If you take a look in the R script, you'll notice that the tidyverse package was loaded using `library(tidyverse)`. In order for this to work, the tidyverse package has to be somewhere where the R script could access it. This is why in the process block calling the R script, there is the process directive `container 'rocker/tidyverse:latest'` that loads in a container containing tidyverse.
+> [!NOTE] 
+> If you take a look in the R script, you'll notice that the tidyverse package was loaded using `library(tidyverse)`. In order for this to work, the tidyverse package has to be somewhere where the R script could access it. This is why in the process block calling the R script, there is the process directive `container 'rocker/tidyverse:latest'` that loads in a container containing tidyverse.
 
 To do this, you can create the bin directory, write our R script into the directory. Finally, and crucially, **make the script executable**:
 
@@ -3603,9 +3617,11 @@ EOF
 }
 ```
 
-**Note:** When working on the cloud, this `nxf_container_env` function will be slightly different. Nextflow will first also ensure that the `bin` directory is copied onto the virtual machine running your task in addition to the modification of `$PATH`.
+> [!NOTE] 
+> When working on the cloud, this `nxf_container_env` function will be slightly different. Nextflow will first also ensure that the `bin` directory is copied onto the virtual machine running your task in addition to the modification of `$PATH`.
 
-**Note:** Always use a portable shebang line in your bin directory scripts.
+> [!NOTE] 
+> Always use a portable shebang line in your bin directory scripts.
 
 - In the R script example shown above, the `Rscript` program may be installed at (for example) `/opt/homebrew/bin/Rscript`. If you hard-code this path into `cars.R`, everything will work when you're testing locally outside of the docker container, but will fail when running with docker/singularity or in the cloud as the `Rscript` program may be installed in a different location in those contexts.
 
@@ -3638,7 +3654,8 @@ print("Hello $name!")
 print("Process completed")
 ```
 
-**Note:** Notice how this script is _not quite python_ because it's using `$` string interpolation. This is as if you had written the script block like this instead:
+> [!NOTE] 
+> Notice how this script is _not quite python_ because it's using `$` string interpolation. This is as if you had written the script block like this instead:
 
 ```nextflow
 process SayHi {
@@ -3789,7 +3806,8 @@ process UseMeta {
 }
 ```
 
-**Note:** When we start passing custom classes through the workflow, it's important to understand a little about the Nextflow caching mechanism. When a task is run, a unique hash is calculated based on the task name, the input files/values, and the input parameters. Our class extends from `HashMap`, which means that the hash will be calculated based on the contents of the `HashMap`. If we add a new method to the class, or amend a class method, this does not change the value of the objects in the hash, which means that the hash will not change. Example:
+> [!NOTE] 
+> When we start passing custom classes through the workflow, it's important to understand a little about the Nextflow caching mechanism. When a task is run, a unique hash is calculated based on the task name, the input files/values, and the input parameters. Our class extends from `HashMap`, which means that the hash will be calculated based on the contents of the `HashMap`. If we add a new method to the class, or amend a class method, this does not change the value of the objects in the hash, which means that the hash will not change. Example:
 
 - We might increase the length of the adapter prefix to 5 characters:
 
@@ -4159,7 +4177,8 @@ workflow {
 nextflow run main.nf -with-wave -resume --devMode false
 ```
 
-**Note:** For more information on conditional workflow execution, [seev here](https://nextflow-io.github.io/patterns/conditional-process/).
+> [!NOTE] 
+> For more information on conditional workflow execution, [see here](https://nextflow-io.github.io/patterns/conditional-process/).
 
 ## Visualizing the Nextflow execution DAG
 
@@ -4213,7 +4232,8 @@ flowchart TB
     v3 --> v4
 ```
 
-**Note:** The small nodes in the graph that don't have any text or names by them represent `map` operations on the data (think of these like anonymous function operations. That's why they have no names).
+> [!NOTE] 
+> The small nodes in the graph that don't have any text or names by them represent `map` operations on the data (think of these like anonymous function operations. That's why they have no names).
 
 ## Getting Syntax Examples using nf-core
 
@@ -4360,7 +4380,8 @@ demo = "one two three"
 assertEquals(demo - ~/t.o ?/, "one three")
 ```
 
-**Note:** In Groovy, `-` is just a shorthand notation for the `minus` method.
+> [!NOTE] 
+> In Groovy, `-` is just a shorthand notation for the `minus` method.
 
 #### **Tokenizing**
 
@@ -4392,7 +4413,8 @@ tumor
 */
 ```
 
-**Note:** Be aware of an important difference between the `tokenize` and `split` methods in Groovy. The `tokenize()` method uses each character of a string as a delimiter whereas `split()` takes the entire string as a delimiter.
+> [!NOTE] 
+> Be aware of an important difference between the `tokenize` and `split` methods in Groovy. The `tokenize()` method uses each character of a string as a delimiter whereas `split()` takes the entire string as a delimiter.
 
 Example:
 
@@ -4601,7 +4623,8 @@ fastqFiles_ch
 
 Now this channel is ready to get passed into a process that takes a `tuple val(metas), path(files)` input shape.
 
-**Note:** The Groovy `transpose` method and the Nextflow `transpose` channel operator are two different things and will give you different results. Be aware of which one you need and when.
+> [!NOTE] 
+> The Groovy `transpose` method and the Nextflow `transpose` channel operator are two different things and will give you different results. Be aware of which one you need and when.
 
 ### Spread-dot notation
 
