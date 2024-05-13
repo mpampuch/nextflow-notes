@@ -39,7 +39,8 @@ workflow {
 }
 ```
 
-**Note**: The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
+> [!NOTE]
+> The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
 
 Nextflow can then run by using the following command
 
@@ -183,7 +184,8 @@ The first thing that nextflow looks for when a workflow is run is configuration 
 
 7. Values defined within the pipeline script itself (e.g. `main.nf`)
 
-**Note**: Precedence is in order of 'distance'. A handy guide to understand configuration precedence is in order of **'distance from the command-line invocation'**. Parameters specified directly on the CLI `--example foo` are "closer" to the run than configuration specified in the remote repository.
+> [!NOTE] 
+> Precedence is in order of 'distance'. A handy guide to understand configuration precedence is in order of **'distance from the command-line invocation'**. Parameters specified directly on the CLI `--example foo` are "closer" to the run than configuration specified in the remote repository.
 
 When more than one of these options for specifying configurations are used, they are merged, so that the settings in the first override the same settings appearing in the second, and so on.
 
@@ -195,7 +197,8 @@ propertyTwo = "Hello $propertyOne"
 customPath = "$PATH:/my/app/folder"
 ```
 
-_Note_: The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
+> [!NOTE]
+> The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
 
 ### Config scopes
 
@@ -242,9 +245,11 @@ E.g.
 nextflow run snippet.nf -resume --foo "Bye"
 ```
 
-**Note**: In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
+> [!NOTE]
+> In nextflow, single dashes (`-`) in command line arguments refer to Nextflow commands (e.g. `-resume`), while double dashes (`--`) refer to workflow parameters
 
-**Also note**: Values assigned to a the config params `params.` will be treated as _value channels_ (see more information below on value channels)
+> [!Also-NOTE] 
+> Values assigned to a the config params `params.` will be treated as _value channels_ (see more information below on value channels)
 
 ### Config env
 
@@ -3014,7 +3019,10 @@ The `-with-trace` option enables the creation of a tab separated value (TSV) fil
 
 The `-with-timeline` option enables the creation of the workflow timeline report showing how processes were executed over time. This may be useful to identify the most time consuming tasks and bottlenecks.
 
-Finally, the `-with-dag` option enables the rendering of the workflow execution direct acyclic graph representation. The dag needs to be given a name (`-with-dag dag.png`). Note: This feature requires the installation of [Graphviz](http://www.graphviz.org/) on your computer. See [here](https://www.nextflow.io/docs/latest/tracing.html#dag-visualisation) for further details. You can also output HTML DAGs (`-with-dag dag.html`), which means Nextflow is going to use [Mermaid](https://mermaid.js.org/) for rendering the graphs. Also the `-preview` command my allow you to have a look at an approximate DAG without having to run the pipeline.
+Finally, the `-with-dag` option enables the rendering of the workflow execution direct acyclic graph representation. The dag needs to be given a name (`-with-dag dag.png`). 
+
+> [!NOTE] 
+>This feature requires the installation of [Graphviz](http://www.graphviz.org/) on your computer. See [here](https://www.nextflow.io/docs/latest/tracing.html#dag-visualisation) for further details. You can also output HTML DAGs (`-with-dag dag.html`), which means Nextflow is going to use [Mermaid](https://mermaid.js.org/) for rendering the graphs. Also the `-preview` command my allow you to have a look at an approximate DAG without having to run the pipeline.
 
 ## The Golden Practice for Containers
 
