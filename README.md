@@ -2512,6 +2512,77 @@ The `set` operator assigns the channel to a variable whose name is specified as 
 
 > [!EXAMPLE]
 
+[!WARNING] or [!WARN]: Indicates a warning or cautionary message.
+[!TIP] or [!INFO]: Provides a helpful tip or additional information.
+[!IMPORTANT]: Indicates information that is particularly significant or crucial.
+[!QUESTION] or [!FAQ]: Marks a question or frequently asked question.
+[!EXAMPLE]: Used to showcase an example or demonstration.
+[!TODO]: Indicates a task that needs to be completed.
+
+[!WARNING] 
+
+[!WARN]
+
+[!TIP]
+
+[!INFO]
+
+[!IMPORTANT]
+
+[!QUESTION] 
+
+[!FAQ]
+
+[!EXAMPLE]
+
+[!TODO]
+
+
+> [!WARNING] 
+
+> [!WARN]
+
+> [!TIP]
+
+> [!INFO]
+
+> [!IMPORTANT]
+
+> [!QUESTION] 
+
+> [!FAQ]
+
+> [!EXAMPLE]
+
+> [!TODO]
+
+> [!WARNING]  
+> test
+
+> [!WARN] 
+> test
+
+> [!TIP] 
+> test
+
+> [!INFO] 
+> test
+
+> [!IMPORTANT] 
+> test
+
+> [!QUESTION]  
+> test
+
+> [!FAQ] 
+> test
+
+> [!EXAMPLE] 
+> test
+
+> [!TODO] 
+> test
+
 ```nextflow
 Channel.of(10, 20, 30).set { my_channel }
 ```
