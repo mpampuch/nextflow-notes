@@ -198,7 +198,7 @@ customPath = "$PATH:/my/app/folder"
 ```
 
 > [!NOTE]
-> The quotes act like in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
+> The quotes act like they do in bash. Variables inside single quotes remain literal. Variables inside double quotes get expanded (including environment variables)
 
 ### Config scopes
 
