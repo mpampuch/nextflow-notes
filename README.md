@@ -2510,7 +2510,7 @@ This is very useful for splitting or fanning-out your data to perforom operation
 
 The `set` operator assigns the channel to a variable whose name is specified as a closure parameter. It is used in place of the assignment (`=`) operator. For example:
 
-[!EXAMPLE]
+> [!EXAMPLE]
 
 ```nextflow
 Channel.of(10, 20, 30).set { my_channel }
