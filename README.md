@@ -2502,7 +2502,6 @@ This is very useful for splitting or fanning-out your data to perforom operation
 
 > [!NOTE] 
 > The `combine` operator is similar to `cross` and `join`, making them easy to confuse. Their differences can be summarized as follows:
-
 > - `combine` and `cross` both produce an _outer product_ or _cross product_, whereas `join` produces an _inner product_.
 > - `combine` filters pairs with a matching key only if the by option is used, whereas `cross` always filters pairs with a matching key.
 > - `combine` with the by option merges and flattens each pair, whereas `cross` does not. Compare the [examples here](https://www.nextflow.io/docs/latest/operator.html#cross) for `combine` and `cross` to see this difference.
