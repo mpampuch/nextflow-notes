@@ -19,7 +19,7 @@ Nextflow pipelines need to be written into files with the `.nf` extension.
 Example, create a file called `main.nf` and provide it the following code:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 process FASTQC {
     input:
@@ -40,7 +40,7 @@ workflow {
 ```
 
 > [!NOTE]
-> The shebang (`#!/usr/bin/env Nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
+> The shebang (`#!/usr/bin/env nextflow`) is a line that helps the operating system decide what program should be used to interpret this script code. If you always use Nextflow to call this script, _this line is optional_.
 
 Nextflow can then run by using the following command
 
@@ -2809,7 +2809,7 @@ The `workflow` scope allows the definition of components that define the invocat
 Example:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 params.greeting = 'Hello world!'
 
@@ -2838,7 +2838,7 @@ A `workflow` component can declare one or more input channels using the `take` s
 For example:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 params.greeting = 'Hello world!'
 
@@ -2871,7 +2871,7 @@ A `workflow` can declare one or more output channels using the `emit` statement.
 For example:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 params.greeting = 'Hello world!'
 greeting_ch = Channel.of(params.greeting)
@@ -2925,7 +2925,7 @@ You can also declare named outputs within the emit block.
 Example:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 params.greeting = 'Hello world!'
 greeting_ch = Channel.of(params.greeting)
@@ -2981,7 +2981,7 @@ Within a `main.nf` script you can also have multiple workflows. In which case yo
 The following snippet has two named workflows (`my_workflow_one` and `my_workflow_two`):
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 params.greeting = 'Hello world!'
 
@@ -4137,7 +4137,7 @@ params.dataDir = params.devMode ? 'data_for-pipeline-dev' : 'data'
 6. (**_Optional_**) If you wish to further modify your development data only, you can perform conditional execution in your workflow using `if/else` and the `params.devMode` parameter. For example, take a look at the following `main.nf` file:
 
 ```nextflow
-#!/usr/bin/env Nextflow
+#!/usr/bin/env nextflow
 
 include { SUBSET_FASTQ } from './modules/local/subset_fastq/main.nf'
 
