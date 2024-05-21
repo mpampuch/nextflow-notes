@@ -3211,7 +3211,10 @@ Additionally, the following methods are also defined for Paths in Nextflow:
 
 > [!NOTE]
 > The `getBaseName` method drops the **first** file extension. If a file has more than one extension, for example `reads.fastq.gz`, calling `getBaseName` on this object will return `reads.fastq`. Since `getBaseName` acts on a `sun.nio.fs.UnixPath` object but returns a `java.lang.String` object, it can not be chained together like methods that act on and return file path objects like `getParent`.
->>To drop multiple extensions from the file name and get just the file name `reads`, add the implicit function `file()` between chains of `getBaseName`. For example.
+>
+> To drop multiple extensions from the file name and get just the file name `reads`, add the implicit function `file()` between chains of `getBaseName`. 
+>
+> For example.
 
 ```nextflow
 def filePath = file('reads.fastq.gz')
