@@ -4757,4 +4757,19 @@ This code is safeguarded in case the `summary` or `after_filtering` objects don'
 
 ### Groovy web console
 
-A convienient way to perform a convient sanity-check on a groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
+A convienient way to perform a convient sanity-check on a Groovy expression is by using the [Groovy web console](https://groovyconsole.appspot.com/) or [JDoodle](https://www.jdoodle.com/execute-groovy-online/).
+
+### Nextflow console
+
+An even better way to quickly check some Groovy or Nextflow code is by using the Nextflow console. 
+
+Activate the console by simply executing the following command in the terminal:
+
+```bash
+nextflow console
+```
+
+This will open a Nextflow REPL console for you to quickly test Groovy or Nextflow expressions.
+
+- Press `command + R` to run the code in the script file.
+- Press `command + W` to clear the console output.
