@@ -2783,7 +2783,10 @@ To use a nf-core module (and a local one too), you should:
 2. Add `includeConfig 'conf/modules.config'` to `nextflow.config`.
 3. Include module into workflows and/or subworkflows.
 
-More information on nf-core can be found in this [video tutorial](https://www.youtube.com/watch?v=tWvou0xj9wA&list=PL3xpfTVZLcNiSvvPWORbO32S1WDJqKp1e&index=6).
+More information on nf-core modules can be found in this [video tutorial](https://www.youtube.com/watch?v=tWvou0xj9wA&list=PL3xpfTVZLcNiSvvPWORbO32S1WDJqKp1e&index=6).
+
+> [!CAUTION]
+> Modules in the `modules/nf-core` directory can be synced with the modules in a remote repository. Any local changes or edits made to these can be lost if you're not careful. For more information [see this video](https://www.youtube.com/watch?v=7pu6Ikhi1eU).
 
 ### The `MultiQC` module
 
