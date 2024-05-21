@@ -3218,6 +3218,16 @@ Additionally, the following methods are also defined for Paths in Nextflow:
 
 ```nextflow
 def filePath = file('reads.fastq.gz')
+
+// INCORRECT
+def fileNameOnly = filePath.getBaseName().getBaseName()
+
+/* Outputs:
+Exception thrown
+groovy.lang.MissingMethodException: No signature of method: java.lang.String.getBaseName() is applicable for argument types: () values: []
+*/
+
+// CORRECT
 def fileNameOnly = file(filePath.getBaseName()).getBaseName()
 println(fileNameOnly)
 
