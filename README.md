@@ -4252,7 +4252,7 @@ To change the output file format, you can pass a filename after the `with-dag` o
 - `.png`: Creates a Graphviz PNG file (_Requires Graphviz to be installed_)
 - `.svg`: Creates a Graphviz SVG file (_Requires Graphviz to be installed_)
 
-> [!NOTE] 
+> [!WARNING] 
 > (As of April 2024) The `nf-core` package (v2.13.1) from bioconda may be incompatible with the `graphviz` package (v9.0.0) from conda-forge. Be aware of having these both in the same conda environment.
 
 However, the default filename (`dag-<timestamp>.html`) is dynamically generated to generate a timestamp. If you naively change the filename in order to try to change the output file type, there's a good chance you'll hardcode the filename and lose the dynamic timestamp generation, in order to get around this, you can leverage the shell command `date`. Rename the file to be `"dag-$(date +"%Y%m%d-%H%M%S").FILETYPE"`.
