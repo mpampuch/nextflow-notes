@@ -4303,7 +4303,7 @@ Seqera Platform (formerly known as Nextflow tower) provides a useful tool to mon
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
-## **nf-core**
+## nf-core
 
 [nf-core](https://nf-co.re/) is a community effort to collect a curated set of analysis workflows built using Nextflow. nf-core provides a standardised set of best practices, guidelines, and templates for building and sharing bioinformatics workflows.
 
