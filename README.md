@@ -4761,7 +4761,7 @@ A convienient way to perform a convient sanity-check on a Groovy expression is b
 
 ### Nextflow console
 
-An even better way to quickly check some Groovy or Nextflow code is by using the Nextflow console. 
+An even better way to quickly check some Groovy or Nextflow code is by using the [Nextflow console](https://www.nextflow.io/blog/2015/introducing-nextflow-console.html). 
 
 Activate the console by simply executing the following command in the terminal:
 
@@ -4771,5 +4771,5 @@ nextflow console
 
 This will open a Nextflow REPL console for you to quickly test Groovy or Nextflow expressions.
 
-- Press `command + R` to run the code in the script file.
+- Press `command + R` to run the script in the console editor box.
 - Press `command + W` to clear the console output.
