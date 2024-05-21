@@ -2547,7 +2547,7 @@ SOME_PROCESS.out.view()
 // outputs path/to/some/file
 
 SOME_PROCESS.out.view{ it.getClass() }
-// outputs java.lang.string
+// outputs java.lang.String
 
 SOME_PROCESS.out.view{ file(it).getClass() }
 // outputs sun.nio.fs.UnixPath
@@ -3208,6 +3208,19 @@ Additionally, the following methods are also defined for Paths in Nextflow:
 - `isFile()` Returns true if it is a regular file (i.e. not a directory).
 
 - `isLink()` Returns true if the file is a symbolic link.
+
+> [!NOTE]
+> The `getBaseName` method drops the **first** file extension. If a file has more than one extension, for example `reads.fastq.gz`, calling `getBaseName` on this object will return `reads.fastq`. Since `getBaseName` acts on a `sun.nio.fs.UnixPath` object but returns a `java.lang.String` object, it can not be chained together like methods that act on and return file path objects like `getParent`.
+> To drop multiple extensions from the file name and get just the file name `reads`, add the implicit function `file()` between chains of `getBaseName`.
+> Example:
+
+```nextflow
+def filePath = file('reads.fastq.gz')
+def fileNameOnly = file(filePath.getBaseName()).getBaseName()
+println(fileNameOnly)
+```
+
+
 
 ## Process Directives
 
@@ -4149,7 +4162,9 @@ workflow {
             def extras = experimentName.split('--').size() == 2 ? experimentName.split('--')[1] : null
             if (extras) {extractionMethod = extractionMethod.split('--')[0]}
             def readsPassOrFail = path.getParent().getBaseName() - 'fastq_'
+            def id = file(path.getBaseName()).getBaseName()
             def meta = [
+                id: id,
                 date: date,
                 strain: strain,
                 replicate: replicate - 'rep-',
