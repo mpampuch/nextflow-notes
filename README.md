@@ -3214,7 +3214,7 @@ Additionally, the following methods are also defined for Paths in Nextflow:
 >
 > To drop multiple extensions from the file name and get just the file name `reads`, add the implicit function `file()` between chains of `getBaseName`. 
 >
-> For example.
+> For example:
 
 ```nextflow
 def filePath = file('reads.fastq.gz')
