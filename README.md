@@ -3715,7 +3715,7 @@ process SayHi {
 
 ### The `./lib` directory
 
-> [!WARNING]
+> [!CAUTION]
 > The `./lib` directory was removed from the nf-core template as of v2.13 ([see here for more information](https://nf-co.re/events/2024/removing_lib_from_template)). 
 > 
 > The information in this section may be outdated / no longer good practice.
@@ -4304,7 +4304,7 @@ Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) 
 
 [nf-core](https://nf-co.re/) is a community effort to collect a curated set of analysis workflows built using Nextflow. nf-core provides a standardised set of best practices, guidelines, and templates for building and sharing bioinformatics workflows.
 
-> [!CAUTION]
+> [!WARNING]
 > Just because nf-core pipelines are built using Nextflow, there is still a steep learning curve to using nf-core effectively even if you can read and write Nextflow code. 
 > 
 > For that reason nf-core deserves it's own dedicated chapter this Nextflow notes document.
