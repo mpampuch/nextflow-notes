@@ -3715,6 +3715,9 @@ process SayHi {
 
 ### The `./lib` directory
 
+> [!WARNING]
+> The `./lib` directory was removed from the nf-core template as of v2.13 ([see here for more information](https://nf-co.re/events/2024/removing_lib_from_template)). The information in this section may be outdated / no longer good practice.
+
 It may at times be helpful to bundle functionality into a new Groovy class (e.g. if a Groovy function that you need starts to grow with a lot of complexity). Any classes defined in the `lib` directory are added to the classpath and are available for use in the workflow - both `main.nf` and any imported modules.
 
 Classes defined in `lib` directory can be used for a variety of purposes. For example, the [nf-core/rnaseq](https://github.com/nf-core/rnaseq/tree/master/lib) workflow uses five custom classes:
