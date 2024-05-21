@@ -4307,7 +4307,9 @@ Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) 
 > [!CAUTION]
 > Just because nf-core pipelines are built using Nextflow, there is still a steep learning curve to using nf-core effectively even if you can read and write Nextflow code. 
 > 
-> In order to use, contribute to, and get the benefits out of using nf-core pipelines and infrastructure in your work, it's important to always stay up to date with what the nf-core community is doing (read the docs, ask questions in the nf-core slack, follow nf-core bytesize talks, etc.) 
+> For that reason nf-core deserves it's own dedicated chapter this Nextflow notes document.
+>
+> Beyond just reviewing these notes, in order to use, contribute to, and get the benefits out of using nf-core pipelines and the infrastructure nf-core provies in your work, it's important to always stay up to date with what the nf-core community is doing (read the docs, ask questions in the nf-core slack, follow nf-core bytesize talks, etc.) 
 
 ## Notes on Groovy
 
