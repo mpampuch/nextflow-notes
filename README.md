@@ -4300,6 +4300,15 @@ Seqera Platform (formerly known as Nextflow tower) provides a useful tool to mon
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
+## nf-core
+
+[nf-core](https://nf-co.re/) is a community effort to collect a curated set of analysis workflows built using Nextflow. nf-core provides a standardised set of best practices, guidelines, and templates for building and sharing bioinformatics workflows.
+
+> [!CAUTION]
+> Just because nf-core pipelines are built using Nextflow, there is still a steep learning curve to using nf-core effectively even if you can read and write Nextflow code. 
+> 
+> In order to use, contribute to, and get the benefits out of using nf-core pipelines and infrastructure in your work, it's important to always stay up to date with what the nf-core community is doing (read the docs, ask questions in the nf-core slack, follow nf-core bytesize talks, etc.) 
+
 ## Notes on Groovy
 
 Nextflow is a domain specific language (DSL) implemented on top of the Groovy programming language, which in turn is a super-set of the Java programming language. This means that Nextflow can run any Groovy or Java code.
