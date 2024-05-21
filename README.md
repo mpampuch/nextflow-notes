@@ -4291,7 +4291,10 @@ When you don't know how a specific Nextflow function or element works, a really 
 
 ### Seqera Platform
 
-Seqera Platform (formerly known as Nextflow tower) provides a useful tool to monitor your pipelines and work on teams. It offered through a web app and a CLI. To learn more about how to use it you can click here:
+> [!WARNING]
+> Seqera Platform was previously known as Nextflow Tower. You may see this name thrown around trying to find information online about it.
+
+Seqera Platform provides a useful tool to monitor your pipelines and work on teams. It offered through a web app and a CLI. To learn more about how to use it you can click here:
 
 - Web app:
 
