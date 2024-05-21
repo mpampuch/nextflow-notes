@@ -4316,7 +4316,7 @@ Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) 
 
 ## Notes on Groovy
 
-Nextflow is a domain specific language (DSL) implemented on top of the Groovy programming language, which in turn is a super-set of the Java programming language. This means that Nextflow can run any Groovy or Java code.
+Nextflow is a domain specific language (DSL) implemented on top of the [Groovy](https://groovy-lang.org/) programming language, which in turn is a super-set of the [Java](https://www.java.com/en/download/help/whatis_java.html) programming language. This means that Nextflow can run any Groovy or Java code.
 
 In some cases it may be useful to know a bit of Groovy when building Nextflow pipelines whenever Nextflow functions are insufficient (rare but sometimes may be the case).
 
