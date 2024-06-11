@@ -2,6 +2,11 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
+
+## To Do
+
+- write notes on the newest nextflow release https://www.nextflow.io/blog/2024/nextflow-2404-highlights.html
+
 ## What is Nextflow?
 
 Nextflow is a framework used for writing parallel and distributed computational pipelines, common in bioinformatics, genomics, and other fields where complex data analysis pipelines are common. It simplifies the process of creating complex workflows that involve processing large volumes of data.
