@@ -2723,6 +2723,36 @@ process {
 }
 ```
 
+>[!NOTE]
+> As of Nextflow v24.04, the **workflow output definition** is the new preferred style for publishing output files.
+
+### The workflow output definition
+
+The workflow output definition is a new syntax for defining workflow outputs. For example:
+
+```nextflow
+nextflow.preview.output = true
+
+workflow {
+  main:
+  ch_foo = foo(data)
+  bar(ch_foo)
+
+  publish:
+  ch_foo >> 'foo'
+}
+
+output { 
+  directory 'results'
+  mode 'copy'
+} 
+```
+
+This essentially provides a DSL2-style approach for publishing, and will replace `publishDir` once it is finalized. It also provides extra flexibility as it allows you to publish any channel, not just process outputs. See the [Nextflow docs](https://nextflow.io/docs/latest/workflow.html#publishing-outputs) for more information.
+
+> [!WARNING]
+> As of right now, this feature is still in preview and may change in a future release. The Seqera teams hopes to finalize it in version 24.10, so be aware of any issues that may come up. 
+
 ## Workflows
 
 ### The `onComplete` Event Handler
@@ -3190,6 +3220,25 @@ You can find more information on Wavelit with the following resources:
 
 - [Wavelit Github Repository](https://github.com/seqeralabs/wave-cli)
 - [Wavelit Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068)
+
+## Seqera Containers
+
+Seqera Containers take the experience of Wave one step further. Instead of browsing available images as you would with a traditional container registry, you just type in the names of the tools you want to use into the following link https://seqera.io/containers/. Clicking “Get container” returns a container URI instantly, which you can use for anything - Nextflow pipeline or not. The key difference with Seqera Containers is that the image is also stored in an image cache, with infrastructure provided by AWS. Subsequent requests for the same package set will return the same image, ensuring reproducibility across runs. The cache has no expiry date, so those images will still be there if you need to rerun your analysis in the future (for at least 5 years after creation).
+
+### Using Seqera Containers using Nextflow
+
+Seqera containers can be used directly from Nextflow and not only through https://seqera.io/containers/.
+
+In order to use Seqera Containers in Nextflow, simply set `wave.freeze` _without_ setting `wave.build.repository` - for example, by using the following config for your pipeline:
+
+```nextflow
+wave.enabled = true
+wave.freeze = true
+wave.strategy = 'conda'
+```
+
+Any processes in your pipeline specifying Conda packages will have Docker or Singularity images created on the fly (depending on whether `singularity.enabled` is set or not) and cached for immediate access in subsequent runs. These images will be publicly available. You can view all container image names with the nextflow inspect command.
+
 
 ## Important functions for file attributes and paths
 
