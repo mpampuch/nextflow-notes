@@ -4850,3 +4850,55 @@ This will open a Nextflow REPL console for you to quickly test Groovy or Nextflo
 
 - Press `command + R` to run the script in the console editor box.
 - Press `command + W` to clear the console output.
+
+## Nextflow Tips
+
+Here are some tips and shortcuts that I've found or came accross that don't really fit anywhere else in the notes.
+
+### One liner to launch a Nextflow process on the KAUST IBEX using TMUX
+
+```bash
+tmux new-session -s SESSION_NAME -d 'source /PATH/TO/.bashrc ; source /PATH/TO/.bash_profile && conda activate CONDA_ENV && nextflow run NEXTFLOW_PIPELINE -r PIPELINE_REVISION_NUMBER -c NEXTFLOW_CONFIGURATION -profile NEXTFLOW_PROFILES --outdir OUTPUT_DIRECTORY ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach (OPTIONAL)
+```
+
+Example:
+
+```bash
+tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate $(pwd)/env && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach
+```
+
+Example without attaching:
+
+```bash
+tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate $(pwd)/env && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log'
+```
+
+Breakdown:
+
+1. **`tmux new-session -s nfcore_rnaseq -d`**:
+   - `new-session`: Creates a new `tmux` session.
+   - `-s nfcore_rnaseq`: Names the new session `nfcore_rnaseq`.
+   - `-d`: Starts the session in detached mode, meaning it will be created and run in the background, without immediately attaching you to it.
+
+2. **Session Command (`'...'`)**:
+   - **`source /home/pampum/.bashrc`**: Sources the `.bashrc` file, which is typically used for setting up the shell environment and environment variables.
+   - **`source /home/pampum/.bash_profile`**: Sources the `.bash_profile` file, which is used for setting up the user environment, often executed for login shells.
+   - **`&& conda activate $(pwd)/env`**: Activates the `conda` environment located at the current directory’s `env` subdirectory. `$(pwd)` dynamically inserts the current directory path.
+   - **`&& nextflow run nf-core/rnaseq -c nextflow.config -profile singularity,test --outdir results_rnaseq`**: Runs a `nextflow` pipeline using the `nf-core/rnaseq` project with the specified configuration file and profiles. The results will be saved to `results_rnaseq`.
+   - **`; exec bash`**: Starts a new interactive `bash` shell after the command completes, keeping the terminal open for further interaction.
+
+3. **`split-window -v`**:
+   - **`-v`**: Splits the current window vertically, creating a new pane below the existing one.
+
+4. **`'sleep 20; tail -n 1000 -f .nextflow.log'`**:
+   - **`sleep 20`**: Pauses for 20 seconds before executing the next command. This can give the primary command enough time to start and generate some output.
+   - **`tail -n 1000 -f .nextflow.log`**: Monitors the `.nextflow.log` file in real-time, showing the last 1000 lines and updating as new lines are added. This is useful for tracking the log output of the `nextflow` run.
+
+5. **`attach`**:
+   - Attaches to the `tmux` session so that you can interact with it directly.
+
+In addition, to monitor the jobs written by this command, you can use:
+
+```bash
+watch -d -n 1 squeue -u $USER -o \"%.8i %.90j %.8u %.2t %.10M %.6D %R\"
+```
