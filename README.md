@@ -263,7 +263,7 @@ The `env` scope allows the definition of one or more variables that will be expo
 A good environment variable to export is the `NXF_OPTS` variable, because in some cases, the Nextflow Java virtual machines can start to request a large amount of memory. Therefore it is recommended to add the following line to your configuration files.
 
 ```nextflow
-NXF_OPTS='-Xms1g -Xmx4g'
+env.NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
 The options `-Xms1g` and `-Xmx4g` are Java Virtual Machine (JVM) options that specify memory allocation. 
