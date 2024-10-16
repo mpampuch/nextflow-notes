@@ -260,21 +260,9 @@ nextflow run snippet.nf -resume --foo "Bye"
 
 The `env` scope allows the definition of one or more variables that will be exported into the environment where the workflow tasks will be executed.
 
-A good environment variable to export is the `NXF_OPTS` variable, because in some cases, the Nextflow Java virtual machines can start to request a large amount of memory. Therefore it is recommended to add the following line to your configuration files.
-
 ```nextflow
-env.NXF_OPTS='-Xms1g -Xmx4g'
+env.NCBI_SETTINGS = params.settings_file
 ```
-
-The options `-Xms1g` and `-Xmx4g` are Java Virtual Machine (JVM) options that specify memory allocation. 
-- `-Xms1g`: Sets the initial heap size of the JVM to 1 gigabyte. This means that when the JVM starts, it will allocate 1 GB of memory right away.
- 
-- `-Xmx4g`: Sets the maximum heap size of the JVM to 4 gigabytes. This limits the maximum amount of memory the JVM can use to 4 GB.
-
-Together, these settings help manage how much memory is available for running Nextflow processes, which can be crucial for performance and stability, especially when processing large datasets or running memory-intensive tasks.
-
-> [!NOTE]
-> Different insitutions have different memory allowances. The KAUST IBEX cluster for example allows you to set `-Xms3g` and `-Xmx5g`. Check what the allowances are to get the best performance on your runs.
 
 ### Config process scopes and process directives
 
