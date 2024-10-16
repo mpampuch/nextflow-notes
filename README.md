@@ -4983,5 +4983,6 @@ nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --inpu
 rm -rf work && \
 nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.01.csv --download_method sratools --outdir results && \
 rm -rf work && \
-nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.02.csv --download_method sratools --outdir results
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.02.csv --download_method sratools --outdir results && \
+rm -rf work
 ```
