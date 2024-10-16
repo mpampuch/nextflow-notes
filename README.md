@@ -4928,3 +4928,45 @@ In addition, to monitor the jobs written by this command, you can use:
 watch -d -n 1 squeue -u $USER -o \"%.8i %.90j %.8u %.2t %.10M %.6D %R\"
 ```
 
+### Downloading a lot of FASTQ files using Nextflow
+
+Using the [fetchngs](https://nf-co.re/fetchngs/1.12.0/) nf-core pipeline
+
+1. Prepare your `ids.csv` file
+
+```
+PRJNA999857
+PRJNA999856
+PRJNA999855
+...
+```
+
+2. Collect the metadata. Use the `--skip_fastq_download` flag
+
+```bash
+# Prepare your shell environment for a nextflow run
+conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds"
+
+# Run pipeline (only extracting metadata)
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv --download_method sratools --outdir results --skip_fastq_download
+```
+
+3. Check the total size of all the `.fastq` files that you would download
+
+- If collecting paired end reads, the bytes of the paired end read files will be seperated with a `;` on the resulting metadata table. Use `awk -F '\t' '{split($29, a, ";"); sum += a[1] + a[2]} END {print sum}'` to extract them.
+
+```bash
+# Change into your results directory
+cd results/metadata
+
+# Check the total size of all your fastq files
+ls -1 | xargs cat | sort | uniq | tail -n +2 | awk -F '\t' '{split($29, a, ";"); sum += a[1] + a[2]} END {print sum}' | numfmt --to=iec
+```
+
+4. If you have enough space, download all the data. Exclude the `--skip_fastq_download` flag.
+
+```bash
+# Run pipeline (fetching fastq files)
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv --download_method sratools --outdir results 
+```
+
