@@ -4871,22 +4871,39 @@ This will open a Nextflow REPL console for you to quickly test Groovy or Nextflo
 
 Here are some tips and shortcuts that I've found or came accross that don't really fit anywhere else in the notes.
 
+### Prepare a shell environment for a Nextflow run on an HPC
+
+There are a few preliminary steps you should do in your shell session before running a Nextflow pipeline on an HPC 
+
+1. Activate your conda environment containing Nextflow
+
+2. Allocate a certain amount of memory for the Nextflow process. The Nextflow runtime runs on top of the Java virtual machine which, by design, tries to allocate as much memory as is available. This is not a good practice in HPC systems which are designed to share compute resources across many users and applications. To avoid this, specify the maximum amount of memory that can be used by the Java VM using the Java flags `-Xms` (which sets the initial heap size) and `-Xmx` (which sets the maximum heap size). These can be specified using the `NXF_OPTS` environment variable.
+
+> [!NOTE]
+> Different insitutions have different memory allowances. The KAUST IBEX cluster for example allows you to set `-Xms3G` and `-Xmx5G`, however for some infrastructures this may be too much. A lot of Nextflow and nf-core pipelines recommend using `-Xms1G` and `-Xmx4G`. Check what the allowances are to get the best performance on your runs.
+
+3. Change the `TMOUT` environment variable. This variable controls the inactivity timeout for the shell (the default is 7200 seconds / 2 hours). When set, if a terminal session (including one inside tmux) remains idle for the specified duration, the shell will automatically terminate. It's useful to increase this because often times you'll run a process inside a tmux session, but when the process is complete you'll not be able to find your tmux session because it terminated 2 hours after the process completed, so you have to go back through the `.nextflow.log` file to see if the process completed successfully instead of just viewing the `stout` to the tmux session which is much cleaner.
+
+```bash
+conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds"
+```
+
 ### One liner to launch a Nextflow process on the KAUST IBEX using TMUX
 
 ```bash
-tmux new-session -s SESSION_NAME -d 'source /PATH/TO/.bashrc ; source /PATH/TO/.bash_profile && conda activate CONDA_ENV && nextflow run NEXTFLOW_PIPELINE -r PIPELINE_REVISION_NUMBER -c NEXTFLOW_CONFIGURATION -profile NEXTFLOW_PROFILES --outdir OUTPUT_DIRECTORY ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach (OPTIONAL)
+tmux new-session -s SESSION_NAME -d 'source /PATH/TO/.bashrc ; source /PATH/TO/.bash_profile && conda activate CONDA_ENV export NXF_OPTS=NEXTFLOW_OPTIONS && echo "NXF_OPTS set to $NXF_OPTS" && export TMOUT=SECONDS_TO_TIMEOUT && echo "TMOUT set to $TMOUT" && nextflow run NEXTFLOW_PIPELINE -r PIPELINE_REVISION_NUMBER -c NEXTFLOW_CONFIGURATION -profile NEXTFLOW_PROFILES --outdir OUTPUT_DIRECTORY ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach (OPTIONAL)
 ```
 
 Example:
 
 ```bash
-tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate $(pwd)/env && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach
+tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate "$(pwd)/env" && export NXF_OPTS="-Xms3G -Xmx5G" && echo "NXF_OPTS set to $NXF_OPTS" && export TMOUT=172800 && echo "TMOUT set to $TMOUT" && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log' \; attach
 ```
 
 Example without attaching:
 
 ```bash
-tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate $(pwd)/env && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log'
+tmux new-session -s nfcore_rnaseq -d 'source /home/pampum/.bashrc ; source /home/pampum/.bash_profile && conda activate "$(pwd)/env" && export NXF_OPTS="-Xms3G -Xmx5G" && echo "NXF_OPTS set to $NXF_OPTS" && export TMOUT=172800 && echo "TMOUT set to $TMOUT" && nextflow run nf-core/rnaseq -r 3.14.0 -c nextflow.config -profile singularity,test --outdir results_rnaseq ; exec bash ' \; split-window -v 'sleep 20; tail -n 1000 -f .nextflow.log'
 ```
 
 Breakdown:
@@ -4900,6 +4917,10 @@ Breakdown:
    - **`source /home/pampum/.bashrc`**: Sources the `.bashrc` file, which is typically used for setting up the shell environment and environment variables.
    - **`source /home/pampum/.bash_profile`**: Sources the `.bash_profile` file, which is used for setting up the user environment, often executed for login shells.
    - **`&& conda activate $(pwd)/env`**: Activates the `conda` environment located at the current directory’s `env` subdirectory. `$(pwd)` dynamically inserts the current directory path.
+   - **`&& export NXF_OPTS="-Xms3G -Xmx5G"`** : Sets the `NXF_OPTS` environment variable to allocate a minimum of 3 GB (`-Xms3G`) and a maximum of 5 GB (`-Xmx5G`) of Java heap memory for the Nextflow process. This ensures that the process has adequate memory resources.
+   - **`&& echo "NXF_OPTS set to $NXF_OPTS"`** : Outputs the value of `NXF_OPTS` to confirm that it has been set correctly.
+   - **`&& export TMOUT=172800`** : Sets the `TMOUT` variable to 172800 seconds (48 hours). This means that if the shell remains idle for 48 hours, it will automatically exit. This is useful for ensuring that idle sessions don’t remain open indefinitely.
+   - **`&& echo "TMOUT set to $TMOUT"`** : Outputs the value of `TMOUT` to confirm that it has been set.
    - **`&& nextflow run nf-core/rnaseq -c nextflow.config -profile singularity,test --outdir results_rnaseq`**: Runs a `nextflow` pipeline using the `nf-core/rnaseq` project with the specified configuration file and profiles. The results will be saved to `results_rnaseq`.
    - **`; exec bash`**: Starts a new interactive `bash` shell after the command completes, keeping the terminal open for further interaction.
 
@@ -4918,3 +4939,4 @@ In addition, to monitor the jobs written by this command, you can use:
 ```bash
 watch -d -n 1 squeue -u $USER -o \"%.8i %.90j %.8u %.2t %.10M %.6D %R\"
 ```
+
