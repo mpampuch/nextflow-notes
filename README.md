@@ -4970,3 +4970,18 @@ ls -1 | xargs cat | sort | uniq | tail -n +2 | awk -F '\t' '{split($29, a, ";");
 nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv --download_method sratools --outdir results 
 ```
 
+#### If there are space issues
+
+Can try to split up the `ids.csv` file into smaller chunks with the `split` command and then clear up the `work` directory between runs. The `work` directory will take up a lot of space and can cause issues.
+
+```bash
+# Split the ids.csv file into smaller chunks
+split -n 3 --numeric-suffixes --additional-suffix=".csv" ids.csv ids.csv.
+
+# Download the reads and clean up the working directory periodically
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.00.csv --download_method sratools --outdir results && \
+rm -rf work && \
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.01.csv --download_method sratools --outdir results && \
+rm -rf work && \
+nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.02.csv --download_method sratools --outdir results
+```
