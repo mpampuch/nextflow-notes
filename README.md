@@ -4954,6 +4954,7 @@ nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --inpu
 3. Check the total size of all the `.fastq` files that you would download
 
 - If collecting paired end reads, the bytes of the paired end read files will be seperated with a `;` on the resulting metadata table. Use `awk -F '\t' '{split($29, a, ";"); sum += a[1] + a[2]} END {print sum}'` to extract them.
+    - Note: This command works regardless of if the reads are paired-end reads (i.e. regardless of if there is a `;` in the `fastq_bytes` column). Can use it for single or paired end reads without breaking the program or affecting the accuracy of the calculation.
 
 ```bash
 # Change into your results directory
