@@ -3620,7 +3620,26 @@ Here are some more user snippets that are alterations of the snippet above.
             "| view { println(it.class); println(it.size()); it }; return; //"
     ],
     "description": "Inserts | view { println(it.class); println(it.size()); it }; return; // for debugging"
-  }
+  },
+  // TODO -- TRY ADDING THE FOLLOWING ONES
+    "Nextflow debug snippet - Hide Metamap": {
+    "scope": "nf,groovy",
+    "prefix": "hmm",
+    "body": [],
+    "description": "Replaces the metamap with an empty list to declutter the output"
+  },
+    "Nextflow debug snippet - Hide FilePath": {
+    "scope": "nf,groovy",
+    "prefix": "hfp",
+    "body": [],
+    "description": "Replaces the file path with an empty string to declutter the output"
+  },
+      "Nextflow debug snippet - Hide Full FilePath": {
+    "scope": "nf,groovy",
+    "prefix": "hffp",
+    "body": [],
+    "description": "Hides the full path name of the file object, giving you only just the basename to declutter the output"
+  },
 }
 ```
 
