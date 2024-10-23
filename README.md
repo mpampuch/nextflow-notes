@@ -3573,7 +3573,7 @@ In vscode you can make use this code to make this a custom user snippet
 ```json
 {
   "Nextflow debug snippet": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "vv",
     "body": [
             "| view { it }; return; //"
@@ -3598,7 +3598,7 @@ Here are some more user snippets that are alterations of the snippet above.
 ```json
 {
   "Nextflow debug snippet - basic": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "vv",
     "body": [
             "| view { it }; return; //"
@@ -3606,7 +3606,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "description": "Inserts | view { it }; return; // for debugging"
   },
   "Nextflow debug snippet - with count": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "cc",
     "body": [
             "| count | view { it }; return; //"
@@ -3614,7 +3614,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "description": "Inserts | count | view { it }; return; // for debugging"
   },
   "Nextflow debug snippet - detailed": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "vvv",
     "body": [
             "| view { println(it.class); println(it.size()); it }; return; //"
@@ -3622,7 +3622,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "description": "Inserts | view { println(it.class); println(it.size()); it }; return; // for debugging"
   },
     "Nextflow debug snippet - Hide Metamap": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "hmm",
     "body": [
         "| map { it -> [\"[ -- List of ${it[0].size()} metadata elements -- ]\", it[1]]} // HIDE METAMAP"
@@ -3630,7 +3630,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "description": "Replaces the metamap with an empty list to declutter the output"
   },
     "Nextflow debug snippet - Hide FilePath": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "hff", 
     "body": [
         "| map { it -> [it[0], \"[ -- List of ${it[1].size()} files -- ]\"]} // HIDE FILEPATHS"
@@ -3638,7 +3638,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "description": "Replaces the file path with an empty string to declutter the output"
   },
       "Nextflow debug snippet - Hide Full FilePath": {
-    "scope": "nf,groovy",
+    "scope": "nextflow,nf,groovy",
     "prefix": "hfff",
     "body": [
         "| map { it -> def filepath = it[1].collect { filepath -> filepath.getBaseName() } ; return [it[0], filepath]} // HIDE FULL FILE PATHS"
