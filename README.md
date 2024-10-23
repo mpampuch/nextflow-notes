@@ -3625,19 +3625,25 @@ Here are some more user snippets that are alterations of the snippet above.
     "Nextflow debug snippet - Hide Metamap": {
     "scope": "nf,groovy",
     "prefix": "hmm",
-    "body": [],
+    "body": [
+        "| map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]]} // HIDE METAMAP"
+    ], 
     "description": "Replaces the metamap with an empty list to declutter the output"
   },
     "Nextflow debug snippet - Hide FilePath": {
     "scope": "nf,groovy",
-    "prefix": "hff",
-    "body": [],
+    "prefix": "hff", 
+    "body": [
+        "| map { it -> [it[0], "[ -- List of ${it[1].size()} files -- ]"]} // HIDE FILEPATHS"
+    ],
     "description": "Replaces the file path with an empty string to declutter the output"
   },
       "Nextflow debug snippet - Hide Full FilePath": {
     "scope": "nf,groovy",
     "prefix": "hfff",
-    "body": [], // Potentially something like: "| map { it -> def filepath = it[1].collect { filepath -> filepath.getBaseName() } ; return [it[0], filepath]}"
+    "body": [
+        "| map { it -> def filepath = it[1].collect { filepath -> filepath.getBaseName() } ; return [it[0], filepath]} // HIDE FULL FILE PATHS"
+    ], 
     "description": "Hides the full path name of the file object, giving you only just the basename to declutter the output"
   },
 }
