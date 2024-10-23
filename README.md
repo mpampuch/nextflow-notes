@@ -3625,7 +3625,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "scope": "nextflow,nf,groovy",
     "prefix": "hmm",
     "body": [
-        "| map { it -> [\"[ -- List of ${it[0].size()} metadata elements -- ]\", it[1]]} // HIDE METAMAP"
+        "| map { it -> [\"[ -- List of ${it[0].size()} metadata elements -- ]\", it[1]] } // HIDE METAMAP"
     ], 
     "description": "Replaces the metamap with an empty list to declutter the output"
   },
@@ -3633,7 +3633,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "scope": "nextflow,nf,groovy",
     "prefix": "hff", 
     "body": [
-        "| map { it -> [it[0], \"[ -- List of ${it[1].size()} files -- ]\"]} // HIDE FILEPATHS"
+        "| map { it -> [it[0], \"[ -- List of ${it[1].size()} files -- ]\"] } // HIDE FILEPATHS"
     ],
     "description": "Replaces the file path with an empty string to declutter the output"
   },
@@ -3641,11 +3641,103 @@ Here are some more user snippets that are alterations of the snippet above.
     "scope": "nextflow,nf,groovy",
     "prefix": "hfff",
     "body": [
-        "| map { it -> def filepath = it[1].collect { filepath -> filepath.getBaseName() } ; return [it[0], filepath]} // HIDE FULL FILE PATHS"
+        "| map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS"
     ], 
     "description": "Hides the full path name of the file object, giving you only just the basename to declutter the output"
   },
 }
+```
+
+## Nextflow standard input patten
+
+A common input pattern you see on a lot of Nextflow pipelines is
+
+```nextflow
+input:
+tuple val(meta), path(files)
+```
+
+Which means that the input is comprised of a tuple containing metadata and a path to files. Specifically, `val(meta)` is a placeholder for any type of metadata you want to associate with the input files, such as sample IDs, conditions, or other relevant information. The `path(files)` indicates the location of the actual data files that will be processed by the pipeline.
+
+An example is taken from the `nf-core/bacass` pipelines below. Take a look at the output to see what the `tuple val(meta), path(files)` pattern looks like in practice.
+
+```nextflow
+ch_trim_reads
+    .join(ch_trim_json)
+    .map {
+        meta, reads, json ->
+            if (getFastpReadsAfterFiltering(json) > 0) {
+                [ meta, reads ]
+            }
+    }
+    .map { println it }
+    .set { ch_trim_reads }
+
+// Outputs
+// [[id:ERR064912, gsize:2.8m, single_end:false], [/Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_1.fastp.fastq.gz, /Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_2.fastp.fastq.gz]]
+```
+**This is what a proper standard input should look like. A metamap followed by a list of paths.**
+
+You can modify this standard input object slightly with `maps` to inspect the individual elements further.
+
+Inspecting the metadata: 
+
+```nextflow
+ch_trim_reads
+    .join(ch_trim_json)
+    .map {
+        meta, reads, json ->
+            if (getFastpReadsAfterFiltering(json) > 0) {
+                [ meta, reads ]
+            }
+    }
+    .map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]] } // HIDE METAMAP
+    .map { println it }
+    .set { ch_trim_reads }
+
+// Outputs
+[[ -- List of 3 metadata elements -- ], [/Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_1.fastp.fastq.gz, /Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_2.fastp.fastq.gz]]
+```
+
+Inspecting the file paths:
+
+```nextflow
+ch_trim_reads
+    .join(ch_trim_json)
+    .map {
+        meta, reads, json ->
+            if (getFastpReadsAfterFiltering(json) > 0) {
+                [ meta, reads ]
+            }
+    }
+    .map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]] } // HIDE METAMAP
+    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS
+    .map { println it }
+    .set { ch_trim_reads }
+
+// Outputs
+[[ -- List of 3 metadata elements -- ], [ERR064912_1.fastp.fastq.gz, ERR064912_2.fastp.fastq.gz]]
+```
+
+Inspecting the file paths further:
+
+```nextflow
+ch_trim_reads
+    .join(ch_trim_json)
+    .map {
+        meta, reads, json ->
+            if (getFastpReadsAfterFiltering(json) > 0) {
+                [ meta, reads ]
+            }
+    }
+    .map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]] } // HIDE METAMAP
+    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS
+    .map { it -> [it[0], "[ -- List of ${it[1].size()} files -- ]"] } // HIDE FILEPATHS
+    .map { println it }
+    .set { ch_trim_reads }
+
+// Outputs
+[[ -- List of 3 metadata elements -- ], [ -- List of 2 files -- ]]
 ```
 
 ## Nextflow special directories
