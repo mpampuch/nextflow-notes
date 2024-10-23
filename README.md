@@ -3696,7 +3696,7 @@ ch_trim_reads
     .set { ch_trim_reads }
 
 // Outputs
-[[ -- List of 3 metadata elements -- ], [/Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_1.fastp.fastq.gz, /Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_2.fastp.fastq.gz]]
+// [[ -- List of 3 metadata elements -- ], [/Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_1.fastp.fastq.gz, /Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_2.fastp.fastq.gz]]
 ```
 
 Inspecting the file paths:
@@ -3716,7 +3716,7 @@ ch_trim_reads
     .set { ch_trim_reads }
 
 // Outputs
-[[ -- List of 3 metadata elements -- ], [ERR064912_1.fastp.fastq.gz, ERR064912_2.fastp.fastq.gz]]
+// [[ -- List of 3 metadata elements -- ], [ERR064912_1.fastp.fastq.gz, ERR064912_2.fastp.fastq.gz]]
 ```
 
 Inspecting the file paths further:
@@ -3737,7 +3737,7 @@ ch_trim_reads
     .set { ch_trim_reads }
 
 // Outputs
-[[ -- List of 3 metadata elements -- ], [ -- List of 2 files -- ]]
+// [[ -- List of 3 metadata elements -- ], [ -- List of 2 files -- ]]
 ```
 
 ## Nextflow special directories
