@@ -3621,12 +3621,11 @@ Here are some more user snippets that are alterations of the snippet above.
     ],
     "description": "Inserts | view { println(it.class); println(it.size()); it }; return; // for debugging"
   },
-  // TODO -- TRY ADDING THE FOLLOWING ONES
     "Nextflow debug snippet - Hide Metamap": {
     "scope": "nf,groovy",
     "prefix": "hmm",
     "body": [
-        "| map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]]} // HIDE METAMAP"
+        "| map { it -> [\"[ -- List of ${it[0].size()} metadata elements -- ]\", it[1]]} // HIDE METAMAP"
     ], 
     "description": "Replaces the metamap with an empty list to declutter the output"
   },
@@ -3634,7 +3633,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "scope": "nf,groovy",
     "prefix": "hff", 
     "body": [
-        "| map { it -> [it[0], "[ -- List of ${it[1].size()} files -- ]"]} // HIDE FILEPATHS"
+        "| map { it -> [it[0], \"[ -- List of ${it[1].size()} files -- ]\"]} // HIDE FILEPATHS"
     ],
     "description": "Replaces the file path with an empty string to declutter the output"
   },
