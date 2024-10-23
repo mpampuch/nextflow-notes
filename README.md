@@ -3676,7 +3676,7 @@ ch_trim_reads
 // Outputs
 // [[id:ERR064912, gsize:2.8m, single_end:false], [/Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_1.fastp.fastq.gz, /Users/markpampuch/Dropbox/to_learn/nextflow/test-bacass/work/88/a5045082c5d077bd6fff234bea8388/ERR064912_2.fastp.fastq.gz]]
 ```
-**This is what a proper standard input should look like. A metamap followed by a list of paths.**
+**This is what a proper standard input should look like. A list of metadata (a metamap) followed by a list of paths to your data files.**
 
 You can modify this standard input object slightly with `maps` to inspect the individual elements further.
 
