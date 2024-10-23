@@ -3630,14 +3630,14 @@ Here are some more user snippets that are alterations of the snippet above.
   },
     "Nextflow debug snippet - Hide FilePath": {
     "scope": "nf,groovy",
-    "prefix": "hfp",
+    "prefix": "hff",
     "body": [],
     "description": "Replaces the file path with an empty string to declutter the output"
   },
       "Nextflow debug snippet - Hide Full FilePath": {
     "scope": "nf,groovy",
-    "prefix": "hffp",
-    "body": [],
+    "prefix": "hfff",
+    "body": [], // Potentially something like: "| map { it -> def filepath = it[1].collect { filepath -> filepath.getBaseName() } ; return [it[0], filepath]}"
     "description": "Hides the full path name of the file object, giving you only just the basename to declutter the output"
   },
 }
