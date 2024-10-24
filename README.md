@@ -3641,7 +3641,7 @@ Here are some more user snippets that are alterations of the snippet above.
     "scope": "nextflow,nf,groovy",
     "prefix": "hfff",
     "body": [
-        "| map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS"
+        "| map { it -> [it[0], it[1].collect { filepath -> filepath.getName() }] } // HIDE FULL FILE PATHS"
     ], 
     "description": "Hides the full path name of the file object, giving you only just the basename to declutter the output"
   },
@@ -3711,7 +3711,7 @@ ch_trim_reads
             }
     }
     .map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]] } // HIDE METAMAP
-    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS
+    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() }] } // HIDE FULL FILE PATHS
     .map { println it }
     .set { ch_trim_reads }
 
@@ -3731,7 +3731,7 @@ ch_trim_reads
             }
     }
     .map { it -> ["[ -- List of ${it[0].size()} metadata elements -- ]", it[1]] } // HIDE METAMAP
-    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() } ] } // HIDE FULL FILE PATHS
+    .map { it -> [it[0], it[1].collect { filepath -> filepath.getName() }] } // HIDE FULL FILE PATHS
     .map { it -> [it[0], "[ -- List of ${it[1].size()} files -- ]"] } // HIDE FILEPATHS
     .map { println it }
     .set { ch_trim_reads }
