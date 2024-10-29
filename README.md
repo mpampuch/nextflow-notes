@@ -340,6 +340,37 @@ process {
 
 The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does not start with `align`.
 
+#### Selector expressions
+
+Both label and process name selectors allow the use of a regular expression in order to apply the same configuration to all processes matching the specified pattern condition. 
+
+For example:
+
+```nextflow
+process {
+    withLabel: 'foo|bar' {
+        cpus = 2
+        memory = 4.GB
+    }
+}
+```
+
+The above configuration snippet sets 2 cpus and 4 GB of memory to the processes annotated with a label `foo` and `bar`.
+
+A process selector can be negated prefixing it with the special character `!`. 
+
+For example:
+
+```nextflow
+process {
+    withLabel: 'foo' { cpus = 2 }
+    withLabel: '!foo' { cpus = 4 }
+    withName: '!align.*' { queue = 'long' }
+}
+```
+
+The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does _not_ start with `align`.
+
 ### Config Conda execution
 
 If you already have a conda environment in your machine that you want to use for your processes, you can use
