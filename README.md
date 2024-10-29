@@ -340,7 +340,7 @@ process {
 
 The above configuration snippet sets 2 cpus for the processes annotated with the `foo` label and 4 cpus to all processes not annotated with that label. Finally it sets the use of `long` queue to all process whose name does not start with `align`.
 
-#### Selector expressions
+### Selector expressions
 
 Both label and process name selectors allow the use of a regular expression in order to apply the same configuration to all processes matching the specified pattern condition. 
 
