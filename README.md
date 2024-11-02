@@ -4545,7 +4545,21 @@ The nf-core pipeline template is a working pipeline and comes pre-configured wit
 
 To add a module to an nf-core pipelines, following the instructions in the documentation found [here](https://nf-co.re/docs/tutorials/nf-core_components/adding_modules_to_pipelines).
 
-Most of the modules 
+Most of the nf-core modules will be used somewhere in a subworkflow. However, there is one exception. The `MultiQC` module will typically be used at the end of the workflow, aggregating all the data from the previous outputs. This means that it is typically used differently than other nf-core modules.
+
+It's not easy to write hard and fast rules for how to incorporate modules into your nextflow pipeline, because each of them are slightly different. Below I've instead written out sort of a case study detailing how I got preset modules to work in a pipeline I was modifying and my thoughts and investigative process at the time.
+
+### Adding a standard module to a subworkflow
+
+Here I describe how I added the [nf-core`samtools_depth`](https://nf-co.re/modules/samtools_depth) module to my pipeline.
+
+...
+
+### Adding `MultiQC` to a workflow
+
+Here I describe how I added the [nf-core`multiqc`](multiqc) module to my pipeline.
+
+...
 
 ## Notes on Groovy
 
