@@ -4511,6 +4511,18 @@ Seqera Platform provides a useful tool to monitor your pipelines and work on tea
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
+## The Nextflow VSCode extension
+
+The Nextflow VSCode extension gives developers tooling designed to make the nextflow development experience smoother. It provides syntax highlighting, and as of recently, warning/error messages, hover hints, code completion, code navigation, automatic formatting, symbol renaming, parameter schema checking, and DAG previews for workflows as well. 
+
+To learn more about the features of this extension, click [here](https://seqera.io/blog/modernizing-nextflow-developer-experience/).
+
+## Migrating from Running Nextflow on an HPC to the Cloud
+
+Bioinformaticians often run their Nextflow workflows on internal HPC clusters, typically using job schedulers like Slurm to manage tasks. However, as the need for scalability and flexibility grows, many are making the shift to public cloud platforms. In these scenarios, platforms like Google Cloud Platform (GCP), with services such as Cloud Storage and the Google Batch API, become key to enabling this transition. The process of adapting workflows from HPC to the cloud involves a series of essential steps that are applicable not just to GCP, but to other cloud providers as well, making it a valuable transformation blueprint for the broader bioinformatics community.
+
+To learn more about this migration process, read this blogpost [here](https://seqera.io/blog/nextflow-from-hpc-to-cloud/).
+
 ## nf-core
 
 [nf-core](https://nf-co.re/) is a community effort to collect a curated set of analysis workflows built using Nextflow. nf-core provides a standardised set of best practices, guidelines, and templates for building and sharing bioinformatics workflows.
@@ -4522,6 +4534,18 @@ Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) 
 
 > [!TIP]
 > Beyond just reviewing these notes, in order to use, contribute to, and get the benefits out of using nf-core pipelines and the infrastructure nf-core provies in your work, it's important to always stay up to date with what the nf-core community is doing ([read the docs](https://nf-co.re/docs), ask questions in the nf-core slack, follow the [nf-core bytesize talks](https://nf-co.re/events/bytesize), check the [nf-core blog](https://nf-co.re/blog), etc.) 
+
+### Adding a module to an nf-core pipelines
+
+The nf-core pipeline template is a working pipeline and comes pre-configured with two modules:
+
+- `FastQC`: A tool that performs quality control checks on raw sequence data coming from high throughput sequencing pipelines. It provides a modular set of analyses that can be used to give a quick impression of your data.
+
+- `MultiQC`: A modular tool to aggregate results from bioinformatics analyses across many samples into a single report.
+
+To add a module to an nf-core pipelines, following the instructions in the documentation found [here](https://nf-co.re/docs/tutorials/nf-core_components/adding_modules_to_pipelines).
+
+Most of the modules 
 
 ## Notes on Groovy
 
