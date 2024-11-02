@@ -4535,6 +4535,20 @@ To learn more about this migration process, read this blogpost [here](https://se
 > [!TIP]
 > Beyond just reviewing these notes, in order to use, contribute to, and get the benefits out of using nf-core pipelines and the infrastructure nf-core provies in your work, it's important to always stay up to date with what the nf-core community is doing ([read the docs](https://nf-co.re/docs), ask questions in the nf-core slack, follow the [nf-core bytesize talks](https://nf-co.re/events/bytesize), check the [nf-core blog](https://nf-co.re/blog), etc.) 
 
+### nf-core pipeline structure
+
+nf-core pipelines follow a set of best practices and standardised conventions. nf-core pipelines start from a common template and follow the same structure. Although you won’t need to edit code in the pipeline project directory, having a basic understanding of the project structure and some core terminology will help you understand how to configure its execution.
+
+Nextflow DSL2 **workflow** are built up of **subworkflows** and **modules** that are stored as separate `.nf` files.
+
+![nf-core structure](nf-core-structure.png)
+
+Most nf-core pipelines consist of a single workflow file (there are a few exceptions). This is the main `<workflow>.nf` file that is used to bring everything else together. Instead of having one large monolithic script, it is broken up into a combination of subworkflows and modules.
+
+![nf-core workflows, subworkflows, and modules](nf-core-workflows-subworkflows-and-modules.png)
+
+More information on configuring these pipelines can be found [here](https://genomicsaotearoa.github.io/Nextflow_Workshop/session_1/3_configuration/#pipeline-structure).
+
 ### Adding a module to an nf-core pipelines
 
 The nf-core pipeline template is a working pipeline and comes pre-configured with two modules:
