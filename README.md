@@ -4671,7 +4671,7 @@ samtools \\
     -o ${prefix}.tsv \\
     $bam
 
-...(rest of code below)
+// ...(rest of code below)
 ```
 
 - This chunk of code indicates that the the `intervals` position is probably optional. The `positions` variable is used in the part of the code that executes the `samtools depth` program and is passed as a parameter. However, this variable is set conditionally and one of the options is to set it as an empty string, indicating that this paramter can be a real value or nothing.
@@ -4804,19 +4804,19 @@ workflow CONVERT_STATS {
 - These were the most important lines for figuring out how to add this module.
 
 ```nextflow
-...(rest of code)
+// ...(rest of code)
 
 workflow CONVERT_STATS {
     take:
     bam // channel: [ val(meta), /path/to/bam, /path/to/bai ]
 
-...(rest of code)
+// ...(rest of code)
 
 // Calculate statistics
 SAMTOOLS_STATS ( ch_data_for_stats, fasta )
 ch_versions = ch_versions.mix( SAMTOOLS_STATS.out.versions.first() )
 
-...(rest of code)
+// ...(rest of code)
 ```
 
 - Here, you can see 2 important things:
