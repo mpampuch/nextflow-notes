@@ -4567,13 +4567,1378 @@ It's not easy to write hard and fast rules for how to incorporate modules into y
 
 Here I describe how I added the [nf-core`samtools_depth`](https://nf-co.re/modules/samtools_depth) module to my pipeline.
 
-...
+1. The first thing I did was install the module of interest into my pipeline. This was done using the `nf-core modules install` command
+
+```bash
+nf-core modules install samtools/depth
+```
+
+> [!NOTE]
+> If this doesn't work, there may be an issue with the nf-core cache. Try clearing it by removing `~/.config/nfcore`
+
+2. Next I looked for the part of my nf-core pipeline where I wanted this module to be inserted. In this case it was in the `./subworkflows/local/convert_stats.nf` file.
+
+3. The `convert_stats.nf` file has a lot of import statements
+
+```nextflow
+include { CRUMBLE                           } from '../../modules/nf-core/crumble/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CRAM    } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_REINDEX } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_STATS                    } from '../../modules/nf-core/samtools/stats/main'
+include { SAMTOOLS_FLAGSTAT                 } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_IDXSTATS                 } from '../../modules/nf-core/samtools/idxstats/main'
+```
+
+- I added the path to the `SAMTOOLS_DEPTH` module (making sure to link the `main.nf` file inside that directory but without the `.nf` extension).
+
+```nextflow
+include { CRUMBLE                           } from '../../modules/nf-core/crumble/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CRAM    } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_REINDEX } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_STATS                    } from '../../modules/nf-core/samtools/stats/main'
+include { SAMTOOLS_FLAGSTAT                 } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_IDXSTATS                 } from '../../modules/nf-core/samtools/idxstats/main'
+include { SAMTOOLS_DEPTH                    } from '../../modules/nf-core/samtools/depth/main'
+```
+
+4. Now that the `SAMTOOLS_DEPTH` module was in my subworkflow, I took a look at the `main.nf` file inside the `SAMTOOLS_DEPTH` module (file path: `./modules/nf-core/samtools/depth/main.nf`) to see what inputs it took. Inside the `main.nf` file, you can see this:
+
+```nextflow
+process SAMTOOLS_DEPTH {
+    tag "$meta1.id"
+    label 'process_low'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/samtools:1.21--h50ea8bc_0' :
+        'biocontainers/samtools:1.21--h50ea8bc_0' }"
+
+    input:
+    tuple val(meta1), path(bam)
+    tuple val(meta2), path(intervals)
+
+    output:
+    tuple val(meta1), path("*.tsv"), emit: tsv
+    path "versions.yml"            , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta1.id}"
+    def positions = intervals ? "-b ${intervals}" : ""
+    """
+    samtools \\
+        depth \\
+        --threads ${task.cpus-1} \\
+        $args \\
+        $positions \\
+        -o ${prefix}.tsv \\
+        $bam
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        samtools: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//')
+    END_VERSIONS
+    """
+}
+```
+
+- The key portion of this file is the `input` block:
+
+```nextflow
+input:
+tuple val(meta1), path(bam)
+tuple val(meta2), path(intervals)
+```
+
+- Here you can see that this module takes in 2 inputs.
+  1. A tuple containing a list of metadata for the file and a `.bam` file.
+  2. A tuple containing a list of metadata for the file and a file containing interval information for the `samtools depth` program.
+- Typically, each module will only require 1 mandatory file, and other inputs might be optional. It's a good idea to investigate the rest of the module code to see if you can verify whether the other inputs are optional.
+  - Inside the `script` block of the module, you can see that the module uses this chunk of code
+
+```nextflow
+def positions = intervals ? "-b ${intervals}" : ""
+
+"""
+samtools \\
+    depth \\
+    --threads ${task.cpus-1} \\
+    $args \\
+    $positions \\
+    -o ${prefix}.tsv \\
+    $bam
+
+...(rest of code below)
+```
+
+- This chunk of code indicates that the the `intervals` position is probably optional. The `positions` variable is used in the part of the code that executes the `samtools depth` program and is passed as a parameter. However, this variable is set conditionally and one of the options is to set it as an empty string, indicating that this paramter can be a real value or nothing.
+  - The `?` and `:` syntax indicates the [tertiary operator]() in Groovy. This is akin to an `if else` statement. This line `def positions = intervals ? "-b ${intervals}" : ""` can be interpretted as "If the variable `interests` exists and contains real ([truthy]()) data, set the variable `positions` to the value of the string `"-b (the value inside the interests variable)"`, otherwise, if `intervals` contains a [falsey]() value, set `positions` to an empty string (`""`).
+- Since I don't want to pass in an intervals file to the `samtools depth` program, this means that the only input I'm concerned with is the `tuple val(meta1), path(bam)` input.
+
+5. Now I went back into my subworkflows file investigate where I wanted to call this `SAMTOOLS_DEPTH` program and how I could pass the inputs into the file. Back in the `./subworkflows/local/convert_stats.nf` file. The entire file looked like this:
+
+```nextflow
+//
+// Convert BAM to CRAM, create index and calculate statistics
+//
+
+include { CRUMBLE                           } from '../../modules/nf-core/crumble/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CRAM    } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_REINDEX } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_STATS                    } from '../../modules/nf-core/samtools/stats/main'
+include { SAMTOOLS_FLAGSTAT                 } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_IDXSTATS                 } from '../../modules/nf-core/samtools/idxstats/main'
+include { SAMTOOLS_DEPTH                    } from '../../modules/nf-core/samtools/depth/main'
+
+
+
+workflow CONVERT_STATS {
+    take:
+    bam      // channel: [ val(meta), /path/to/bam, /path/to/bai ]
+    fasta    // channel: [ val(meta), /path/to/fasta ]
+
+    main:
+    ch_versions = Channel.empty()
+
+
+    // Split outfmt parameter into a list
+    def outfmt_options = params.outfmt.split(',').collect { it.trim() }
+
+
+    // (Optionally) Compress the quality scores of Illumina and PacBio CCS alignments
+    if ( params.compression == "crumble" ) {
+        bam
+        | branch {
+            meta, bam ->
+                run_crumble: meta.datatype == "hic" || meta.datatype == "illumina" || meta.datatype == "pacbio"
+                no_crumble: true
+        }
+        | set { ch_bams }
+
+        CRUMBLE ( ch_bams.run_crumble, [], [] )
+        ch_versions = ch_versions.mix( CRUMBLE.out.versions )
+
+        // Convert BAM to CRAM
+        CRUMBLE.out.bam
+        | mix( ch_bams.no_crumble )
+        | map { meta, bam -> [meta, bam, []] }
+        | set { ch_bams_for_conversion }
+
+    } else {
+        bam
+        | map { meta, bam -> [meta, bam, []] }
+        | set { ch_bams_for_conversion }
+    }
+
+
+    // (Optionally) convert to CRAM if it's specified in outfmt
+    ch_cram = Channel.empty()
+    ch_crai = Channel.empty()
+
+    if ("cram" in outfmt_options) {
+        SAMTOOLS_CRAM ( ch_bams_for_conversion, fasta, [] )
+        ch_versions = ch_versions.mix( SAMTOOLS_CRAM.out.versions.first() )
+
+        // Combine CRAM and CRAI into one channel
+        ch_cram = SAMTOOLS_CRAM.out.cram
+        ch_crai = SAMTOOLS_CRAM.out.crai
+    }
+
+
+    // Re-generate BAM index if BAM is in outfmt
+    def ch_data_for_stats
+    if ("cram" in outfmt_options) {
+        ch_data_for_stats = ch_cram.join( ch_crai )
+    } else {
+        ch_data_for_stats = ch_bams_for_conversion
+    }
+
+    ch_bam = Channel.empty()
+    ch_bai = Channel.empty()
+
+    if ("bam" in outfmt_options) {
+        // Re-generate BAM index
+        SAMTOOLS_REINDEX ( ch_bams_for_conversion, fasta, [] )
+        ch_versions = ch_versions.mix( SAMTOOLS_REINDEX.out.versions.first() )
+
+        // Set the BAM and BAI channels for emission
+        ch_bam = SAMTOOLS_REINDEX.out.bam
+        ch_bai = SAMTOOLS_REINDEX.out.bai
+
+        // If using BAM for stats, use the reindexed BAM
+        if ( !("cram" in outfmt_options) ) {
+            ch_data_for_stats = ch_bam.join ( ch_bai )
+        }
+    }
+
+
+    // Calculate statistics
+    SAMTOOLS_STATS ( ch_data_for_stats, fasta )
+    ch_versions = ch_versions.mix( SAMTOOLS_STATS.out.versions.first() )
+
+
+    // Calculate statistics based on flag values
+    SAMTOOLS_FLAGSTAT ( ch_data_for_stats )
+    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions.first() )
+
+
+    // Calculate index statistics
+    SAMTOOLS_IDXSTATS ( ch_data_for_stats )
+    ch_versions = ch_versions.mix( SAMTOOLS_IDXSTATS.out.versions.first() )
+
+    emit:
+    bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+    bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+    cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+    crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+    stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+    idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+    versions = ch_versions                          // channel: [ versions.yml ]
+}
+```
+
+- These were the most important lines for figuring out how to add this module.
+
+```nextflow
+...(rest of code)
+
+workflow CONVERT_STATS {
+    take:
+    bam // channel: [ val(meta), /path/to/bam, /path/to/bai ]
+
+...(rest of code)
+
+// Calculate statistics
+SAMTOOLS_STATS ( ch_data_for_stats, fasta )
+ch_versions = ch_versions.mix( SAMTOOLS_STATS.out.versions.first() )
+
+...(rest of code)
+```
+
+- Here, you can see 2 important things:
+  - The subworkflow takes in a `bam` channel as input. The contents of this channel are a tuple containing the metadata of the `.bam` file, the path to the `.bam` file, and a path to the `.bai` file, which is an [indexed]() version of the `.bam` file.
+  - The line `SAMTOOLS_STATS(ch_data_for_stats, fasta)` is a call to the `samtools stats` program, which is structured very similar to the `samtools depth` program that we're trying to add. You can see that the program takes in a channel containing the data to process, called `ch_data_for_stats`, as well as a channel containing the path to the `.fasta` file. If you look at the entire subworkflow code, you can see that the `ch_data_for_stats` channel contains basically the same information as the `bam` channel, but the data was processed to be fed nicely to the other programs. Just like the `bam` channel, this `ch_data_for_stats` channel contains a list of metadata for the `.bam` file, the path to the `.bam` file, and a path to the indexed `.bai` file.
+    - Since the `SAMTOOLS_DEPTH` module only required the metadata and the path to the `.bam` file, but not the indexed file, we can use the channel operator [`map`]() to modify the channel and format it properly for this program.
+      - This can be done with something like this: `ch_data_for_stats.map { meta, input, index -> [meta, input] }`
+    - Since the program also takes an optional `intervals` input, we can create a _dummy channel_ that has bascially an empty value that we can pass into the program to satisfy it's 2 input requirements, but not effect the processing of our data.
+      - This can be done with something like this: `ch_intervals = ch_data_for_stats.map { meta, input, index -> [meta, []] }`
+- Therefore, to add a call to the `SAMTOOLS_DEPTH` program, you can insert the following code:
+
+```nextflow
+// Using samtools depth
+ch_data_for_samtools_depth = ch_data_for_stats.map { meta, input, index -> [meta, input] }
+ch_intervals = ch_data_for_stats.map { meta, input, index -> [meta, []] }
+SAMTOOLS_DEPTH(ch_data_for_samtools_depth, ch_intervals)
+ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+```
+
+> [!NOTE]
+> The line `ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())` a standard best practice is used to emit the exact version of the program used. All the standard nextflow modules will contain lines in their script blocks that emit the version and an output channel called `versions` that you can use to capture that version information and put into one output file at the end of the program.
+
+6. The final step in this workflow file was to emit the data from the `SAMTOOLS_DEPTH` module. At the bottom of the subworkflow, you can see this code block:
+
+```nextflow
+    emit:
+    bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+    bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+    cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+    crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+    stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+    idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+    versions = ch_versions                          // channel: [ versions.yml ]
+}
+```
+
+- This code will _emit_ the data that gets outputted by each module, so that whatever process that will import the `CONVERT_STATS` subworkflow will be able to access and use it's outputs.
+  - Remember inside the `main.nf` file for the `SAMTOOLS_DEPTH` module there was this line of code:
+
+```nextflow
+output:
+tuple val(meta1), path("*.tsv"), emit: tsv
+```
+
+- This means that the outputs of this module are emitted into an output channel called `tsv`. This can be accessed using the `out` channel operator and inserted into the bottom code block.
+
+```nextflow
+    emit:
+    bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+    bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+    cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+    crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+    depth    = SAMTOOLS_DEPTH.out.tsv               // channel: [ val(meta), /path/to/tsv ]
+    stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+    idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+    versions = ch_versions                          // channel: [ versions.yml ]
+}
+```
+
+- Now, with most `nf-core` pipelines, these output channels will usually be _caught_ by some almagomating program (aka summarizing program), such as [MultiQC](). Most modules can be added using the general thought process as outlined above, because they typically are called somewhere deep inside the Nextflow pipeline and then their outputs are propogated upwards to be caught by a summarizing program like MultiQC. However, MultiQC is different because it is a program that sits at the top level of the pipeline and is only called after all of the outputs are propogated upwards and combined to be fed to this program, typically at the end of the pipeline.
+
+The final code for the `CONVERT_STATS` subworkflow updated with the `SAMTOOLS_DEPTH` module is as follows:
+
+```nextflow
+//
+// Convert BAM to CRAM, create index and calculate statistics
+//
+
+include { CRUMBLE                           } from '../../modules/nf-core/crumble/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CRAM    } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_REINDEX } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_STATS                    } from '../../modules/nf-core/samtools/stats/main'
+include { SAMTOOLS_FLAGSTAT                 } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_IDXSTATS                 } from '../../modules/nf-core/samtools/idxstats/main'
+include { SAMTOOLS_DEPTH                    } from '../../modules/nf-core/samtools/depth/main'
+
+
+
+workflow CONVERT_STATS {
+    take:
+    bam      // channel: [ val(meta), /path/to/bam, /path/to/bai ]
+    fasta    // channel: [ val(meta), /path/to/fasta ]
+
+    main:
+    ch_versions = Channel.empty()
+
+
+    // Split outfmt parameter into a list
+    def outfmt_options = params.outfmt.split(',').collect { it.trim() }
+
+
+    // (Optionally) Compress the quality scores of Illumina and PacBio CCS alignments
+    if ( params.compression == "crumble" ) {
+        bam
+        | branch {
+            meta, bam ->
+                run_crumble: meta.datatype == "hic" || meta.datatype == "illumina" || meta.datatype == "pacbio"
+                no_crumble: true
+        }
+        | set { ch_bams }
+
+        CRUMBLE ( ch_bams.run_crumble, [], [] )
+        ch_versions = ch_versions.mix( CRUMBLE.out.versions )
+
+        // Convert BAM to CRAM
+        CRUMBLE.out.bam
+        | mix( ch_bams.no_crumble )
+        | map { meta, bam -> [meta, bam, []] }
+        | set { ch_bams_for_conversion }
+
+    } else {
+        bam
+        | map { meta, bam -> [meta, bam, []] }
+        | set { ch_bams_for_conversion }
+    }
+
+
+    // (Optionally) convert to CRAM if it's specified in outfmt
+    ch_cram = Channel.empty()
+    ch_crai = Channel.empty()
+
+    if ("cram" in outfmt_options) {
+        SAMTOOLS_CRAM ( ch_bams_for_conversion, fasta, [] )
+        ch_versions = ch_versions.mix( SAMTOOLS_CRAM.out.versions.first() )
+
+        // Combine CRAM and CRAI into one channel
+        ch_cram = SAMTOOLS_CRAM.out.cram
+        ch_crai = SAMTOOLS_CRAM.out.crai
+    }
+
+
+    // Re-generate BAM index if BAM is in outfmt
+    def ch_data_for_stats
+    if ("cram" in outfmt_options) {
+        ch_data_for_stats = ch_cram.join( ch_crai )
+    } else {
+        ch_data_for_stats = ch_bams_for_conversion
+    }
+
+    ch_bam = Channel.empty()
+    ch_bai = Channel.empty()
+
+    if ("bam" in outfmt_options) {
+        // Re-generate BAM index
+        SAMTOOLS_REINDEX ( ch_bams_for_conversion, fasta, [] )
+        ch_versions = ch_versions.mix( SAMTOOLS_REINDEX.out.versions.first() )
+
+        // Set the BAM and BAI channels for emission
+        ch_bam = SAMTOOLS_REINDEX.out.bam
+        ch_bai = SAMTOOLS_REINDEX.out.bai
+
+        // If using BAM for stats, use the reindexed BAM
+        if ( !("cram" in outfmt_options) ) {
+            ch_data_for_stats = ch_bam.join ( ch_bai )
+        }
+    }
+
+    // Calculate Depth using Samtools Depth
+    ch_data_for_samtools_depth = ch_data_for_stats.map { meta, input, index -> [meta, input] }
+    ch_intervals = ch_data_for_stats.map { meta, input, index -> [meta, []] }
+    SAMTOOLS_DEPTH(ch_data_for_samtools_depth, ch_intervals)
+    ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+
+    // Calculate statistics
+    SAMTOOLS_STATS ( ch_data_for_stats, fasta )
+    ch_versions = ch_versions.mix( SAMTOOLS_STATS.out.versions.first() )
+
+
+    // Calculate statistics based on flag values
+    SAMTOOLS_FLAGSTAT ( ch_data_for_stats )
+    ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions.first() )
+
+
+    // Calculate index statistics
+    SAMTOOLS_IDXSTATS ( ch_data_for_stats )
+    ch_versions = ch_versions.mix( SAMTOOLS_IDXSTATS.out.versions.first() )
+
+    emit:
+    bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+    bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+    cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+    crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+    depth    = SAMTOOLS_DEPTH.out.tsv               // channel: [ val(meta), /path/to/tsv ]
+    stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+    idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+    versions = ch_versions                          // channel: [ versions.yml ]
+}
+```
+
+After you finish updating the section with your code, make sure you continue to do all the rest of the stuff outlined in the [inserting a module]() guidelines.
+
+#### Some Further Notes on the `samtools depth` program (or other programs with irregurities)
+
+Nf-core modules (and subworkflows) are a community driven effort to standardize many bioinformatics and data analysis tools, but sometimes there are errors or irregularities that are published in the module or subworkflow and this can break your code in unexpected ways. This is the case (as of right now) with the `SAMTOOLS_DEPTH` module.
+
+- The `SAMTOOLS_DEPTH` module takes in 2 inputs, and it has it's input block structured as follows:
+
+```nextflow
+input:
+tuple val(meta1), path(bam)
+tuple val(meta2), path(intervals)
+```
+
+Typically, the name for the variable that contains the metamap should **_always_** be `meta`. If there are more then one inputs, the other input variable should be named something like `meta1` or `meta2`, but `meta` should always be the name of the first one.
+
+In this case, the metamap had 2 inputs, but the first one was the non-standard `meta1`. This is an issue because often times this variable name is referenced somewhere, usually in some configuration file. This was the case in this pipeline. Inside the original `./readmapping/conf/modules.config` file (the file that describes the configurations for each of the modules used in your pipeline), there is a code snipped that looks like this: 
+
+```nextflow
+withName: '.*:CONVERT_STATS:SAMTOOLS_.*' {
+    publishDir = [
+        path: { "${params.outdir}/read_mapping/${meta.datatype}" },
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+    ]
+}
+```
+
+This block of code can be generally read as "For any modules inside the `CONVERT_STATS` subworkflow that starts with `SAMTOOLS_`, make sure to save the output files those module programs generated into the `read_mapping/WHATEVER-THE-DATATYPE-OF-YOUR-SAMPLE-WAS` directory." This sample datatype is extracted from the metadata in your list. In order for this metadata to be extracted properly, it has to be saved under the `meta` variable, as this is what's explicitly written in the configuration file. In the case of the `SAMTOOLS_DEPTH` module that we were working with, since it's metadata is not saved in a variable called `meta`, but rather `meta1`, this means that none of the outputs from the `samtools depth` program will be saved to your outputs. 
+
+To fix this, there are a few approaches. Two of them are:
+  
+1. Change the variable name from `meta1` to `meta` directly in the `./modules/nf-core/samtools/depth/main.nf` file.
+> [!NOTE]
+> When editing nf-core modules, it's recommended to use the [`patch`]() tool. Just editing can be dangerous because if nextflow pulls the module from the nf-core/modules remote repository it can overwrite your local changes.
+
+2. Add an additional configuration to accomodate the non-standard irregularities in the module. This is a safer (but more hack-y) option because it doesn't run the risk of being overwritten but code in a remote repository.
+
+
+```nextflow
+withName: '.*:CONVERT_STATS:SAMTOOLS_.*' {
+    publishDir = [
+        path: { "${params.outdir}/read_mapping/${meta.datatype}" },
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+    ]
+}
+
+// Needs separate configuration since nf-core/samtools/depth uses meta1 instead of meta as it's metamap name 
+withName: '.*:CONVERT_STATS:SAMTOOLS_DEPTH' {
+    publishDir = [
+        path: { "${params.outdir}/read_mapping/${meta1.datatype}" },
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+    ]
+}
+```
+
+With this fix, all your program outputs should now be published in the pipeline outputs folder.
+
+This is just one example of fixing an irregularity. Every irregularity will be different but this is just a framework for thinking about where to look and how to solve each problem. With time and practice you get more familiar and efficient with the process and will start writing and editing pipelines with ease.
 
 ### Adding `MultiQC` to a workflow
 
 Here I describe how I added the [nf-core`multiqc`](multiqc) module to my pipeline.
 
-...
+1. As with before, the first thing I did was install the module of interest into my pipeline. This was done using the `nf-core modules install` command
+
+```bash
+nf-core modules install multiqc
+```
+
+2. The next step was to investigate where the `MULTIQC` module should go. `MULTIQC` should always go at the top level of the code and collect all the desired software outputs at the end of the pipeline, but figuring out where this top-level/end of the pipeline is can be trickier than it seems. In nextflow and nf-core, the `main.nf` file in the top level of the code is **_always_** the entrypoint for the pipeline to start. However often times this file doesn't contain anything really meaniningful from a dataprocessing perspective and it might make a call to the main "engine" of the pipeline very early on. Often this is something that was imported from the `./workflows` folder. In this pipeline used there, the top-level `main.nf` file contains this: 
+
+
+```nextflow
+#!/usr/bin/env nextflow
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    sanger-tol/readmapping
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------------------------------
+*/
+
+nextflow.enable.dsl = 2
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { READMAPPING } from './workflows/readmapping'
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_readmapping_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_readmapping_pipeline'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    GENOME PARAMETER VALUES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow SANGERTOL_READMAPPING {
+    take:
+    samplesheet
+    fasta
+    header
+
+    main:
+    READMAPPING (
+        samplesheet,
+        fasta,
+        header
+    )
+
+}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow {
+
+    main:
+
+    //
+    // SUBWORKFLOW: Run initialisation tasks
+    //
+    PIPELINE_INITIALISATION (
+        params.version,
+        params.help,
+        params.validate_params,
+        params.monochrome_logs,
+        args,
+        params.outdir,
+        params.input
+    )
+
+    //
+    // WORKFLOW: Run main workflow
+    //
+    SANGERTOL_READMAPPING (
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.fasta,
+        PIPELINE_INITIALISATION.out.header
+    )
+
+    //
+    // SUBWORKFLOW: Run completion tasks
+    //
+    PIPELINE_COMPLETION (
+        params.email,
+        params.email_on_fail,
+        params.plaintext_email,
+        params.outdir,
+        params.monochrome_logs,
+        params.hook_url,
+        []
+    )
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+```
+
+- The `workflow` of this file basically makes 3 calls to other smaller pipeline processes: `PIPELINE_INITIALISATION`, `SANGERTOL_READMAPPING`, and `PIPELINE_COMPLETION`. It might be tempting to think that since we need to put the `MULTIQC` module at the end of the pipeline, we should put it in the `PIPELINE_COMPLETION` subworflow, but if you look carefully you'll notice that this workflow has very little to do with handling any biological data and more so with generating logs and emails and things of that nature. All the bulk of the biological data is flowing through the `SANGERTOL_READMAPPING` pipeline, which is imported from `./workflows/readmapping`.
+
+- If we take a look at the `./workflows/readmapping.nf` file, we can see the following code:
+
+
+```nextflow
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Local modules
+//
+
+include { SAMTOOLS_REHEADER           } from '../modules/local/samtools_replaceheader'
+
+
+//
+// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+//
+
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome'
+include { ALIGN_SHORT as ALIGN_HIC      } from '../subworkflows/local/align_short'
+include { ALIGN_SHORT as ALIGN_ILLUMINA } from '../subworkflows/local/align_short'
+include { ALIGN_PACBIO as ALIGN_HIFI    } from '../subworkflows/local/align_pacbio'
+include { ALIGN_PACBIO as ALIGN_CLR     } from '../subworkflows/local/align_pacbio'
+include { ALIGN_ONT                     } from '../subworkflows/local/align_ont'
+include { CONVERT_STATS                 } from '../subworkflows/local/convert_stats'
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT NF-CORE MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Installed directly from nf-core/modules
+//
+
+include { UNTAR                       } from '../modules/nf-core/untar/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+workflow READMAPPING {
+
+    take:
+    ch_samplesheet
+    ch_fasta
+    ch_header
+
+    main:
+    // Initialize an empty versions channel
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+
+    //
+    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //
+    INPUT_CHECK ( ch_samplesheet ).reads
+    | branch {
+        meta, reads ->
+            hic : meta.datatype == "hic"
+            illumina : meta.datatype == "illumina"
+            pacbio : meta.datatype == "pacbio"
+            clr : meta.datatype == "pacbio_clr"
+            ont : meta.datatype == "ont"
+    }
+    | set { ch_reads }
+
+    ch_versions = ch_versions.mix ( INPUT_CHECK.out.versions )
+
+    ch_fasta
+    | map { [ [ id: it.baseName ], it ] }
+    | set { ch_genome }
+
+    PREPARE_GENOME ( ch_genome )
+    ch_versions = ch_versions.mix ( PREPARE_GENOME.out.versions )
+
+
+    //
+    // Create channel for vector DB
+    //
+    // ***PacBio condition does not work - needs fixing***
+    if ( ch_reads.pacbio || ch_reads.clr ) {
+        if ( params.vector_db.endsWith( '.tar.gz' ) ) {
+            UNTAR ( [ [:], params.vector_db ] ).untar
+            | set { ch_vector_db }
+
+            ch_versions = ch_versions.mix ( UNTAR.out.versions )
+
+        } else {
+            Channel.fromPath ( params.vector_db )
+            | set { ch_vector_db }
+        }
+    }
+
+
+    //
+    // SUBWORKFLOW: Align raw reads to genome
+    //
+    ALIGN_HIC ( PREPARE_GENOME.out.fasta, PREPARE_GENOME.out.bwaidx, ch_reads.hic )
+    ch_versions = ch_versions.mix ( ALIGN_HIC.out.versions )
+    
+    ALIGN_ILLUMINA ( PREPARE_GENOME.out.fasta, PREPARE_GENOME.out.bwaidx, ch_reads.illumina )
+    ch_versions = ch_versions.mix ( ALIGN_ILLUMINA.out.versions )
+
+    ALIGN_HIFI ( PREPARE_GENOME.out.fasta, ch_reads.pacbio, ch_vector_db )
+    ch_versions = ch_versions.mix ( ALIGN_HIFI.out.versions )
+
+    ALIGN_CLR ( PREPARE_GENOME.out.fasta, ch_reads.clr, ch_vector_db )
+    ch_versions = ch_versions.mix ( ALIGN_CLR.out.versions )
+
+    ALIGN_ONT ( PREPARE_GENOME.out.fasta, ch_reads.ont )
+    ch_versions = ch_versions.mix ( ALIGN_ONT.out.versions )
+
+    // gather alignments
+    ch_aligned_bams = Channel.empty()
+    | mix( ALIGN_HIC.out.bam )
+    | mix( ALIGN_ILLUMINA.out.bam )
+    | mix( ALIGN_HIFI.out.bam )
+    | mix( ALIGN_CLR.out.bam )
+    | mix( ALIGN_ONT.out.bam )
+
+    // Optionally insert params.header information to bams
+    ch_reheadered_bams = Channel.empty()
+    if ( params.header ) {
+        SAMTOOLS_REHEADER( ch_aligned_bams, ch_header.first() )
+        ch_reheadered_bams = SAMTOOLS_REHEADER.out.bam
+        ch_versions = ch_versions.mix ( SAMTOOLS_REHEADER.out.versions )
+    } else {
+        ch_reheadered_bams = ch_aligned_bams
+    }
+
+    // convert to cram and gather stats
+    CONVERT_STATS ( ch_reheadered_bams, PREPARE_GENOME.out.fasta )
+    ch_versions = ch_versions.mix ( CONVERT_STATS.out.versions )
+
+
+    //
+    // MODULE: Combine different versions.yml
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions
+        | unique { it.text }
+        | collectFile ( name: 'collated_versions.yml' )
+    )
+}
+
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+```
+
+- Here at the end you can see a call to `CUSTOM_DUMPSOFTWAREVERSIONS`. Emitting the versions of all the softwares used in this pipeline usally indicates that this is the end of the dataprocessing, because all the programs have run and their software versions have been collected. This indicates this we can probably add our call to the `multiqc` program somewhere here. Now that we've determined the endpoint of the data processing in the pipeline, we can begin working on adding the `MULTIQC` module here.
+
+3. The next step is to inspect the `MULTIQC` module that we installed (inside the `./modules/nf-core/multiqc/main.nf` file) to understand what inputs it takes and outputs it emits. The module looks like this:
+
+
+```nextflow
+process MULTIQC {
+    label 'process_single'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/multiqc:1.25.1--pyhdfd78af_0' :
+        'biocontainers/multiqc:1.25.1--pyhdfd78af_0' }"
+
+    input:
+    path  multiqc_files, stageAs: "?/*"
+    path(multiqc_config)
+    path(extra_multiqc_config)
+    path(multiqc_logo)
+    path(replace_names)
+    path(sample_names)
+
+    output:
+    path "*multiqc_report.html", emit: report
+    path "*_data"              , emit: data
+    path "*_plots"             , optional:true, emit: plots
+    path "versions.yml"        , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ? "--filename ${task.ext.prefix}.html" : ''
+    def config = multiqc_config ? "--config $multiqc_config" : ''
+    def extra_config = extra_multiqc_config ? "--config $extra_multiqc_config" : ''
+    def logo = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
+    def replace = replace_names ? "--replace-names ${replace_names}" : ''
+    def samples = sample_names ? "--sample-names ${sample_names}" : ''
+    """
+    multiqc \\
+        --force \\
+        $args \\
+        $config \\
+        $prefix \\
+        $extra_config \\
+        $logo \\
+        $replace \\
+        $samples \\
+        .
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    mkdir multiqc_data
+    mkdir multiqc_plots
+    touch multiqc_report.html
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+    END_VERSIONS
+    """
+}
+```
+
+- You can see that the `MULTIQC` module takes in alot of inputs. If you inspect them closely however, you'll notice that all of them are optional, with the exception of the first one `path  multiqc_files, stageAs: "?/*"` (Remember that if you see a pattern like this `input_variable ? "--some_parameter $input_variable" : ''` in the `script` block, that indicates this input was optional). This means that we can focus on preparing the first input, and then feed the module _dummy channels_ to satisfy the other input requirments. 
+
+4. Now knowing what we know, it's time to insert the `MULTIQC` module at the end of the workflow. The first thing to do is to import the module into the `./workflows/readmapping.nf` workflow.
+
+```nextflow
+//
+// MODULE: Installed directly from nf-core/modules
+//
+
+include { UNTAR                         } from '../modules/nf-core/untar/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { MULTIQC                       } from '../modules/nf-core/multiqc'
+```
+
+- Next it's time to create the mandatory input channel for the `MULTIQC` module. We can start of as setting this to an empty channel for now: 
+
+
+```nextflow
+main:
+    // Initialize an empty versions channel
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+```
+
+- Now it's important to fill this channel with all the data we want in our final output. The issue is that the data we want is being emitted in the `CONVERT_STATS` subworkflow. If we want that data in this `ch_multiqc_files` channel, we need a way to propograte it from the `CONVERT_STATS` subworkflow to the `READMAPPING` workflow. This means that we will have to go back into the `CONVERT_STATS` subworkflow code and modify it to accomodate capturing data to be used in the MultiQC report.
+
+- So back in the `./readmapping/subworkflows/local/convert_stats.nf` subworkflow, initialize another channel for multiqc files (`ch_multiqc_files`).
+
+
+```nextflow
+workflow CONVERT_STATS {
+    take:
+    bam // channel: [ val(meta), /path/to/bam, /path/to/bai ]
+    fasta // channel: [ val(meta), /path/to/fasta ]
+
+    main:
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+```
+
+- Then for every process that generates an output, add a line that captures that output inside the multiqc channel. The Nextflow [channel operator `mix`]() is really useful for this purpose.
+
+```nextflow
+// Calculate Depth using Samtools Depth
+ch_data_for_samtools_depth = ch_data_for_stats.map { meta, input, index -> [meta, input] }
+ch_intervals = ch_data_for_stats.map { meta, input, index -> [meta, []] }
+SAMTOOLS_DEPTH(ch_data_for_samtools_depth, ch_intervals)
+ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+ch_multiqc_files = SAMTOOLS_DEPTH.out.tsv.mix(ch_multiqc_files)
+
+// Calculate statistics
+SAMTOOLS_STATS ( ch_data_for_stats, fasta )
+ch_versions = ch_versions.mix( SAMTOOLS_STATS.out.versions.first() )
+ch_multiqc_files = SAMTOOLS_STATS.out.stats.mix(ch_multiqc_files)
+
+
+// Calculate statistics based on flag values
+SAMTOOLS_FLAGSTAT ( ch_data_for_stats )
+ch_versions = ch_versions.mix( SAMTOOLS_FLAGSTAT.out.versions.first() )
+ch_multiqc_files = SAMTOOLS_FLAGSTAT.out.flagstat.mix(ch_multiqc_files)
+
+
+// Calculate index statistics
+SAMTOOLS_IDXSTATS ( ch_data_for_stats )
+ch_versions = ch_versions.mix( SAMTOOLS_IDXSTATS.out.versions.first() )
+ch_multiqc_files = SAMTOOLS_IDXSTATS.out.idxstats.mix(ch_multiqc_files)
+```
+
+> [!NOTE]
+> If you have a module or a process that produces multiple outputs and you are trying to capture all of them, you can chain together many `mix` operations. For example, when I was working on editing this pipeline myself, in one version I added the `MOSDEPTH` module to this subworkflow. This is how I did it:
+> 
+> ```nextflow
+> // Calculate sequencing depth using mosdepth
+> ch_data_for_mosdepth = ch_data_for_stats.map { meta, input, index -> [meta, input, index, []] }
+> MOSDEPTH(ch_data_for_mosdepth, fasta)
+> ch_versions = ch_versions.mix(MOSDEPTH.out.versions.first())
+> ch_multiqc_files = MOSDEPTH.out.global_txt
+>     .mix(MOSDEPTH.out.summary_txt)
+>     .mix(MOSDEPTH.out.regions_txt)
+>     .mix(MOSDEPTH.out.per_base_d4)
+>     .mix(MOSDEPTH.out.per_base_bed)
+>     .mix(MOSDEPTH.out.per_base_csi)
+>     .mix(MOSDEPTH.out.regions_bed)
+>     .mix(MOSDEPTH.out.regions_csi)
+>     .mix(MOSDEPTH.out.quantized_bed)
+>     .mix(MOSDEPTH.out.quantized_csi)
+>     .mix(MOSDEPTH.out.thresholds_bed)
+>     .mix(MOSDEPTH.out.thresholds_csi)
+>     .mix(ch_multiqc_files)
+> ```
+
+- Once this is complete, the last thing to do is to make sure you propogate up this multiqc channel (in other words, emit the multiqc channel so that it is able to be used in a workflow that imports this subworkflow). 
+  - Because this is a special channel, you may have to modify it in a special way to get the output correct. A useful operator for this is the `transponse()` function. Note that this function is **_not_** the [Nextflow `transpose` channel operator](https://www.nextflow.io/docs/latest/operator.html#transpose), but rather the [`transpose` method of Groovy collections](https://docs.groovy-lang.org/latest/html/api/groovy/util/GroovyCollections.html#transpose(java.util.List)). Remember that Nextflow, Groovy, and Java are all interconnected and sometimes it might be useful to use a function from one of the lower level languages to get your desired effect, as is often the case with the `transpose()` method. This one is just extra confusing becasue it shares a name with a Nextflow operator. Often times you can tell the difference because the Groovy method will just be invoke with empty parentheses `()` (e.g. `transpose()`).
+
+```nextflow
+emit:
+bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+depth    = SAMTOOLS_DEPTH.out.tsv               // channel: [ val(meta), /path/to/tsv ]
+stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+versions = ch_versions                          // channel: [ versions.yml ]
+multiqc_files = ch_multiqc_files.transpose().map { it[1] }
+```
+
+> [!NOTE]
+> This has to be done in every subworkflow in which you want data to appear in the MultiQC report. In this specific example, we are only concerned about the data that is outputted in the `CONVERT_STATS` subworkflow.
+
+- Now that the output data is being propogated upwards from our desired subworkflows, we can return back to our workflow and continue implementing the `MULTIQC` module.
+
+- So back in the `./readmapping/workflows/readmapping.nf` file, collect multiqc channel data emitted by the `CONVERT_STATS` subworkflow:
+
+```nextflow
+ch_versions = ch_versions.mix ( CONVERT_STATS.out.versions )
+ch_multiqc_files = ch_multiqc_files.mix(CONVERT_STATS.out.multiqc_files)
+```
+
+- Now you're ready to feed this data into the `MULTIQC` module. Before you do so, make sure the MultiQC channel is formatted correctly. The [`collect` operator]() puts everything into a single list entry which can then be fed into `MULTIQC`:
+
+
+```nextflow
+// Also can load some MultiQC configuration files before calling the program
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty() // CAN ALSO DO SOMETHING LIKE Channel.fromPath("$projectDir/workflows/assets/multiqc/multiqc_config.yml", checkIfExists: true) IF YOU HAVE ANY CONFIGURATION FILES HERE
+ch_multiqc_logo          = params.multiqc_logo   ? Channel.fromPath(params.multiqc_logo)   : Channel.empty()
+
+// Call MultiQC program
+// Remember the inputs:
+// input:
+// path  multiqc_files, stageAs: "?/*"
+// path(multiqc_config)
+// path(extra_multiqc_config)
+// path(multiqc_logo)
+// path(replace_names)
+// path(sample_names)
+
+MULTIQC (
+    ch_multiqc_files.collect(),
+    [],     
+    ch_multiqc_custom_config.toList(),
+    ch_multiqc_logo.toList(),
+    [],
+    []  // empty lists are dummy channels
+)
+```
+
+5. Now we're almost done. The `MULTIQC` program has been executed and all the important data has been summarized, but remember how I mentionned that there were three workflows that were run in the Nextflow entrypoint (the top-level `main.nf` file): `PIPELINE_INITIALISATION`, `SANGERTOL_READMAPPING`, and `PIPELINE_COMPLETION`? Even though `SANGERTOL_READMAPPING` is where all the important data processing and program executions takes place, it's still technically not the end of the whole pipeline. Nextflow requires you to explicitly declare if you want a program's outputs pubished. This includes the `MULTIQC` program. There is a chance there is some important code that publishes the `MULTIQC` results to your outputs folder in the last stage of the pipeline, the `PIPELINE_COMPLETION` subworkflow, and so it's a really good idea to check whether or not there is anything in that subworkflow's code that indicates we should propogate the `MULTIQC` results there.
+   - Inside the `./subworkflows/local/utils_nfcore_readmapping_pipeline/main.nf` file, you can find the following code snippet:
+
+```nextflow
+workflow PIPELINE_COMPLETION {
+
+    take:
+    email           //  string: email address
+    email_on_fail   //  string: email address sent on pipeline failure
+    plaintext_email // boolean: Send plain-text email instead of HTML
+    outdir          //    path: Path to output directory where results will be published
+    monochrome_logs // boolean: Disable ANSI colour codes in log output
+    hook_url        //  string: hook URL for notifications
+    multiqc_report  //  string: Path to MultiQC report
+```
+
+- Here you can see that one of the things the `PIPELINE_COMPLETION` subworkflow takes as input a channel called `multiqc_report`, which contains the path to the MultiQC report. This suggests that in our `SANGERTOL_READMAPPING` workflow, we should emit our multiqc output. So back in our `./workflows/readmapping.nf` file, after calling the `MULTIQC` program, we should add the following code:
+
+
+```nextflow
+// Save the path to the MultiQC report in a channel
+// Remember from the output block of the rom the MULTIQC module that the path to the MultiQC report is emitted as `report`
+// 
+// output:
+// path "*multiqc_report.html", emit: report
+ch_multiqc_report = MULTIQC.out.report
+
+// Emit that channel so that it can be captured by the PIPELINE_COMPLETION subworkflow
+// Make sure to name the emission the same thing that the PIPELINE_COMPLETION takes as input: multiqc_report
+emit:
+multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
+```
+
+6. And that's it. Now you can test your pipeline to see if it works. From here you can go and read the rest of the instructions outlined in the [inserting a module]() guidelines to see what else you need to do to follow the best practices. MultiQC also comes with a lot of configutation options. You can [read the documention]() and look at other nf-core pipelines to see how they implemented different configuration options. It is a huge module and too much to go into right here but with this knowledge you should be ready to go on and pursue more knowledge yourself.
+
+- To summarize, this is what the final files look like after successfully adding the `MULTIQC` module.
+
+- `./subworkflows/local/convert_stats.nf`
+
+```nextflow
+//
+// Convert BAM to CRAM, create index and calculate statistics
+//
+
+include { CRUMBLE                           } from '../../modules/nf-core/crumble/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_CRAM    } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_VIEW as SAMTOOLS_REINDEX } from '../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_STATS                    } from '../../modules/nf-core/samtools/stats/main'
+include { SAMTOOLS_FLAGSTAT                 } from '../../modules/nf-core/samtools/flagstat/main'
+include { SAMTOOLS_IDXSTATS                 } from '../../modules/nf-core/samtools/idxstats/main'
+include { SAMTOOLS_DEPTH                    } from '../../modules/nf-core/samtools/depth/main'
+
+workflow CONVERT_STATS {
+    take:
+    bam // channel: [ val(meta), /path/to/bam, /path/to/bai ]
+    fasta // channel: [ val(meta), /path/to/fasta ]
+
+    main:
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+
+
+    // Split outfmt parameter into a list
+    def outfmt_options = params.outfmt.split(',').collect { it.trim() }
+
+
+    // (Optionally) Compress the quality scores of Illumina and PacBio CCS alignments
+    if (params.compression == "crumble") {
+        bam
+            | branch { meta, bam ->
+                run_crumble: meta.datatype == "hic" || meta.datatype == "illumina" || meta.datatype == "pacbio"
+                no_crumble: true
+            }
+            | set { ch_bams }
+
+        CRUMBLE(ch_bams.run_crumble, [], [])
+        ch_versions = ch_versions.mix(CRUMBLE.out.versions)
+
+        // Convert BAM to CRAM
+        CRUMBLE.out.bam
+            | mix(ch_bams.no_crumble)
+            | map { meta, bam -> [meta, bam, []] }
+            | set { ch_bams_for_conversion }
+    }
+    else {
+        bam
+            | map { meta, bam -> [meta, bam, []] }
+            | set { ch_bams_for_conversion }
+    }
+
+
+    // (Optionally) convert to CRAM if it's specified in outfmt
+    ch_cram = Channel.empty()
+    ch_crai = Channel.empty()
+
+    if ("cram" in outfmt_options) {
+        SAMTOOLS_CRAM(ch_bams_for_conversion, fasta, [])
+        ch_versions = ch_versions.mix(SAMTOOLS_CRAM.out.versions.first())
+
+        // Combine CRAM and CRAI into one channel
+        ch_cram = SAMTOOLS_CRAM.out.cram
+        ch_crai = SAMTOOLS_CRAM.out.crai
+    }
+
+
+    // Re-generate BAM index if BAM is in outfmt
+    def ch_data_for_stats = 
+    if ("cram" in outfmt_options) {
+        ch_data_for_stats = ch_cram.join(ch_crai)
+    }
+    else {
+        ch_data_for_stats = ch_bams_for_conversion
+    }
+
+    ch_bam = Channel.empty()
+    ch_bai = Channel.empty()
+
+    if ("bam" in outfmt_options) {
+        // Re-generate BAM index
+        SAMTOOLS_REINDEX(ch_bams_for_conversion, fasta, [])
+        ch_versions = ch_versions.mix(SAMTOOLS_REINDEX.out.versions.first())
+
+        // Set the BAM and BAI channels for emission
+        ch_bam = SAMTOOLS_REINDEX.out.bam
+        ch_bai = SAMTOOLS_REINDEX.out.bai
+
+        // If using BAM for stats, use the reindexed BAM
+        if (!("cram" in outfmt_options)) {
+            ch_data_for_stats = ch_bam.join(ch_bai)
+        }
+    }
+
+    // Index fasta
+    ch_fai = Channel.empty()
+    SAMTOOLS_FAIDX(fasta, [[:], []])
+    ch_fai = SAMTOOLS_FAIDX.out.fai
+    ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions.first())
+
+
+    // Calculate Depth using Samtools Depth
+    ch_data_for_samtools_depth = ch_data_for_stats.map { meta, input, index -> [meta, input] }
+    ch_intervals = ch_data_for_stats.map { meta, input, index -> [meta, []] }
+    SAMTOOLS_DEPTH(ch_data_for_samtools_depth, ch_intervals)
+    ch_versions = ch_versions.mix(SAMTOOLS_DEPTH.out.versions.first())
+    ch_multiqc_files = SAMTOOLS_DEPTH.out.tsv.mix(ch_multiqc_files)
+
+
+    // Calculate statistics
+    SAMTOOLS_STATS(ch_data_for_stats, fasta)
+    ch_versions = ch_versions.mix(SAMTOOLS_STATS.out.versions.first())
+    ch_multiqc_files = SAMTOOLS_STATS.out.stats.mix(ch_multiqc_files)
+
+
+    // Calculate statistics based on flag values
+    SAMTOOLS_FLAGSTAT(ch_data_for_stats)
+    ch_versions = ch_versions.mix(SAMTOOLS_FLAGSTAT.out.versions.first())
+    ch_multiqc_files = SAMTOOLS_FLAGSTAT.out.flagstat.mix(ch_multiqc_files)
+
+
+    // Calculate index statistics
+    SAMTOOLS_IDXSTATS(ch_data_for_stats)
+    ch_versions = ch_versions.mix(SAMTOOLS_IDXSTATS.out.versions.first())
+    ch_multiqc_files = SAMTOOLS_IDXSTATS.out.idxstats.mix(ch_multiqc_files)
+
+    emit:
+    bam      = ch_bam                               // channel: [ val(meta), /path/to/bam ] (optional)
+    bai      = ch_bai                               // channel: [ val(meta), /path/to/bai ] (optional)
+    cram     = ch_cram                              // channel: [ val(meta), /path/to/cram ] (optional)
+    crai     = ch_crai                              // channel: [ val(meta), /path/to/crai ] (optional)
+    depth    = SAMTOOLS_DEPTH.out.tsv               // channel: [ val(meta), /path/to/tsv ]
+    stats    = SAMTOOLS_STATS.out.stats             // channel: [ val(meta), /path/to/stats ]
+    flagstat = SAMTOOLS_FLAGSTAT.out.flagstat       // channel: [ val(meta), /path/to/flagstat ]
+    idxstats = SAMTOOLS_IDXSTATS.out.idxstats       // channel: [ val(meta), /path/to/idxstats ]
+    versions = ch_versions                          // channel: [ versions.yml ]
+    multiqc_files = ch_multiqc_files.transpose().map { it[1] }
+}
+
+```
+
+- `./subworkflows/local/utils_nfcore_readmapping_pipeline/main.nf`
+
+```nextflow
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Local modules
+//
+
+include { SAMTOOLS_REHEADER             } from '../modules/local/samtools_replaceheader'
+
+
+//
+// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+//
+
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome'
+include { ALIGN_SHORT as ALIGN_HIC      } from '../subworkflows/local/align_short'
+include { ALIGN_SHORT as ALIGN_ILLUMINA } from '../subworkflows/local/align_short'
+include { ALIGN_PACBIO as ALIGN_HIFI    } from '../subworkflows/local/align_pacbio'
+include { ALIGN_PACBIO as ALIGN_CLR     } from '../subworkflows/local/align_pacbio'
+include { ALIGN_ONT                     } from '../subworkflows/local/align_ont'
+include { CONVERT_STATS                 } from '../subworkflows/local/convert_stats'
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT NF-CORE MODULES/SUBWORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+//
+// MODULE: Installed directly from nf-core/modules
+//
+
+include { UNTAR                         } from '../modules/nf-core/untar/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { MULTIQC                       } from '../modules/nf-core/multiqc'
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN WORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Header files for MultiQC (TODO)
+
+
+workflow READMAPPING {
+
+    take:
+    ch_samplesheet
+    ch_fasta
+    ch_header
+
+    main:
+    // Initialize an empty versions channel
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+
+    //
+    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //
+    INPUT_CHECK ( ch_samplesheet ).reads
+    | branch {
+        meta, reads ->
+            hic : meta.datatype == "hic"
+            illumina : meta.datatype == "illumina"
+            pacbio : meta.datatype == "pacbio"
+            clr : meta.datatype == "pacbio_clr"
+            ont : meta.datatype == "ont"
+    }
+    | set { ch_reads }
+
+    ch_versions = ch_versions.mix ( INPUT_CHECK.out.versions )
+
+    ch_fasta
+    | map { [ [ id: it.baseName ], it ] }
+    | set { ch_genome }
+
+    PREPARE_GENOME ( ch_genome )
+    ch_versions = ch_versions.mix ( PREPARE_GENOME.out.versions )
+
+
+    //
+    // Create channel for vector DB
+    //
+    // ***PacBio condition does not work - needs fixing***
+    if ( ch_reads.pacbio || ch_reads.clr ) {
+        if ( params.vector_db.endsWith( '.tar.gz' ) ) {
+            UNTAR ( [ [:], params.vector_db ] ).untar
+            | set { ch_vector_db }
+
+            ch_versions = ch_versions.mix ( UNTAR.out.versions )
+
+        } else {
+            Channel.fromPath ( params.vector_db )
+            | set { ch_vector_db }
+        }
+    }
+
+
+    //
+    // SUBWORKFLOW: Align raw reads to genome
+    //
+    ALIGN_HIC ( PREPARE_GENOME.out.fasta, PREPARE_GENOME.out.bwaidx, ch_reads.hic )
+    ch_versions = ch_versions.mix ( ALIGN_HIC.out.versions )
+    
+    ALIGN_ILLUMINA ( PREPARE_GENOME.out.fasta, PREPARE_GENOME.out.bwaidx, ch_reads.illumina )
+    ch_versions = ch_versions.mix ( ALIGN_ILLUMINA.out.versions )
+
+    ALIGN_HIFI ( PREPARE_GENOME.out.fasta, ch_reads.pacbio, ch_vector_db )
+    ch_versions = ch_versions.mix ( ALIGN_HIFI.out.versions )
+
+    ALIGN_CLR ( PREPARE_GENOME.out.fasta, ch_reads.clr, ch_vector_db )
+    ch_versions = ch_versions.mix ( ALIGN_CLR.out.versions )
+
+    ALIGN_ONT ( PREPARE_GENOME.out.fasta, ch_reads.ont )
+    ch_versions = ch_versions.mix ( ALIGN_ONT.out.versions )
+
+    // gather alignments
+    ch_aligned_bams = Channel.empty()
+    | mix( ALIGN_HIC.out.bam )
+    | mix( ALIGN_ILLUMINA.out.bam )
+    | mix( ALIGN_HIFI.out.bam )
+    | mix( ALIGN_CLR.out.bam )
+    | mix( ALIGN_ONT.out.bam )
+
+    // Optionally insert params.header information to bams
+    ch_reheadered_bams = Channel.empty()
+    if ( params.header ) {
+        SAMTOOLS_REHEADER( ch_aligned_bams, ch_header.first() )
+        ch_reheadered_bams = SAMTOOLS_REHEADER.out.bam
+        ch_versions = ch_versions.mix ( SAMTOOLS_REHEADER.out.versions )
+    } else {
+        ch_reheadered_bams = ch_aligned_bams
+    }
+
+    // convert to cram and gather stats
+    CONVERT_STATS ( ch_reheadered_bams, PREPARE_GENOME.out.fasta )
+    ch_versions = ch_versions.mix ( CONVERT_STATS.out.versions )
+    ch_multiqc_files = ch_multiqc_files.mix(CONVERT_STATS.out.multiqc_files)
+
+    //
+    // MODULE: Combine different versions.yml
+    //
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions
+        | unique { it.text }
+        | collectFile ( name: 'collated_versions.yml' )
+    )
+
+    // Load MultiQC configuration files
+    ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty() // CAN ALSO DO SOMETHING LIKE Channel.fromPath("$projectDir/workflows/assets/multiqc/multiqc_config.yml", checkIfExists: true) IF YOU HAVE ANY CONFIGURATION FILES HERE
+    ch_multiqc_logo          = params.multiqc_logo   ? Channel.fromPath(params.multiqc_logo)   : Channel.empty()
+
+    // Call MultiQC program
+    // Remember the inputs:
+    // input:
+    // path  multiqc_files, stageAs: "?/*"
+    // path(multiqc_config)
+    // path(extra_multiqc_config)
+    // path(multiqc_logo)
+    // path(replace_names)
+    // path(sample_names)
+
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        [], // empty lists are dummy channels
+        ch_multiqc_custom_config.toList(),
+        ch_multiqc_logo.toList(),
+        [],
+        []
+    )
+    ch_multiqc_report = MULTIQC.out.report
+
+
+
+    emit:
+    multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
+
+}
+
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+```
 
 ## Notes on Groovy
 
@@ -5073,6 +6438,13 @@ There are a few preliminary steps you should do in your shell session before run
 
 ```bash
 conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds"
+```
+
+> [!CAUTION]
+> Use updated command below. Need to finish notes about this.
+
+```bash
+conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds" && export SINGULARITY_CACHEDIR=$(pwd)/CACHE && export NXF_SINGULARITY_CACHEDIR=$(pwd)/NFCACHE && mkdir -p $SINGULARITY_CACHEDIR $NXF_SINGULARITY_CACHEDIR && echo "Created Singularity cache directory at $SINGULARITY_CACHEDIR" && echo "Created Nextflow Singularity cache directory at $NXF_SINGULARITY_CACHEDIR"
 ```
 
 ### One liner to launch a Nextflow process on the KAUST IBEX using TMUX
