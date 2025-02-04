@@ -6444,7 +6444,7 @@ conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM 
 > Use updated command below. Need to finish notes about this.
 
 ```bash
-conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds" && export SINGULARITY_CACHEDIR=$(pwd)/CACHE && export NXF_SINGULARITY_CACHEDIR=$(pwd)/NFCACHE && mkdir -p $SINGULARITY_CACHEDIR $NXF_SINGULARITY_CACHEDIR && echo "Created Singularity cache directory at $SINGULARITY_CACHEDIR" && echo "Created Nextflow Singularity cache directory at $NXF_SINGULARITY_CACHEDIR" && export NXF_WORK=/ibex/scratch/projects/c2303/work && echo "Nextflow WORK directory will be outputted at $NXF_WORK"
+source env.sh
 ```
 
 ### One liner to launch a Nextflow process on the KAUST IBEX using TMUX
@@ -6516,7 +6516,7 @@ PRJNA999855
 
 ```bash
 # Prepare your shell environment for a nextflow run
-conda activate "$(pwd)/env" && export NXF_OPTS='-Xms3G -Xmx5G' && echo "Java VM Heap memory allocated to a range of $(echo $NXF_OPTS | grep -oP '(?<=-Xms)\S+') and $(echo $NXF_OPTS | grep -oP '(?<=-Xmx)\S+') using the Nextflow ENV variable NXF_OPTS" && export TMOUT=172800 && echo "tmux timeout ENV variable (TMOUT) changed to $TMOUT seconds"
+source env.sh
 
 # Run pipeline (only extracting metadata)
 nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv --download_method sratools --outdir results --skip_fastq_download
