@@ -6558,3 +6558,33 @@ rm -rf work && \
 nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --input ids.csv.02.csv --download_method sratools --outdir results && \
 rm -rf work
 ```
+
+# Figure out which processes failed in a Nextflow run
+
+Usually, when I run a nextflow pipline, I run the pipeline with the following configurations:
+
+```groovy
+workflow {
+    failOnIgnore = true
+}
+```
+
+When I come back usually a day later to see how the pipeline ran, I take a peak at the end of the final `nextflow.log` file for that run and I will often find a message like this towards the end of the file: 
+
+```
+[main] INFO  nextflow.Nextflow - -[nf-core/bacass] Pipeline completed successfully, but with errored process(es) -
+```
+
+Since programs that fail typically tend to emit an error code other than `0`, to quickly check what processes might have failed, I use the following command:
+
+```bash
+cat nextflow.log | grep -E "exit: [123456789]"
+```
+
+Which will output something like this:
+
+```
+May-05 16:10:50.784 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 38640561; id: 3; name: NFCORE_BACASS:BACASS:NANOPLOT (Potential_Spirulina); status: COMPLETED; exit: 2; error: -; workDir: /ibex/scratch/projects/c2303/work/d8/967a8e3a16d4c4c7685f4239d65e05 started: 1746450650781; exited: 2025-05-05T13:10:35.934751716Z; ]
+```
+
+I then inspect the `.command.*` files (typically `.command.log`, `.command.sh`, and `.command.run`) in the `work/` directory for that process to figure out what samples failed and try to figure out why.
