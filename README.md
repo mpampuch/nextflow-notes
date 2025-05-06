@@ -6559,7 +6559,7 @@ nextflow run nf-core/fetchngs -r 1.12.0 -c nextflow.config -profile mamba --inpu
 rm -rf work
 ```
 
-# Figure out which processes failed in a Nextflow run
+### Figure out which processes failed in a Nextflow run
 
 Usually, when I run a nextflow pipline, I run the pipeline with the following configurations:
 
