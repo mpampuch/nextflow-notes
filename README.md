@@ -3247,6 +3247,120 @@ nextflow run main.nf -with-wave
 
 Now Nextflow will automatically build a container containing the conda package that you requested.
 
+### A real example of building containers using wave
+
+Recently I used wave to build a container for a conda environment. Below are some details and some things I learned about using wave:
+
+I created a file called `envs/whisperx.yml`, to build a conda environment for the [whisperx](https://github.com/m-bain/whisperX) program I wanted to use in my pipeline. This file looked like this:
+
+```yml
+name: whisperx
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.9
+  - pytorch
+  - torchaudio
+  - pip
+  - pip:
+    - whisperx
+```
+
+In my `nextflow.config` file I put
+
+```groovy
+// Wave configuration
+wave {
+    enabled = true
+    strategy = ['conda','container']
+}
+```
+
+I also specified container options in that same file for the process:
+
+```groovy
+    // Container selection for WHISPERX process
+    withName: WHISPERX {
+        conda = "${projectDir}/envs/whisperx.yml"
+        containerOptions = '--platform=linux/amd64'
+    }
+```
+
+Now I just ran my pipeline:
+
+```bash
+nextflow run main.nf --input test.mp4 --outdir OUTPUTS
+```
+
+And the whisperx process started:
+
+```
+[27/ec146e] WHISPERX | 0 of 1
+```
+
+When I investiaged the progress, I saw this:
+
+```bash
+cat work/27/ec146e6eed3f7a9bbfce0b0714fe00/.command.log
+# Unable to find image 'wave.seqera.io/wt/2e5a6ec3e4a3/wave/build:whisperx--ab2df51ab97aac6a' locally
+```
+
+So this container was currently not available and my pipeline was stalled. But wave was working behind the scenes.
+
+Inside the `nextflow.log`, I found the following lines:
+
+```
+Jun-02 20:46:38.617 [Actor Thread 12] DEBUG io.seqera.wave.plugin.WaveClient - Wave request: https://wave.seqera.io/v1alpha2/container; attempt=1 - request: SubmitContainerTokenRequest(towerAccessToken:null, towerRefreshToken:null, towerWorkspaceId:null, towerEndpoint:https://api.cloud.seqera.io, containerImage:null, containerFile:null, containerConfig:ContainerConfig(entrypoint:null, cmd:null, env:null, workingDir:null, layers:null), condaFile:null, spackFile:null, containerPlatform:linux/amd64, buildRepository:null, cacheRepository:null, timestamp:2025-06-02T20:46:38.616030+03:00, fingerprint:95d7afee1347ea2861069c5331457bb5, freeze:false, format:null, dryRun:false, workflowId:null, containerIncludes:null, packages:PackagesSpec{type=CONDA, envFile='bmFtZTogd2hpc3BlcngKY2hhbm5lbHM6CiAgLSBjb25kYS1mb3JnZQogIC0gcHl0b3JjaApkZXBlbmRlbmNpZXM6CiAgLSBweXRob249My45CiAgLSBweXRvcmNoCiAgLSB0b3JjaGF1ZGlvCiAgLSBwaXAKICAtIHBpcDoKICAgIC0gd2hpc3Blcng=', packages=null, condaOpts=CondaOpts(mambaImage=mambaorg/micromamba:1.5.8-lunar; basePackages=conda-forge::procps-ng, commands=null), spackOpts=null, channels=null})
+Jun-02 20:46:38.808 [Actor Thread 12] DEBUG io.seqera.wave.plugin.WaveClient - Wave response: statusCode=200; body={"requestId":"b8432f6c2926","containerToken":"b8432f6c2926","targetImage":"wave.seqera.io/wt/b8432f6c2926/wave/build:whisperx--ab2df51ab97aac6a","expiration":"2025-06-04T05:46:38.861031704Z","containerImage":"private.cr.seqera.io/wave/build:whisperx--ab2df51ab97aac6a","buildId":"bd-ab2df51ab97aac6a_1","cached":true,"freeze":false,"mirror":false,"scanId":"sc-f37131a5db6e15e9_1"}
+Jun-02 20:46:38.846 [Actor Thread 17] DEBUG nextflow.conda.CondaCache - conda found local env for environment=/Users/markpampuch/Dropbox/nf-whisperx/envs/whisperx.yml; path=/Users/markpampuch/.conda/cache/whisperx-ec3b71d8826e26eb56cf15a351b87625
+```
+
+The important lines were:
+
+- Container Token: `2e5a6ec3e4a3`
+- Target Image: `wave.seqera.io/wt/2e5a6ec3e4a3/wave/build:whisperx--ab2df51ab97aac6a`
+- Build ID: `bd-ab2df51ab97aac6a_1`
+Status: `cached=false` 
+  - This means a new build was triggered
+- Security Scan ID: `sc-f37131a5db6e15e9_1`
+
+Using this information (specifically the Build ID), I could run the following line in the terminal to check the status of the container build with Wave:
+
+```bash
+curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/status"
+```
+
+Which gave me:
+
+```
+{"id":"bd-ab2df51ab97aac6a_1","status":"PENDING","startTime":"2025-06-02T17:27:37.160744070Z"}
+```
+
+Wave builds typically go through these stages:
+
+1. `PENDING` ← The current status in this example
+2. `BUILDING`
+3. `COMPLETED` (success) or `FAILED` (error)
+
+On Completion, the container will be cached for future use. Your Pipeline will automatically use the built container
+
+Typically, the phases take as follows:
+
+1. Pending Phase: 1-5 minutes (current)
+2. Building Phase: 10-20 minutes (for ML packages)
+3. Total Time: 15-25 minutes for first build
+
+The summary commands to monitor your builds are as follows:
+
+```bash
+# Check build status
+curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/status"
+
+# Once building starts, you can view logs
+curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/logs"
+```
+
 ### Wavelit
 
 Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
