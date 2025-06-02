@@ -3165,6 +3165,24 @@ However, it will only try to pull the container _if you tell Nextflow to run the
 nextflow run main.nf -with-docker
 ```
 
+### Running containers with root privileges
+
+Sometimes, you'll encounter weird permissions issues when running containers. This is because often times within the containers, commands will be executed with permissions for a user or group that is created for use with the containers. This is especially true for web apps where you don't want your users messing with the containers so you limit their privileges. However for scientific computing, where files are contantly being made and altered, this can cause problems. That's why I believe for most scientific computing scenarios, allowing root priveleges inside containers is completely fine. It will probably save you a lot of headache or be a good troubleshooting tool when the containers are not behaving as you expect them to. To activate this, you can insert arguments into the container processes as follows:
+
+```groovy
+docker {
+    enabled = true
+    runOptions = '-user root'
+}
+
+// or 
+
+// Container selection for PROCESS process
+    withName: PROCESS {
+        containerOptions = '--user root'
+    }
+```
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
@@ -3283,7 +3301,7 @@ I also specified container options in that same file for the process:
     // Container selection for WHISPERX process
     withName: WHISPERX {
         conda = "${projectDir}/envs/whisperx.yml"
-        containerOptions = '--platform=linux/amd64'
+        containerOptions = '--platform=linux/amd64 --user root'
     }
 ```
 
