@@ -3178,9 +3178,9 @@ docker {
 // or 
 
 // Container selection for PROCESS process
-    withName: PROCESS {
-        containerOptions = '--user root'
-    }
+withName: PROCESS {
+    containerOptions = '--user root'
+}
 ```
 
 ## Biocontainers
