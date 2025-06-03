@@ -670,6 +670,137 @@ process MULTIQC {
     // ...
 ```
 
+#### Resource Limits
+
+In addition to the executor, you may find that pipeline runs occasionally fail due to a particular step of the pipeline requesting more resources than you have on your system.
+
+To avoid these failures, you can tell Nextflow to set a cap pipeline-step resource requests against a list called `resourceLimits` specified in Nextflow config file. These should represent the maximum possible resources of a machine or node.
+
+For example, you can place into a file the following:
+
+```groovy
+process {
+  resourceLimits = [
+    cpus: 32,
+    memory: 256.GB,
+    time: 24.h
+  ]
+}
+```
+
+Then, during a pipeline run, if, for example, a job exceeds the default memory request, it will be retried, increasing the memory each time until either the job completes or until it reaches a request of `256.GB`.
+
+Therefore, these parameters only act as a _cap_ to prevent Nextflow from submitting a single job requesting resources more than what is possible on your system and requests getting out of hand.
+
+Note that specifying these will **not _increase_** the resources available to the pipeline tasks!  
+
+The base config of nf-core pipelines defines the default resources allocated to each different step in the workflow (e.g. in a base.config file).
+
+These values are deliberately generous due to the wide variety of workloads done by different users. As a result, you may find that the jobs are given more resources than they need and your system is not used as efficiently as possible. At the other end of the scale, you may want to increase the resources given to a specific task to make it run as fast as possible. You may wish to do this if you get a pipeline reporting a step failing with an Command exit status of e.g., 137.
+
+Where possible we try to get tools to make use of the resources available, for example with a tool parameter like -p ${task.cpus}, where ${task.cpus} is dynamically set according to what has been made specified in the pipeline configuration files. However, this is not possible with all tools, in which case we try to make a best guess.
+
+To tune workflow resources to better match your requirements, we can tweak these through [custom configuration files](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files) or [shared nf-core/configs](https://nf-co.re/docs/usage/getting_started/configuration#shared-nf-coreconfigs).
+
+By default, most process resources are specified using process _labels_, as in the following example base config:
+
+```groovy
+process {
+  resourceLimits = [
+    cpus: 32,
+    memory: 256.GB,
+    time: 24.h
+  ]
+  withLabel:process_low {
+    cpus   = { 2 * task.attempt }
+    memory = { 14.GB * task.attempt }
+    time   = { 6.h  * task.attempt }
+  }
+  withLabel:process_medium {
+    cpus   = { 6  * task.attempt }
+    memory = { 42.GB * task.attempt }
+    time   = { 8.h * task.attempt }
+  }
+  withLabel:process_high {
+    cpus   = { 12 * task.attempt }
+    memory = { 84.GB * task.attempt }
+    time   = { 10.h * task.attempt }
+  }
+}
+```
+
+The `resourceLimits` list sets the absolute maximums any pipeline job can request (typically corresponding to the maximum available resources on your machine). The label blocks indicate the initial ‘default’ resources a pipeline job will request. For most nf-core pipelines, if a job runs out of memory, it will retry the job but increase the amount of resource requested up to the `resourceLimits` maximum.
+
+You don’t need to copy all of the labels into your own custom config file, only overwrite the things you wish to change
+
+##### Old syntax
+
+On old pipelines, you may encounter the following syntax:
+
+```groovy
+// Max resource options
+    max_memory                 = '80.GB' 
+    max_cpus                   = 14 
+    max_time                   = '240.h'
+```
+
+These will not act as a cap, instead if a nextflow process requests resources over this limit, the process will automatically error.
+
+To prevent this, custom `check_max()` functions were employed:
+
+```groovy
+// Function to ensure that resource requirements don't go beyond
+// a maximum limit
+def check_max(obj, type) {
+    if (type == 'memory') {
+        try {
+            if (obj.compareTo(params.max_memory as nextflow.util.MemoryUnit) == 1)
+                return params.max_memory as nextflow.util.MemoryUnit
+            else
+                return obj
+        } catch (all) {
+            println "   ### ERROR ###   Max memory '${params.max_memory}' is not valid! Using default value: $obj"
+            return obj
+        }
+    } else if (type == 'time') {
+        try {
+            if (obj.compareTo(params.max_time as nextflow.util.Duration) == 1)
+                return params.max_time as nextflow.util.Duration
+            else
+                return obj
+        } catch (all) {
+            println "   ### ERROR ###   Max time '${params.max_time}' is not valid! Using default value: $obj"
+            return obj
+        }
+    } else if (type == 'cpus') {
+        try {
+            return Math.min( obj, params.max_cpus as int )
+        } catch (all) {
+            println "   ### ERROR ###   Max cpus '${params.max_cpus}' is not valid! Using default value: $obj"
+            return obj
+        }
+    }
+}
+
+process {
+  withLabel:process_low {
+    cpus = { check_max( 2 * task.attempt, 'cpus' ) }
+    memory = { check_max( 14.GB * task.attempt, 'memory' ) }
+    time = { check_max( 6.h * task.attempt, 'time' ) }
+  }
+  withLabel:process_medium {
+    cpus = { check_max( 6 * task.attempt, 'cpus' ) }
+    memory = { check_max( 42.GB * task.attempt, 'memory' ) }
+    time = { check_max( 8.h * task.attempt, 'time' ) }
+  }
+  withLabel:process_high {
+    cpus = { check_max( 12 * task.attempt, 'cpus' ) }
+    memory = { check_max( 84.GB * task.attempt, 'memory' ) }
+    time = { check_max( 10.h * task.attempt, 'time' ) }
+  }
+}
+```
+
 ## Processes
 
 In Nextflow, a process is the basic computing primitive to execute foreign functions (i.e., custom scripts or tools).
@@ -3250,11 +3381,6 @@ This will tell you how much CPU and memory the container _actually_ sees.
 
 
 If you're on Linux without Docker Desktop, Docker uses the host resources directly, so `--memory` and `--cpus` do directly control and constrain usage. You don't need to "increase Docker's memory limit" — it just uses the machine’s.
-
-
- 
-
-
 
 
 ## Biocontainers
