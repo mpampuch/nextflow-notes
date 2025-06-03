@@ -3645,7 +3645,6 @@ Swap = MemorySwap - Memory
 
 So your container could use up to 54.6 GB of swap, if needed.
 
-
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
