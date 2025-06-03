@@ -670,6 +670,8 @@ process MULTIQC {
     // ...
 ```
 
+`maxErrors` can also be specified, although this is usally set to `-1` to turn it off. The `maxRetries` directive allows you to define the maximum number of times the exact same subjob can be re-submitted in case of failure and the `maxErrors` directive allows you to specify the maximum number of times a process (across all subjobs of that process executed) can fail when using the retry error strategy. See [this github issue](https://github.com/nextflow-io/nextflow/issues/179) and this post(https://academy.dnanexus.com/buildingworkflows/nf/errorstrategies) for more of an explanation.
+
 #### Resource Limits
 
 In addition to the executor, you may find that pipeline runs occasionally fail due to a particular step of the pipeline requesting more resources than you have on your system.
@@ -749,6 +751,24 @@ These will not act as a cap, instead if a nextflow process requests resources ov
 To prevent this, custom `check_max()` functions were employed:
 
 ```groovy
+process {
+  withLabel:process_low {
+    cpus = { check_max( 2 * task.attempt, 'cpus' ) }
+    memory = { check_max( 14.GB * task.attempt, 'memory' ) }
+    time = { check_max( 6.h * task.attempt, 'time' ) }
+  }
+  withLabel:process_medium {
+    cpus = { check_max( 6 * task.attempt, 'cpus' ) }
+    memory = { check_max( 42.GB * task.attempt, 'memory' ) }
+    time = { check_max( 8.h * task.attempt, 'time' ) }
+  }
+  withLabel:process_high {
+    cpus = { check_max( 12 * task.attempt, 'cpus' ) }
+    memory = { check_max( 84.GB * task.attempt, 'memory' ) }
+    time = { check_max( 10.h * task.attempt, 'time' ) }
+  }
+}
+
 // Function to ensure that resource requirements don't go beyond
 // a maximum limit
 def check_max(obj, type) {
@@ -781,25 +801,9 @@ def check_max(obj, type) {
         }
     }
 }
-
-process {
-  withLabel:process_low {
-    cpus = { check_max( 2 * task.attempt, 'cpus' ) }
-    memory = { check_max( 14.GB * task.attempt, 'memory' ) }
-    time = { check_max( 6.h * task.attempt, 'time' ) }
-  }
-  withLabel:process_medium {
-    cpus = { check_max( 6 * task.attempt, 'cpus' ) }
-    memory = { check_max( 42.GB * task.attempt, 'memory' ) }
-    time = { check_max( 8.h * task.attempt, 'time' ) }
-  }
-  withLabel:process_high {
-    cpus = { check_max( 12 * task.attempt, 'cpus' ) }
-    memory = { check_max( 84.GB * task.attempt, 'memory' ) }
-    time = { check_max( 10.h * task.attempt, 'time' ) }
-  }
-}
 ```
+
+If you want to use `check_max()` in a custom config file, you must copy the function to the end of your config outside of any configuration scopes! It will not be inherited from `base.config`.
 
 ## Processes
 
@@ -3335,7 +3339,7 @@ process {
 
     errorStrategy = { task.exitStatus in ((130..145) + 104) ? 'retry' : 'finish' }
     maxRetries    = 3
-    // maxErrors     = '-1'
+    maxErrors     = '-1'
 ```
 
 Inside the `.command.run` file for this process, I see:
