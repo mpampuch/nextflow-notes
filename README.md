@@ -6276,6 +6276,10 @@ workflow READMAPPING {
 */
 ```
 
+### Institutional Profiles
+
+The following configs are common Nextflow pipeline configurations and options for particular institutional clusters or compute environments. Some institutes have default configurations for all Nextflow pipelines, and also configurations for specific nf-core pipelines. They can all be found [here](https://nf-co.re/configs).
+
 ## Notes on Groovy
 
 Nextflow is a domain specific language (DSL) implemented on top of the [Groovy](https://groovy-lang.org/) programming language, which in turn is a super-set of the [Java](https://www.java.com/en/download/help/whatis_java.html) programming language. This means that Nextflow can run any Groovy or Java code.
