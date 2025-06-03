@@ -3501,6 +3501,150 @@ This will tell you how much CPU and memory the container _actually_ sees.
 
 If you're on Linux without Docker Desktop, Docker uses the host resources directly, so `--memory` and `--cpus` do directly control and constrain usage. You don't need to "increase Docker's memory limit" — it just uses the machine’s.
 
+#### More notes on Docker Resources
+
+To check docker resources, you can view them on the Docker Desktop GUI, or you can start an interactive shell session in one of your containers and investigate. I.e.
+
+```bash
+docker exec -it <container_id_or_name> /bin/bash # or /bin/sh if the distribution doesn't have bash
+
+# Once inside
+top # or htop if configured on the container
+```
+
+Inside you might see something like this
+
+```
+Tasks:   4 total,   1 running,   3 sleeping,   0 stopped,   0 zo
+%Cpu0  :   0.0/0.0     0[          ]   %Cpu1  :   0.0/0.0     0[
+%Cpu2  :   0.0/0.0     0[          ]   %Cpu3  :   0.0/0.0     0[
+%Cpu4  :   0.0/0.0     0[          ]   %Cpu5  :   0.0/0.0     0[
+%Cpu6  :   0.0/0.0     0[          ]   %Cpu7  :   0.0/0.0     0[
+%Cpu8  :   0.0/0.0     0[          ]   %Cpu9  :   0.0/0.0     0[
+%Cpu10 :   0.0/0.0     0[          ]   %Cpu11 :   0.0/0.0     0[
+%Cpu12 :   0.0/0.0     0[          ]   %Cpu13 : 100.0/0.0   100[
+GiB Mem : 42.4/93.6     [          ]   GiB Swap:  0.0/1.0      [
+```
+
+(Here immediately you can see that threading is not working. 14 cpu cores have been allocated to this container but only 1 is being used. When you see this you should try and debug to see if threading is possible or can be better utilized to make your programs run faster)
+
+However outside your container, if you run `top` or `htop`, you might see this
+
+```
+  0[||||||  37.9%]   4[||||||  36.8%]   7[|||||||||61.2%] 11[||        2.2%]
+    1[|||||   27.7%]   5[||||||  36.7%]   8[|||||    27.7%] 12[|         6.0%]
+    2[|||     17.4%]   6[||||||  36.3%]   9[|         5.4%] 13[          0.0%]
+    3[||      11.4%]                     10[|         6.5%]
+  Mem[|||||||              8.69G/96.0G] Tasks: 1050, 7649 thr, 0 kthr; 5 runni
+  Swp[|||||||||||||||||||||4.92G/6.00G] Load average: 3.15 4.33 4.56 
+```
+
+Notice a difference in resource usage between inside the container and your host system? Especially regarding CPU usage? Inside the container, only one core (CPU 13) was maxed out but outside, `htop` shows moderate load across many cores, but CPU 13 is idle (0.0%).
+
+This might seem confusing, but this is what goes on under the hood:
+
+CPU Numbering Isn't Always Consistent Between Host and Container. The container may be running in a cgroup or namespace that remaps or limits the visible CPUs. So when the container shows CPU 13 at 100%, **it may not be the same physical CPU 13 on your host**.
+Outside, that physical core might be mapped to a different CPU index.
+
+You can check the container's CPU restrictions from the host:
+
+```bash
+docker inspect --format='{{.HostConfig.CpusetCpus}}' 470e3486ea1b
+```
+
+To see Container CPU Usage from the Host, run 
+
+```bash
+docker stats <container_id_or_name>
+```
+
+This will output something like 
+
+```
+CONTAINER ID   NAME                           CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O     PIDS 
+6e311377f6f4   nxf-ZbUCIARYqbX037ORIqwEKoIJ   999.82%   36.29GiB / 72GiB    50.41%    1.65GB / 17.3MB   0B / 1.62GB   27 
+```
+
+##### What about Swap
+
+Swap is a special part of disk space used as an overflow area for RAM.
+
+When your system runs out of physical memory (RAM), it moves some inactive data from RAM to swap space on the disk, freeing up RAM for active processes.
+
+RAM is fast memory for running programs. Swap is Slower backup space on disk for inactive memory.
+
+When memory is full:
+
+1. OS looks for memory that hasn’t been used recently.
+
+2. Moves that memory to swap (disk).
+
+3. Keeps active processes running in RAM.
+
+The pros of swap is that it prevents crashes when RAM is full, Keeps background apps "alive", and helps large applications (like ML models or video editing). But it's cons are that it's Much slower than RAM (100× or more), can cause sluggish performance, and excessive swap = "thrashing" (system constantly reading/writing to disk)
+
+For example: Let’s say you have 16 GB RAM and you're running apps that use 18 GB. Your system will use 16 GB RAM, and put 2 GB into swap. But accessing that 2 GB in swap is much slower, and your computer may feel laggy or unresponsive if it swaps a lot.
+
+Swap is managed differently on different systems:
+
+- Linux: Uses a swap partition or swapfile
+
+- macOS: Uses swapfiles automatically (e.g., in `/private/var/vm`)
+
+- Windows: Uses a "pagefile"
+
+With regards to Docker and containers.
+
+1. Containers Don't See Host Swap Usage
+
+Each Docker container is isolated using control groups (cgroups), so it sees only its allocated memory and swap, not the full host memory situation.
+
+If the container isn't using its own swap (or isn't allowed to), it will show `0` swap used, even if the host is swapping heavily.
+
+Especially on Mac and Windows this is the case, because the container is actually using the Linux VM's RAM, which may have its own swap setup. Therefore what's seen on macOS or Windows OS is not the same as what’s seen inside the container.
+
+2. Docker May Limit or Disable Swap in Containers
+By default, Docker containers:
+
+Share the host's swap space, but:
+
+Might have no swap limit set (in which case they don't use it) or might be restricted via the `--memory-swap` option.
+
+You can check how Docker configured swap for the container:
+
+```bash
+docker inspect <container_id_or_name> --format '{{.HostConfig.MemorySwap}}'
+```
+
+If it returns `0` or `-1`, it likely means that it has access to unlimited or unmanaged swap, or the container simply hasn’t needed swap, while the host has.
+
+You can view the swap capacity of the container by doing
+
+```bash
+docker inspect --format '{{.HostConfig.MemorySwap}}' <container_id_or_name>
+```
+
+Which will return something like `154618822656`. This is the **memory + swap limit** in bytes, i.e., 154,618,822,656 bytes
+→ 154.6 GB total (RAM + swap)
+
+So to find the swap alone, get the RAM limit by running
+
+```
+docker inspect <container_id_or_name> --format '{{.HostConfig.Memory}}'
+```
+
+Let’s say it returns something like `107374182400` → 100 GB RAM
+
+Then you calculate by
+
+```
+Swap = MemorySwap - Memory
+     = 154.6 GB - 100 GB
+     = 54.6 GB of swap
+```
+
+So your container could use up to 54.6 GB of swap, if needed.
+
 
 ## Biocontainers
 
