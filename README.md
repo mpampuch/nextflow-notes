@@ -3183,6 +3183,80 @@ withName: PROCESS {
 }
 ```
 
+### A Note on Docker Resources 
+
+On macOS or Windows, Docker runs in a virtualized environment (via `colima`, `hyperkit`, or `wsl2`). Sometimes, when you are running a Nextflow process using Docker and you request a resource limit on a process, you will recieve less resources than your pipeline requested. You need to manually set the limits to fix this. For example:
+
+Inside a `nextflow.config` file I have: 
+
+```groovy
+process {
+    // Global process config
+    resourceLimits = [
+        cpus: 14, 
+        memory: 95.GB, 
+        time: 240.h
+    ]
+
+    cpus   = { 1    * Math.pow(2, task.attempt - 1 ) } 
+    memory = { 48.GB * Math.pow(2, task.attempt - 1 ) } 
+    time   = { 4.h  * Math.pow(2, task.attempt - 1) } 
+
+    errorStrategy = { task.exitStatus in ((130..145) + 104) ? 'retry' : 'finish' }
+    maxRetries    = 3
+    // maxErrors     = '-1'
+```
+
+Inside the `.command.run` file for this process, I see:
+
+```bash
+nxf_launch() {
+    docker run -i --cpu-shares 14336 --memory 97280m -e "NXF_TASK_WORKDIR" -v /Users/markpampuch/Dropbox/nf-whisperx/work:/Users/markpampuch/Dropbox/nf-whisperx/work -w "$NXF_TASK_WORKDIR" -u $(id -u):$(id -g) --platform=linux/amd64 --user root --name $NXF_BOXID wave.seqera.io/wt/36ca57f66b65/wave/build:whisperx--731402d60df023ad /bin/bash -euo pipefail /Users/markpampuch/Dropbox/nf-whisperx/work/22/9647d496f345149488769ad3b03852/.command.sh
+}
+```
+
+`--cpu-shares 14336` means the relative CPU weight for this container is 14x more CPU than default (1024). Docker uses a share-based system so this only matters when CPU is contended (i.e., multiple containers are trying to use the CPU at the same time). `--memory 97280m` Limits the maximum memory the container can use to 97,280 megabytes, which equals 95 GB.
+
+However, this process often get's killed. 
+
+This is because Docker runs inside a virtual machine, and that VM has fixed resources set globally in Docker Desktop.
+
+To check what Docker is actually allowed to use, run:
+
+```bash
+docker info | grep -E 'CPU|Memory'
+
+# Will output something like:
+#  CPUs: 14
+#  Total Memory: 7.751GiB
+```
+
+To fix this: Open your docker desktop application, change the resource limits in the settings, and restart docker.
+
+![alt text](docker-resources.png)
+
+To check if this work, You can run the following commands:
+
+```bash
+# Enter an interactive container session
+docker run --rm -it ubuntu bash
+
+# Once inside, run
+nproc
+free -h
+```
+
+This will tell you how much CPU and memory the container _actually_ sees.
+
+
+If you're on Linux without Docker Desktop, Docker uses the host resources directly, so `--memory` and `--cpus` do directly control and constrain usage. You don't need to "increase Docker's memory limit" — it just uses the machine’s.
+
+
+ 
+
+
+
+
 ## Biocontainers
 
 Each program should have its own designated container. Don't create container images with too many things or things your don't need.
