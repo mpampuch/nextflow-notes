@@ -735,6 +735,18 @@ The `resourceLimits` list sets the absolute maximums any pipeline job can reques
 
 You don’t need to copy all of the labels into your own custom config file, only overwrite the things you wish to change
 
+##### How do you figure out what your resource limits are
+
+If you need to figure out what the resource limits are on the device you are trying to configure a Nextfow pipeline for, the most useful commands I've found are:
+
+```bash
+sysctl -n hw.ncpu
+# This will give you the resource limits for 'cpus' on your machine
+
+echo "$(sysctl -n hw.memsize) / 1024 / 1024 / 1024" | bc
+# This will give you the resource limits for 'memory' on your machine
+```
+
 ##### Old syntax
 
 On old pipelines, you may encounter the following syntax:
