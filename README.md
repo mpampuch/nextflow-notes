@@ -6924,3 +6924,13 @@ May-05 16:10:50.784 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task c
 ```
 
 I then inspect the `.command.*` files (typically `.command.log`, `.command.sh`, and `.command.run`) in the `work/` directory for that process to figure out what samples failed and try to figure out why.
+
+### Listing All Containers Used in Your Pipeline 📦
+
+With Nextflow’s `inspect` command, you can easily get a list of all the containers your pipeline uses without running the entire pipeline. This command is a lifesaver when you’re managing multiple containers or want to double-check container versions before starting a run.
+
+To get your container list, use:
+
+```bash
+nextflow inspect main.nf
+```
