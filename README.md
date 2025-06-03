@@ -6934,3 +6934,7 @@ To get your container list, use:
 ```bash
 nextflow inspect main.nf
 ```
+
+### Nextflow Cheatsheet
+
+A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
