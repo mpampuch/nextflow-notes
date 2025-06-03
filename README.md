@@ -805,6 +805,109 @@ def check_max(obj, type) {
 
 If you want to use `check_max()` in a custom config file, you must copy the function to the end of your config outside of any configuration scopes! It will not be inherited from `base.config`.
 
+##### Dynamic Resource Limits based on file size and setting _minimum_ resource limits
+
+Sometimes it's useful to set a dynamic resource requirments based off file sizes. For example, below is a snipper from one of my modules, `whisperx.nf`:
+
+```nextflow
+process WHISPERX {
+    tag "${meta.id}"
+    label 'process_high'
+    publishDir "${params.outdir}", mode: 'copy'
+
+    input:
+    tuple val(meta), path(mp3_file)
+...
+```
+
+Inside the `conf/modules.config` file, I have set the following configuration:
+
+```groovy
+memory = { 
+    def calculated = mp3_file.size() as nextflow.util.MemoryUnit * 2
+    calculated < 256.MB ? 256.MB : calculated
+}
+```
+
+Do not try and use the following syntax:
+
+```groovy
+memory = { Math.max(256.MB, mp3_file.size() as nextflow.util.MemoryUnit * 2) }
+```
+
+Because the `Math.max()` function doesn't work directly with `MemoryUnit` objects in Nextflow.
+
+> [!CAUTION]
+> Be careful using this method! You may run into strange issues if you provide the container with a small file and thus provide the container with too little resources. For example, recently I provided encountered an issue where I inputted a file that was only `1.Mb` in size, and I got the following error:
+>
+> ```
+> Command exit status:
+>   125
+> 
+> Command output:
+>   (empty)
+> 
+> Command error:
+>   docker: Error response from daemon: Minimum memory limit allowed is 6MB
+>   
+>   Run 'docker run --help' for more information
+> ```
+>
+> So modified the dynamic memory allocation line to say `calculated < 6.MB ? 6.MB : calculated`
+>
+> This resulted in all my following processes encountering the issue below:
+>
+> ```
+> Command exit status:
+>  1
+>
+> Command output:
+>  
+>  'micromamba' is running as a subprocess and can't modify the parent shell.
+>  Thus you must initialize your shell before using activate and deactivate.
+>  
+>  To initialize the current bash shell, run:
+>      $ eval "$(micromamba shell hook --shell bash)"
+>  and then activate or deactivate with:
+>      $ micromamba activate
+>  To automatically initialize all future (bash) shells, run:
+>      $ micromamba shell init --shell bash --root-prefix=~/micromamba
+>  If your shell was already initialized, reinitialize your shell with:
+>      $ micromamba shell reinit --shell bash
+>  Otherwise, this may be an issue. In the meantime you can run commands. See:
+>      $ micromamba run --help
+>  
+>  Supported shells are {bash, zsh, csh, xonsh, cmd.exe, powershell, fish}.
+>
+> Command error:
+>  Unable to find image 'wave.seqera.io/wt/4fdf1a29fbe1/wave/>build:whisperx--731402d60df023ad' locally
+>  whisperx--731402d60df023ad: Pulling from wt/4fdf1a29fbe1/wave/build
+>  Digest: sha256:41570aabe693908264a9bff9451f36d150939a525a3075134768a66c05599883
+>  Status: Downloaded newer image for wave.seqera.io/wt/4fdf1a29fbe1/wave/>build:whisperx--731402d60df023ad
+>  critical libmamba Shell not initialized
+>  
+>  'micromamba' is running as a subprocess and can't modify the parent shell.
+>  Thus you must initialize your shell before using activate and deactivate.
+>  
+>  To initialize the current bash shell, run:
+>      $ eval "$(micromamba shell hook --shell bash)"
+>  and then activate or deactivate with:
+>      $ micromamba activate
+>  To automatically initialize all future (bash) shells, run:
+>      $ micromamba shell init --shell bash --root-prefix=~/micromamba
+>  If your shell was already initialized, reinitialize your shell with:
+>      $ micromamba shell reinit --shell bash
+>  Otherwise, this may be an issue. In the meantime you can run commands. See:
+>      $ micromamba run --help
+>  
+>  Supported shells are {bash, zsh, csh, xonsh, cmd.exe, powershell, fish}.
+> ```
+>
+> This took me a long time to debug. What happened here? Since the file was smaller then `6.Mb`, the other `6.Mb` of memory was allocated to the container. However, the container typically runs micromamba, which can be around `60.Mb`. `6.Mb` was too little to properly run the processes in the container, and so I started getting error messages from the failing processes within the container. Increasing the fallback mmemory requirment to something higher, in this case `256.Mb` fixed this issue.
+
+
+##### Tips
+
 ## Processes
 
 In Nextflow, a process is the basic computing primitive to execute foreign functions (i.e., custom scripts or tools).
