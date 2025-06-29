@@ -6599,6 +6599,8 @@ rm sandbox-*.tar.gz
 
 - If you keep iterating, make sure to refresh Seqera AI. Be aware that it may become glitchy upon successive requests.
 
+> [!WARNING]
+> Seqera AI may sometimes say `Download failed: HTTP error: 500 . The sandbox may no longer be available.` when you try to download the updated repository. When this happens, I just copy that error message back into the chat. If the program is nice, it will say something like "I understand there was a download error with the sandbox. Let me clone the repository and make the changes you requested in a new sandbox environment." and you should be able to recover your download.
 
 ## Notes on Groovy
 
