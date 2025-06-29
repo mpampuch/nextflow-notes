@@ -6552,10 +6552,51 @@ The way I run this is as follows.
 2. Create a Public GitHub Repository for your project
 
 ```bash
-
+# Replace <your-project-name> with your desired repo name
+gh repo create <your-project-name> --public --clone
+cd <your-project-name>
 ```
 
-It can be run in VSCode by integrating it as a GitHub Copilot plugin—activate by typing @Seqera in your Nextflow projects. A video tutorial can be found [here](https://www.youtube.com/watch?v=IrAAFCRvcjo).
+If you don’t have the GitHub CLI (`gh`) installed, you can create the repository manually via GitHub's web interface.
+
+3. **IMPORTANT:** Make a new branch on your local repository and publish that branch to GitHub
+
+This is what you will provide your GitHub
+
+4. Connect your public repository to Seqera AI Chat in Build / Debug Pipelines mode.
+
+At the bottom of the page, it should say "Enter a Github repository URL". Paste your updated remote repository (the branched version).
+
+Example 
+
+```
+https://github.com/mpampuch/nf-whisperx/tree/make-whisperx-process
+```
+
+5. Now ask the AI agent to do something. For example: "Adjust this pipeline so it can take in a samplesheet of video files". It will do some changes in the cloud. Once it's done, it'll give you the option to download your new AI-modified repository.
+
+6. Download it and wait. It can take a while to compress and transfer everything. 
+- A tip I like to do is to open the Chrome Dev Tools Network tab before pressing download to make sure everything is working and nothing is hanging as you are trying to download your new pipeline.
+- The downloaded file will be something like this: `sandbox-334e3826-9321-41ed-9b99-229e1d17a8a3.tar.gz`
+
+7. Run the following commands (best from the VSCode terminal) to integrate the new file into your local repository:
+
+```bash
+# Move the downloaded sandbox archive from your Downloads folder to your project directory
+mv ~/Downloads/sandbox-*.tar.gz .
+
+# (Optional) Extract the contents into your project
+tar -xzf sandbox-*.tar.gz
+
+# Remove the archive if no longer needed
+rm sandbox-*.tar.gz
+```
+
+> [!NOTE]
+> Make sure there is only 1 `sandbox*.tar.gz` file in your `Downloads` folder at any given time.
+
+8. Inspect the changes, test the pipeline. If everything looks good you can commit and merge with the main branch. If you would like to do more changes, you can publish the branch back to the remote and then repeat the process with the AI until you are satisfied.
+
 
 
 ## Notes on Groovy
