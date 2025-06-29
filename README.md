@@ -6597,6 +6597,7 @@ rm sandbox-*.tar.gz
 
 8. Inspect the changes, test the pipeline. If everything looks good you can commit and merge with the main branch. If you would like to do more changes, you can publish the branch back to the remote and then repeat the process with the AI until you are satisfied.
 
+- If you keep iterating, make sure to refresh Seqera AI. Be aware that it may become glitchy upon successive requests.
 
 
 ## Notes on Groovy
