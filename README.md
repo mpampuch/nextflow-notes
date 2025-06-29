@@ -2,11 +2,6 @@
 
 Some tips / things of notes for myself while I'm learning Nextflow
 
-
-## To Do
-
-- write notes on the newest nextflow release https://www.nextflow.io/blog/2024/nextflow-2404-highlights.html
-
 ## What is Nextflow?
 
 Nextflow is a framework used for writing parallel and distributed computational pipelines, common in bioinformatics, genomics, and other fields where complex data analysis pipelines are common. It simplifies the process of creating complex workflows that involve processing large volumes of data.
@@ -6537,6 +6532,31 @@ workflow READMAPPING {
 ### Institutional Profiles
 
 The following configs are common Nextflow pipeline configurations and options for particular institutional clusters or compute environments. Some institutes have default configurations for all Nextflow pipelines, and also configurations for specific nf-core pipelines. They can all be found [here](https://nf-co.re/configs).
+
+## Seqera AI's
+
+Seqera AIs are LLM's that will help you develop code faster. I have subsetted them into 2 different classes: **Seqera Copilot** and **Seqera AI**.
+
+### Seqera Copilot
+
+Seqera Copilot is what I would consider a lite version of a Seqera AI. It's like a general chat. It is built on top of LLMs and good for getting general help or getting context from a few files (like log files). To make changes to your pipelines, you will have to manually create new files and copy-and-paste the AI outputs into your repository. The good thing is that it can be integrated directly into VSCode. It also creates `nf-test` code really well. The Seqera team recommends running it with Claude Models. A video tutorial can be found [here](https://www.youtube.com/watch?v=IrAAFCRvcjo), athough accessing the Seqera Copilot is a little different. I found that instead of looking for a `Chat` extension on the left-hand side of VSCode, instead click on the `Nextflow` extension, then in the bottom tab, there should be a `Resources` panel and within that there will be a `Open Seqera Copilot` button. Then within VSCode, a chat should appear starting with `@Seqera` and now you can directly get Nextflow help from the agent.
+
+### Seqera AI
+
+Seqera AI is a specialized agent purpose-built to assist scientists and developers using Nextflow workflows and bioinformatics pipelines. I found it more useful for  creat ingend-to-end pipelines with DSL2 compliance and modifying existing. It has access to tested modules and pipelines from nf‑core/Nextflow community repositories, and can read the context of basically your entire pipeline repository. 
+
+The way I run this is as follows.
+
+1. Go to [https://seqera.io/ask-ai/](https://seqera.io/ask-ai/) and login to Seqera (I do this through GitHub)
+
+2. Create a Public GitHub Repository for your project
+
+```bash
+
+```
+
+It can be run in VSCode by integrating it as a GitHub Copilot plugin—activate by typing @Seqera in your Nextflow projects. A video tutorial can be found [here](https://www.youtube.com/watch?v=IrAAFCRvcjo).
+
 
 ## Notes on Groovy
 
