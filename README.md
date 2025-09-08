@@ -6727,6 +6727,40 @@ rm sandbox-*.tar.gz
 > [!WARNING]
 > Seqera AI may sometimes say `Download failed: HTTP error: 500 . The sandbox may no longer be available.` when you try to download the updated repository. When this happens, I just copy that error message back into the chat. If the program is nice, it will say something like "I understand there was a download error with the sandbox. Let me clone the repository and make the changes you requested in a new sandbox environment." and you should be able to recover your download.
 
+#### Seqera AI on the HPC
+
+As of September 2025, working with Seqera AI on an HPC is a little bit finicky because it doesn't have cursor-style integration. It is only run through the website. So to be able to pass in your codebase on the HPC and quickly review the edits you need to use some remote repository intermediate. 
+
+I have created a quick workflow to do this.
+
+1. On the HPC, create a GitHub repository with your edits. 
+
+2. Connect this repository to Seqera AI and ask it to do something for you.
+
+3. When it's done, download the `.tar.gz` file, and I have created a helper script `~/custom-bash-scripts/upload-and-pr-seqera.sh` to create a branch on the remote repository with the Seqera AI edits.
+    - Importantly, this runs `BRANCH_NAME="auto-upload-$(date +%Y%m%d%H%M%S)"`, which creates a new branch with a timestamp in your remote repository.
+
+4. On the HPC, use git to integrate your changes
+
+```bash
+# Fetch the remote
+git fetch
+
+# View that the new branch is there
+git branch -a
+
+# Switch to your master/main branch
+git checkout master
+
+# Merge the new branch
+git merge origin/auto-upload-20250908142426
+
+# Review the edits
+
+# Once done, delete the remote branch
+git push origin --delete auto-upload-20250908142426
+```
+
 ## Notes on Groovy
 
 Nextflow is a domain specific language (DSL) implemented on top of the [Groovy](https://groovy-lang.org/) programming language, which in turn is a super-set of the [Java](https://www.java.com/en/download/help/whatis_java.html) programming language. This means that Nextflow can run any Groovy or Java code.
