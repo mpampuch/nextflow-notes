@@ -5138,6 +5138,131 @@ Most nf-core pipelines consist of a single workflow file (there are a few except
 
 More information on configuring these pipelines can be found [here](https://genomicsaotearoa.github.io/Nextflow_Workshop/session_1/3_configuration/#pipeline-structure).
 
+
+### Creating a new nf-core pipeline
+
+New pipelines can be made by running the following command:
+
+```bash
+nf-core pipelines create
+```
+
+This will open up the pipeline builder, where you can click through the settings and set up your pipeline with the settings you would like.
+
+#### Creating a GitHub repository for your pipeline
+
+`nf-core pipelines` can create a GitHub repository for your new pipeline. In order for you to set this up, you need to have personal access tokens configured on GitHub to set this up.
+
+The `nf-core pipelines create` command tries to call the API endpoint: `POST /user/repos`.
+- That requires a `PAT` with `repo` scope (and if you want to create private repos, it must include _full repo access_).
+    - If you used a `fine-grained PAT`, those usually only allow access to existing repos, not creating new ones.
+    
+So to get `nf-core pipelines create` to work, you need to create a **`classic PAT` with `repo` scope**.
+
+When working on a shared system, it's a good idea to get access to this token through an environment variable. This environment variable is known as `GITHUB_TOKEN`.
+- What I do is I have my tokens stored in `~/.secrets/github.sh` (`chmod 700 ~/.secrets (drwx------)`, `chmod 600 github.sh (-rw-------)` ), and inside that file just have:
+
+```bash
+export GITHUB_TOKEN="XXXXXX"
+```
+
+Then I have all my tokens made by going on my GitHub Settings -> Developer Settings -> and then personal access tokens.
+
+These personal access tokens let you interact with HTTPS endpoints.
+
+After creating a pipeline, you should see your API endpoints with `git remote -v`. You should see something like this
+
+```bash
+origin	https://github.com/mpampuch-bioinformatics-pipelines/TEST-NEW-PROJ-CREATION.git (fetch)
+origin	https://github.com/mpampuch-bioinformatics-pipelines/TEST-NEW-PROJ-CREATION.git (push)
+```
+
+For git workflows on HPCs or shared computing systems, it's a good idea to work with SSH endpoints instead of HTTPS.
+
+To do this, create the public and private keys with:
+
+```bash
+ssh-keygen -t ed25519 -C "markpampuch@gmail.com"
+```
+
+If this was done correctly, you should see these two files in `~/.ssh`
+
+```
+id_ed25519
+id_ed25519.pub
+```
+
+The first is the private key and the second is the public key
+
+Now you can add your key to your SSH agent (a program that holds your private keys in memory and handles authentication) so Git (or any other SSH client) can use it without asking for the passphrase every time.
+
+```bash
+eval "$(ssh-agent -s)" # Starts your SSH agent in the background
+ssh-add ~/.ssh/id_ed25519 # Adds your private key to the running SSH agent.
+```
+
+Then view your public key and create a new SSH key by copying it to GitHub → Settings → SSH and GPG keys.
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+Update the remote:
+
+```
+git remote set-url origin git@github.com:mpampuch-bioinformatics-pipelines/TEST-NEW-PROJ-CREATION.git
+```
+
+Now when you run `git remote -v`, you should see something like:
+
+```
+origin	git@github.com:mpampuch-bioinformatics-pipelines/TEST-NEW-PROJ-CREATION.git (fetch)
+origin	git@github.com:mpampuch-bioinformatics-pipelines/TEST-NEW-PROJ-CREATION.git (push)
+```
+
+These are now SSH endpoints. You can test that everything works by running
+
+```bash
+ssh -T git@github.com
+# If it worked, will output something like
+# Hi mpampuch! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+#### Creating a pipeline from a template
+
+Creating your pipeline from a template allows you to automate generation of the pipeline so you don't have to go through the whole clicking steps everytime. 
+
+To do this, first create a `.yml` file with your pipeline configuration. Example:
+
+```yaml
+org: nf-core
+name: pipeline
+description: TODO
+author: Mark Pampuch
+version: 1.0.0dev
+force: true
+outdir: .
+skip_features:
+  - github
+  - github_badges
+  - ci
+  - igenomes
+  - fastqc
+  - gpu
+  - gitpod
+  - codespaces
+  - code_linters
+  - adaptivecard
+  - slackreport
+is_nfcore: false
+```
+
+Then run:
+
+```bash
+nf-core pipelines create --template-yaml pipeline-template.yml
+```
+
 ### Adding a module to an nf-core pipelines
 
 The nf-core pipeline template is a working pipeline and comes pre-configured with two modules:
