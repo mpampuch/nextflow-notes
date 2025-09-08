@@ -6670,6 +6670,95 @@ workflow READMAPPING {
 
 The following configs are common Nextflow pipeline configurations and options for particular institutional clusters or compute environments. Some institutes have default configurations for all Nextflow pipelines, and also configurations for specific nf-core pipelines. They can all be found [here](https://nf-co.re/configs).
 
+## nf-test
+
+
+### The Two Default nf-test Files
+
+When you run `nf-test init` in a Nextflow pipeline project, it automatically generates **two basic test files**:
+
+---
+
+#### 1. `main.nf.test` - Workflow-level Test
+
+```groovy
+nextflow_workflow {
+    name "Test Workflow main.nf"
+    script "main.nf"
+    
+    test("Should run without failures") {
+        when {
+            params {
+                // define parameters here
+            }
+        }
+        then {
+            assert workflow.success
+        }
+    }
+}
+```
+
+**What it does:**
+
+-   Tests your entire main workflow from start to finish.
+    
+-   Runs the complete pipeline with specified parameters.
+    
+-   Checks that the workflow completes successfully (`workflow.success`).
+    
+-   Essentially an **integration test** – it tests how all your processes work together.
+    
+-   Equivalent to running `nextflow run main.nf` but in an automated, repeatable way.
+  
+
+#### 2\. `tests/default.nf.test` - Pipeline-level Test
+
+```groovy
+nextflow_pipeline {
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    
+    test("-profile test") {
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+        then {
+            assert workflow.success
+            // Additional assertions for outputs, file counts, etc.
+        }
+    }
+}
+```
+
+**What it does:**
+
+-   Tests your entire pipeline using the `-profile test` configuration.
+    
+-   Uses the test data and parameters defined in `conf/test.config`.
+    
+-   Validates that all expected output files are created.
+    
+-   Checks that the pipeline runs successfully with the standard test dataset.
+    
+-   Often includes **snapshot testing** to ensure outputs remain consistent over time.
+    
+
+
+#### Key Differences
+
+| Aspect | `main.nf.test` | `tests/default.nf.test` |
+| --- | --- | --- |
+| **Scope** | Workflow-level | Pipeline-level |
+| **Configuration** | Custom parameters | Uses `-profile test` |
+| **Purpose** | Test workflow logic | Test complete pipeline with standard test data |
+| **Data** | You specify inputs | Uses predefined test dataset |
+| **Assertions** | Basic success check | Comprehensive output validation |
+
+
 ## Seqera AI's
 
 Seqera AIs are LLM's that will help you develop code faster. I have subsetted them into 2 different classes: **Seqera Copilot** and **Seqera AI**.
