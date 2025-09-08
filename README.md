@@ -6672,7 +6672,6 @@ The following configs are common Nextflow pipeline configurations and options fo
 
 ## nf-test
 
-
 ### The Two Default nf-test Files
 
 When you run `nf-test init` in a Nextflow pipeline project, it automatically generates **two basic test files**:
@@ -6758,6 +6757,133 @@ nextflow_pipeline {
 | **Data** | You specify inputs | Uses predefined test dataset |
 | **Assertions** | Basic success check | Comprehensive output validation |
 
+### nf-test snapshots
+
+By default nf-tests will create snapshots of your runs. Example:
+
+For this test, `default.nf.test`:
+
+```groovy
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+
+    test("Should run test profile with singularity") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            // stable_name: All files + folders in ${params.outdir}/ with a stable name
+            def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
+            // stable_path: All files in ${params.outdir}/ with stable content
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            assertAll(
+                { assert workflow.success},
+                { assert snapshot(
+                    // Number of successful tasks
+                    workflow.trace.succeeded().size(),
+                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                    removeNextflowVersion("$outputDir/pipeline_info/pipeline_software_mqc_versions.yml"),
+                    // All stable path name, with a relative path
+                    stable_name,
+                    // All files with stable contents
+                    stable_path
+                ).match() }
+            )
+        }
+    }
+}
+```
+
+An automatically generated `default.nf.test.snap` file looks like:
+
+```json
+{
+    "Should run test profile with singularity": {
+        "content": [
+            1,
+            {
+                "Workflow": {
+                    "nf-core/pipeline": "v1.0.0dev"
+                }
+            },
+            [
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/BETA-multiqc.parquet",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_citations.txt",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_software_versions.txt",
+                "multiqc/multiqc_data/multiqc_sources.txt",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/pipeline_software_mqc_versions.yml"
+            ],
+            [
+                "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.6"
+        },
+        "timestamp": "2025-09-08T17:52:48.96575705"
+    }
+}
+```
+
+Sometimes this snapshot can cause your test to fail, for example, if you create a previous snapshot from a failed run or a run that produces different outputs, then there will be a mismatch between that snapshot and the snapshot that's produced by the test. Therefore, even if your test should pass, it will fail. 
+
+For example, running: 
+
+```bash
+nf-test test tests/default.nf.test --verbose
+```
+
+might output something like:
+
+```
+  [73/abcbc3] Submitted process > NFCORE_PIPELINE:PIPELINE:MULTIQC
+  -[nf-core/pipeline] Pipeline completed successfully-
+  Nextflow stderr:
+  
+  
+
+  Snapshots:
+    Obsolete snapshots can only be checked if all tests of a file are executed successful.
+
+
+FAILURE: Executed 1 tests in 20.81s (1 failed)
+```
+
+To fix this, add `--update-snapshot` to the command:
+
+```bash
+nf-test test tests/default.nf.test --verbose --update-snapshot
+```
+
+Now the snapshots will get regenerated and you should get something like:
+
+```
+    > [17/077275] Submitted process > NFCORE_PIPELINE:PIPELINE:MULTIQC
+    > -[nf-core/pipeline] Pipeline completed successfully-
+    PASSED (14.457s)
+  Snapshots:
+    1 created [Should run test profile]
+
+
+Snapshot Summary:
+  1 created
+
+SUCCESS: Executed 1 tests in 14.52s
+```
 
 ## Seqera AI's
 
