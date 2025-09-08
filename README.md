@@ -5207,6 +5207,18 @@ Then view your public key and create a new SSH key by copying it to GitHub → S
 cat ~/.ssh/id_ed25519.pub
 ```
 
+Now update your `~/.ssh/config` file to use this SSH key for github
+
+```
+# GitHub-specific settings
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  StrictHostKeyChecking accept-new
+```
+
 Update the remote:
 
 ```
