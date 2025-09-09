@@ -6672,6 +6672,10 @@ The following configs are common Nextflow pipeline configurations and options fo
 
 ## nf-test
 
+The nf-test framework is designed to test the **behavior and outputs** of processes rather than their internal implementation details like script content. This is actually a good testing practice - you should test what the process produces, not how it produces it.
+
+If you absolutely need to verify script content, you would need to examine the Nextflow work directory directly, but this is not the intended use case for nf-test.
+
 ### The Two Default nf-test Files
 
 When you run `nf-test init` in a Nextflow pipeline project, it automatically generates **two basic test files**:
