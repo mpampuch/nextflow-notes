@@ -482,13 +482,17 @@ Glob pattern matching can also be used:
 
 ```nextflow
 process {
-    withLabel: '.*:INDEX' {
+    withName: '.*:INDEX' {
         cpus = 2
     }
 }
 ```
 
 This will run _any_ task that ends with `:INDEX` to run with 2 cpus.
+
+> [!NOTE]
+> Nextflow will use the Java regex patterns. The important thing to note is that it uses `.*` as basically an _everything glob_, unlike the shell which just uses `*`. `.` means _any character_ and `*` means _select zero or more of the adjacent character_. For example: `'YAK_INSPECT.*PACBIO.*'` is valid Java regex that says **give me anything that starts with `YAK_INSPECT` and has `PACBIO` somewhere else in the text**. But if you tried to use the common shell globbing systax of `'YAK_INSPECT*PACBIO*'`, what you'll actually be asking for with Java regex syntax is **give me anything that starts with `YAK_INSPEC`, then has zero or more `T`'s, then has `PACBI`, then has zero or more `O'`s, which is probably not what you want. So always remember to use `.*` when globbing. This is especially useful in `.config` files. 
+> This does not apply to process directives, where often you're providing shell systax. Example: `output: tuple val(meta), path("*.txt"), emit: txt`. Here you use shell syntax globbing. 
 
 Just to make sure the globbing is working, you can also configure your processes to have a `tag` directive. The process tag is the value that's printed out in parentheses after the process name.
 
@@ -516,7 +520,7 @@ If you modify the `nextflow.config` to look like this:
 
 ```nextflow
 process {
-    withLabel: '.*:INDEX' {
+    withName: '.*:INDEX' {
         cpus = 2
         tag = "Example debug"
     }
