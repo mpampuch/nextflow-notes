@@ -5110,6 +5110,14 @@ Seqera Platform provides a useful tool to monitor your pipelines and work on tea
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
+#### Invoke Nextflow CLI run arguments during Seqera launch
+
+From Nextflow v22.09.1-edge, you can specify Nextflow CLI run arguments when invoking a pipeline from Seqera. Set the NXF_CLI_OPTS environment variable using a pre-run script:
+
+```
+export NXF_CLI_OPTS='-dump-hashes'
+```
+
 ## The Nextflow VSCode extension
 
 The Nextflow VSCode extension gives developers tooling designed to make the nextflow development experience smoother. It provides syntax highlighting, and as of recently, warning/error messages, hover hints, code completion, code navigation, automatic formatting, symbol renaming, parameter schema checking, and DAG previews for workflows as well. 
