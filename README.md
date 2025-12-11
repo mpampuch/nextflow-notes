@@ -7847,6 +7847,8 @@ To fix this, all I had to do was restructure my directory like this
 
 And then re-run the pipeline.
 
+- Logging the inputs and the hashes is my preferred way to do it because you keep ALL the important information inside the log file. This makes it also easier for AI tools to help you catch what's going on.
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
