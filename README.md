@@ -7669,6 +7669,184 @@ To get your container list, use:
 nextflow inspect main.nf
 ```
 
+### Debugging Staging Issues In Your Pipelines
+
+Combining `log.info` and `-dump-hashes json` is a great way to debug your scripts, especially for file staging issues (seen in the log as `stageName`).
+
+Many nf-core template pipelines also come with a `debug` profile that has `dumpHashes = true`, so you can also use that if you want.
+
+I'll give a quick example of something that took me a long time to debug and how I used this strategy to find the issue.
+
+I had this directory structure 
+
+```
+/ibex/scratch/projects/c2303/DATABASES/BUSCO/
+└── v5
+    └──fungi_odb10
+```
+
+And in my input file I had this:
+
+```yaml
+busco:
+  lineages_path: /ibex/scratch/projects/c2303/DATABASES/BUSCO/v5
+  lineage: fungi_odb10
+```
+
+My pipeline kept failing because of the following issue:
+
+```
+Unable to run BUSCO in offline mode. Dataset /ibex/project/c2303/work/8e/10df380287ae4570e977cddb918e5d/v5/lineages/fungi_odb10 does not exist.
+```
+
+This is what I did. 
+
+1. I modified the `workflow.main.nf` file to log what was parsed from the input file
+
+```
+    //
+    // SUBWORKFLOW: Run initialisation tasks
+    //
+    PIPELINE_INITIALISATION(
+        params.version,
+        params.validate_params,
+        params.monochrome_logs,
+        args,
+        params.outdir,
+        params.input,
+        params.mode,
+        params.binfile,
+        params.juicer,
+        params.run_hires,
+    )
+
+    PIPELINE_INITIALISATION.out.assembly_id.map { val ->
+        log.info("assembly_id: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.reference.map { val ->
+        log.info("reference: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.map_order.map { val ->
+        log.info("map_order: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.assem_reads.map { val ->
+        log.info("assem_reads: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.kmer_prof_file.map { val ->
+        log.info("kmer_prof_file: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.hic_reads.map { val ->
+        log.info("hic_reads: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.supp_reads.map { val ->
+        log.info("supp_reads: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.align_genesets.map { val ->
+        log.info("align_genesets: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.synteny_paths.map { val ->
+        log.info("synteny_paths: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.intron_size.map { val ->
+        log.info("intron_size: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.teloseq.map { val ->
+        log.info("teloseq: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.lineageinfo.map { val ->
+        log.info("lineageinfo: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.lineagespath.map { val ->
+        log.info("lineagespath: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.binfile.map { val ->
+        log.info("binfile: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.juicer.map { val ->
+        log.info("juicer: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.mode.map { val ->
+        log.info("mode: ${val}")
+        return val
+    }
+    PIPELINE_INITIALISATION.out.run_hires.map { val ->
+        log.info("run_hires: ${val}")
+        return val
+    }
+
+    log.info("Pipeline initialisation complete")
+```
+
+- The `.map { val -> log.info("run_hires: ${val}") ; return val }` pattern is how you can print channel values to the log
+
+2. I then ran the pipeline with the `-dump-hashes json` setting
+
+3. I looked in the `nextflow.log` file for clues as to what could be going wrong
+
+```
+# Ctrl + F for `v5`
+
+Dec-11 14:17:19.187 [Actor Thread 17] INFO  nextflow.Nextflow - lineagespath: /ibex/scratch/projects/c2303/DATABASES/BUSCO/v5
+# The input file was parsed correctly
+
+...
+
+{
+    "hash": "ac8d1d27333d903f690f386144a1037a",
+    "type": "nextflow.util.ArrayBag",
+    "value": "[FileHolder(sourceObj:/ibex/scratch/projects/c2303/DATABASES/BUSCO/v5, storePath:/ibex/project/c2303/DATABASES/BUSCO/v5, stageName:v5)]"
+},
+# The v5 directory was staged as v5
+
+...
+
+Command executed:
+ busco \
+      --cpu 16 \
+      --in "$INPUT_SEQS" \
+      --out grTriPseu1_1-fungi_odb10-busco \
+      --mode genome \
+      --lineage_dataset fungi_odb10 \
+      --download_path v5 \
+       \
+      --offline --metaeuk
+# The busco command was trying to download v5, meaning from /ibex/scratch/projects/c2303/DATABASES/BUSCO/v5
+
+...
+
+Command error:
+2025-12-11 13:37:15 ERROR:	Unable to run BUSCO in offline mode. Dataset /ibex/project/c2303/work/8e/10df380287ae4570e977cddb918e5d/v5/lineages/fungi_odb10 does not exist.
+# Voila
+```
+
+Here you can see whats happened. `busco` look for a dataset `fungi_odb10` inside of a `lineages` directory. It doesn't find it so it errors out.
+
+To fix this, all I had to do was restructure my directory like this
+
+```
+/ibex/scratch/projects/c2303/DATABASES/BUSCO/
+└── v5
+    └── lineages
+        └──  fungi_odb10
+```
+
+And then re-run the pipeline.
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
