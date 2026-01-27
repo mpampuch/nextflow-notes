@@ -7669,6 +7669,26 @@ To get your container list, use:
 nextflow inspect main.nf
 ```
 
+### Reminder About Containers
+
+Containers for certain processes need to be placed inside a `process` directive in the config files.
+
+Example:
+
+```nextflow
+// Will not work
+withName:'.*MITOHIFI.*' {
+    container = '/ibex/project/c2303/NXF_SINGULARITY_CACHEDIR/mitohifi-3.2.3.sif'
+}
+
+// Needs to be like this to be applied
+process {
+    withName:'.*MITOHIFI.*' {
+        container = '/ibex/project/c2303/NXF_SINGULARITY_CACHEDIR/mitohifi-3.2.3.sif'
+    }
+}
+```
+
 ### Debugging Staging Issues In Your Pipelines
 
 Combining `log.info` and `-dump-hashes json` is a great way to debug your scripts, especially for file staging issues (seen in the log as `stageName`).
