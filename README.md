@@ -3846,7 +3846,7 @@ curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/status"
 curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/logs"
 ```
 
-### Wavelit
+### Wavelit (now Wave-CLI)
 
 Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
 
@@ -3854,6 +3854,16 @@ You can find more information on Wavelit with the following resources:
 
 - [Wavelit Github Repository](https://github.com/seqeralabs/wave-cli)
 - [Wavelit Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068)
+
+Examples:
+
+```bash
+# Build Docker image from Dockerfile
+wave -f Dockerfile --context . --platform linux/amd64 --freeze --build-repo docker.io/mpampuch/gfastar_v0.1 --await --log-level "DEBUG"
+
+# Build Singularity image from Docker image
+wave -i docker.io/mpampuch/gfastar_v0.1:5c20eb567bc6a6d8 --singularity --freeze --build-repo docker.io/mpampuch/gfastar_v0.1_singularity --await --log-level="DEBUG"
+```
 
 ## Seqera Containers
 
