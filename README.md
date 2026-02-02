@@ -5122,7 +5122,7 @@ Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) 
 
 ### Seqera Platform API
 
-Sometimes you may encounter issues working with the platform. In these instances I found troubleshooting with the Seqera Platform API to be quite helpful.
+Sometimes you may encounter issues working with the platform. In these instances I found troubleshooting with the [Seqera Platform API](https://docs.seqera.io/platform-api) to be quite helpful.
 
 An example of an API command can be found here
 
