@@ -5120,6 +5120,20 @@ Seqera Platform provides a useful tool to monitor your pipelines and work on tea
 
 Also can watch [this video](https://youtu.be/vB8OVsmLUfM?feature=shared&t=8535) to learn how to get set up and use Seqera platform.
 
+### Seqera Platform API
+
+Sometimes you may encounter issues working with the platform. In these instances I found troubleshooting with the Seqera Platform API to be quite helpful.
+
+An example of an API command can be found here
+
+```bash
+# Replace 4qUEm8646Ysvjs with your Run ID of interest
+curl 'https://cloud.seqera.io/api/workflow/4qUEm8646Ysvjs/launch' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H "authorization: Bearer $TOWER_ACCESS_TOKEN" \
+  -H 'content-type: application/json' | jq
+```
+
 #### Invoke Nextflow CLI run arguments during Seqera launch
 
 From Nextflow v22.09.1-edge, you can specify Nextflow CLI run arguments when invoking a pipeline from Seqera. Set the NXF_CLI_OPTS environment variable using a pre-run script:
