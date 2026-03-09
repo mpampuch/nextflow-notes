@@ -6936,13 +6936,28 @@ SUCCESS: Executed 1 tests in 14.52s
 Running:
 
 ```bash
-nf-test generate process modules/local/YOUR_MODULE_NAME.nf
+nf-test generate process modules/local/MODULE_NAME.nf
 ```
 
-Will generate this file `YOUR_MODULE_NAME.nf.test`
+Will generate this file `MODULE_NAME.nf.test`
 
 > [!NOTE]
-> Move the module `.nf` and `.nf.test` file into a common directory (e.g. `modules/local/YOUR_MODULE_NAME/{YOUR_MODULE_NAME.nf,YOUR_MODULE_NAME.nf.test}` ). Update your import paths. I also like to add a `TESTDATA` folder inside this directory
+> Move the module `.nf` and `.nf.test` file into a common directory (e.g. `modules/local/MODULE_NAME/{MODULE_NAME.nf,MODULE_NAME.nf.test}` ). Update your import paths. I also like to add a `TESTDATA` folder inside this directory
+
+Add your test and then run this to check for syntax errors.
+
+```bash
+nf-test test --dryRun modules/local/MODULE_NAME
+```
+
+> [!NOTE]
+> Inside `nf-test.config`, make sure there is no `profile` option configured.
+> 
+> Inside `tests/nextflow.config`, make sure `process { executor = 'slurm' }` is set
+> 
+> For each test:
+> 1. Add a tag
+> 2. Add this `options "-profile [singularity OR docker] -dump-hashes [-stub-run IF TESTING A STUB]"`
 
 ## Seqera AI's
 
