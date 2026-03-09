@@ -6951,13 +6951,36 @@ nf-test test --dryRun modules/local/MODULE_NAME
 ```
 
 > [!NOTE]
-> Inside `nf-test.config`, make sure there is no `profile` option configured.
+> Inside `nf-test.config`, make sure you have `profile "test,singularity"` configured (or `docker` if you want to do docker tests).
 > 
-> Inside `tests/nextflow.config`, make sure `process { executor = 'slurm' }` is set
+> Inside `tests/nextflow.config`, make sure these are set
+> ```
+> process {
+>     executor = 'slurm'
+> }
+> singularity {
+>     pullTimeout = '3 hours'
+>     cacheDir = '/ibex/scratch/projects/c2303/NXF_SINGULARITY_CACHEDIR'
+> }
+> apptainer {
+>     pullTimeout = '3 hours'
+>     cacheDir = '/ibex/scratch/projects/c2303/NXF_APPTAINER_CACHEDIR'
+> }
+> ```
 > 
 > For each test:
 > 1. Add a tag
-> 2. Add this `options "-profile [singularity OR docker] -dump-hashes [-stub-run IF TESTING A STUB]"`
+> 2. Add this `options "-dump-hashes [-stub-run IF TESTING A STUB]"`
+> 3. Add `log.info "process.out: ${process.out}"` at the start of every `then` block. 
+
+Then run this to run your tests:
+
+```bash
+nf-test test modules/local/MODULE_NAME --verbose
+```
+
+> ![TIP]
+> When you begin testing your tests, It's a good idea to comment out all tests but one just to start. Often times I find getting the first test to pass is the trickiest and having more tests will just create a messier output. Once you tweak the module to work on the first one then you can uncomment the rest to test it on different inputs and outputs. 
 
 ## Seqera AI's
 
