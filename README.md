@@ -7002,6 +7002,22 @@ rm sandbox-*.tar.gz
 
 #### Seqera AI on the HPC
 
+```bash
+# Make sure you have a nodejs conda environment. 
+# conda create -n nodejs -c conda-forge nodejs
+conda activate nodejs
+
+# Install Seqera AI CLI if you haven't 
+# npm install -g seqera
+
+# login to your Seqera account
+seqera login
+
+seqera ai
+```
+
+##### OLD notes (Now a CLI tool exists)
+
 As of September 2025, working with Seqera AI on an HPC is a little bit finicky because it doesn't have cursor-style integration. It is only run through the website. So to be able to pass in your codebase on the HPC and quickly review the edits you need to use some remote repository intermediate. 
 
 I have created a quick workflow to do this.
