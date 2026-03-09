@@ -6931,6 +6931,19 @@ Snapshot Summary:
 SUCCESS: Executed 1 tests in 14.52s
 ```
 
+### Generating tests for your modules
+
+Running:
+
+```bash
+nf-test generate process modules/local/YOUR_MODULE_NAME.nf
+```
+
+Will generate this file `YOUR_MODULE_NAME.nf.test`
+
+> [!NOTE]
+> Move the module `.nf` and `.nf.test` file into a common directory (e.g. `modules/local/YOUR_MODULE_NAME/{YOUR_MODULE_NAME.nf,YOUR_MODULE_NAME.nf.test}` ). Update your import paths. I also like to add a `TESTDATA` folder inside this directory
+
 ## Seqera AI's
 
 Seqera AIs are LLM's that will help you develop code faster. I have subsetted them into 2 different classes: **Seqera Copilot** and **Seqera AI**.
@@ -7728,6 +7741,38 @@ process {
     }
 }
 ```
+
+### Easily checking if your pipeline contains valid containers
+
+Especially if you are using AI tools for help, you might have real looking but completely bogus container paths in your modules.
+
+Example:
+
+```groovy
+process DECOMPRESS_GENOME {
+    tag "$meta.id"
+    label 'process_low'
+
+    conda "conda-forge::gzip=1.12"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/gzip:1.12' :
+        'biocontainers/gzip:1.12' }"
+...
+}
+```
+
+An easy way to check this is by running `curl -I`. The `-I` option requests only the headers, not the full content. This is an easy way to check the validity of the endpoint without trying to pull the entire container.
+
+```bash
+curl -I https://depot.galaxyproject.org/singularity/gzip:1.12
+# HTTP/1.1 404 Not Found
+# Server: nginx/1.26.2
+# Date: Mon, 09 Mar 2026 12:31:32 GMT
+# Content-Type: text/html
+# Content-Length: 153
+# Connection: keep-alive
+```
+
 
 ### Debugging Staging Issues In Your Pipelines
 
