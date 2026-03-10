@@ -7033,6 +7033,39 @@ nf-test test --dryRun modules/local/MODULE_NAME
 >     }
 > }
 > ```
+> 
+> This will output something nice like this:
+> ```groovy
+> --------------------------------
+> PROCESS OUTPUT
+> [0:[[[id:test_fa], /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/GCA_009858895.3_ASM985889v3_genomic.200409.fa]], 1:[/ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/versions.yml], genome:[[[id:test_fa], /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/GCA_009858895.3_ASM985889v3_genomic.200409.fa]], versions:[/ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/versions.yml]]
+> --------------------------------
+> 
+> --------------------------------
+> DETAILED TREE VIEW OF PROCESS OUTPUT
+> vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+> 
+> 0:
+>   - [0]
+>     - [0]
+>       id:
+>         test_fa
+>     - [1]
+>       /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/GCA_009858895.3_ASM985889v3_genomic.200409.fa
+> 1:
+>   - [0]
+>     /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/versions.yml
+> genome:
+>   - [0]
+>     - [0]
+>       id:
+>         test_fa
+>     - [1]
+>       /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/GCA_009858895.3_ASM985889v3_genomic.200409.fa
+> versions:
+>   - [0]
+>     /ibex/project/c2303/20260309_NEXTFLOW-ALGAE-TAXA-FROM-GENOME/.nf-test/tests/f08b1056fb8439342cb24ee0a38d3c3c/work/ff/4e7e6183e60767aa7e9a8a95b054f1/versions.yml
+> ```
 
 Then run this to run your tests:
 
