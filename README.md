@@ -7073,7 +7073,7 @@ Then run this to run your tests:
 nf-test test modules/local/MODULE_NAME --verbose
 ```
 
-> ![TIP]
+> [!TIP]
 > When you begin testing your tests, It's a good idea to comment out all tests but one just to start. Often times I find getting the first test to pass is the trickiest and having more tests will just create a messier output. Once you tweak the module to work on the first one then you can uncomment the rest to test it on different inputs and outputs. 
 
 ## Seqera AI's
