@@ -6969,7 +6969,8 @@ nf-test test --dryRun modules/local/MODULE_NAME
 > ```
 > 
 > For each test:
-> 1. Add a tag
+> 1. Add a tag. Usually `tag "fast"` is a good one (unless testing a slow process, in which case use `tag "slow"`). 
+>    - This way you can skip slow tests by only running `--tag fast` because `nf-test` currently doesn't have a option to exlcude tests by tags
 > 2. Add this `options "-dump-hashes [-stub-run IF TESTING A STUB]"`
 > 3. Add one of the 3 options at the start of every then block 
 > ```groovy
