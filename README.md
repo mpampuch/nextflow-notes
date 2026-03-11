@@ -7071,11 +7071,70 @@ nf-test test --dryRun modules/local/MODULE_NAME
 Then run this to run your tests:
 
 ```bash
-nf-test test modules/local/MODULE_NAME --verbose
+nf-test test modules/local/MODULE_NAME --verbose --update-snapshot
 ```
 
 > [!TIP]
 > When you begin testing your tests, It's a good idea to comment out all tests but one just to start. Often times I find getting the first test to pass is the trickiest and having more tests will just create a messier output. Once you tweak the module to work on the first one then you can uncomment the rest to test it on different inputs and outputs. 
+
+> [!WARNING]
+> When combining using `nf-test` and `nf-core` tools, you may want to add custom tests to modules you install from the nf-core modules repository using `nf-core modules install MODULE`. There is a line in the `nextflow.config` file that may cause your tests inside `modules/nf-core` to go unnoticed. You should remove it if you need to.
+>```bash
+> // ignore tests coming from the nf-core/modules repo
+> ignore 'modules/nf-core/**/tests/*', 'subworkflows/nf-core/**/tests/*'
+>```
+> You can comment it out or modify as need be.
+> Example: `ignore 'modules/nf-core/!(barrnap)/**/tests/*'`
+
+
+#### Configuring Custom Resources for tests on nf-tests
+
+This can be a bit tricky because there are some hurdles that will probably interfere with you trying to add configs. But here is what you need to check to get it to work. 
+
+To add a custom config for a test, add a custom `test.config` file for your test. I like to do this inside the directory with the test.
+
+Example: `modules/local/itsx/itsx.test.config`
+
+```groovy
+process {
+  withName: 'ITSX' {
+      cpus   = 32
+      memory = 32.GB
+      time   = 4.h
+    }
+}
+```
+
+Make sure you create the tests using `withName:` ! If you don't do this, your configs probably won't be seen because of the nextflow selector precedence.
+
+Nextflow config selector precedence (highest -> lowest):
+
+1. `withName` - most specific, always wins
+2. `withLabel` - label-based
+3. bare `process { }` - lowest precedence by default
+
+In a lot of cases, trying to add selections to processes seems like it doesn't work, because most processes have something like `label 'process_medium'` which and have `withLabel:process_medium` inside `base.config` which will trump a local config file. To fix this, use `withName:`
+
+**Additionally**, by default most `nf-test.config` files will have this line: 
+
+```groovy
+// run all test with defined profile(s) from the main nextflow.config
+profile "test"
+```
+
+And by default, the `test` profile will pull from `conf/test.config` and this file might have:
+
+```groovy
+process {
+    resourceLimits = [
+        cpus: 4,
+        memory: '15.GB',
+        time: '1.h'
+    ]
+}
+```
+
+This will cap your resources and may be tricky to find. If you need to do more, you can update these or just remove or comment out the `resourceLimits` block.
 
 ## Seqera AI's
 
