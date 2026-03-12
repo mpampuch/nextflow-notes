@@ -8162,6 +8162,8 @@ When working with objects in Groovy—or wrapped classes in frameworks like Next
 
 Nextflow often exposes process outputs via properties like `stdout` and `stderr` instead of Java’s standard `getInputStream()`. Inspecting the object lets you safely access outputs and debug workflows without guessing property names.
 
+This is especially useful if the documentation is not clear.
+
 I used this trick to try and breakdown what Properties are available on the nf-test `process` class. I had tried to preview my inputs with `process.in` because `process.out` exists, but you can see in the properties that `process.in` is not an available property of the `process` class.
 
 ```groovy
