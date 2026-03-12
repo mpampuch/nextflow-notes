@@ -8146,6 +8146,78 @@ And then re-run the pipeline.
 
 - Logging the inputs and the hashes is my preferred way to do it because you keep ALL the important information inside the log file. This makes it also easier for AI tools to help you catch what's going on.
 
+### Inspecting Process Properties and Methods
+
+When working with objects in Groovy—or wrapped classes in frameworks like Nextflow—it’s often unclear what properties or methods are available. Groovy provides convenient ways to explore objects at runtime using `metaClass` or Java reflection.
+
+-   **Properties**:  
+    `object.metaClass.properties*.name` lists all accessible properties. For a Nextflow `process` object, this includes things like `stdout`, `stderr`, `exitStatus`, `success`, etc.
+    
+-   **Methods**:  
+    `object.metaClass.methods*.name` shows all methods you can call, including standard getters (`getOut()`) and boolean checks (`isSuccess()`).
+    
+-   **Declared Methods**:  
+    `object.class.declaredMethods*.name` lists methods specifically declared in the class, ignoring inherited ones.
+    
+
+Nextflow often exposes process outputs via properties like `stdout` and `stderr` instead of Java’s standard `getInputStream()`. Inspecting the object lets you safely access outputs and debug workflows without guessing property names.
+
+I used this trick to try and breakdown what Properties are available on the nf-test `process` class. I had tried to preview my inputs with `process.in` because `process.out` exists, but you can see in the properties that `process.in` is not an available property of the `process` class.
+
+```groovy
+println "Properties:"
+process.metaClass.properties*.name.sort().each { println it }
+// Properties:
+//  class
+//  errorMessage
+//  errorReport
+//  exitStatus
+//  failed
+//  mapping
+//  name
+//  out
+//  stderr
+//  stdout
+//  success
+//  trace
+
+println "Methods:"
+process.metaClass.methods*.name.unique().sort().each { println it }
+// Methods:
+//  equals
+//  getClass
+//  getErrorMessage
+//  getErrorReport
+//  getExitStatus
+//  getMapping
+//  getName
+//  getOut
+//  getStderr
+//  getStdout
+//  getTrace
+//  hashCode
+//  isFailed
+//  isSuccess
+//  loadFromFolder
+//  loadOutputChannels
+//  notify
+//  notifyAll
+//  setMapping
+//  setName
+//  toString
+//  viewChannels
+//  wait
+
+println "Declared Methods:"
+process.class.declaredMethods*.name.sort().each { println it }
+// Declared Methods:
+//  getMapping
+//  getOut
+//  loadOutputChannels
+//  setMapping
+//  viewChannels
+```
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
