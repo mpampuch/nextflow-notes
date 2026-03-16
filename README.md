@@ -2988,6 +2988,18 @@ nextflow run <script> -w /some/scratch/dir
 
 ### Using the `publishDir` process directive
 
+> [!NOTE]
+> As of March 2026, I have learned that the default behaviour of nextflow is to provide every output in your process folder by a symlink. Example:
+> ```groovy
+> // 1. Annotate reference databases with taxonomy
+> process APPEND_MOTHUR_TAXONOMY_TO_DB{...}
+> ```
+> This will tokenize the process and uses the first word before `_` as the name of the output directory, in this case: `append`. So all the output files from this process will get symlinked to `${params.outdir}/append/`. To disable this behaviour, you need to disable the `enabled` option: 
+> ```groovy
+> withName: 'APPEND_MOTHUR_TAXONOMY_TO_DB' {
+>    publishDir = [enabled: false]
+> ```
+
 In order to use the `processDir` directive to publish your desired files to some output directory, add the following to your process block
 
 ```nextflow
