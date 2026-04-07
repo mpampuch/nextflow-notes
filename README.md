@@ -4976,6 +4976,23 @@ nextflow run rnaseq-nf -resume mighty_boyd
 
 More information can be found [here](https://training.nextflow.io/basic_training/cache_and_resume/#how-to-organize-in-silico-experiments).
 
+The `nextflow log` command can also be used to find all the relevant working directories of your tasks:
+
+```bash
+nextflow log <run_name> -f name,workdir,status 
+```
+
+Will give you something like this:
+
+```
+NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT (LIB_CMD00795a_03)	/ibex/project/c2303/20260406_get-transcript-density-around-CRTO/work/b7/d1ed24269ac23ba50f4a4cbe86dc88	COMPLETED
+NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT (LIB_CMD00795a_07)	/ibex/project/c2303/20260406_get-transcript-density-around-CRTO/work/c8/5e400fbb9a7f8368868f3f1e1f3ec3	COMPLETED
+NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT (LIB_CMD00795a_01)	/ibex/project/c2303/20260406_get-transcript-density-around-CRTO/work/ef/c1378f5049a4654977bad7febf5dab	COMPLETED
+NFCORE_RNASEQ:RNASEQ:FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS:FQ_LINT (LIB_CMD00795a_05)	/ibex/project/c2303/20260406_get-transcript-density-around-CRTO/work/e7/b3d6410de3c7b9182ab4a044b2bf40	COMPLETED
+```
+
+You can then use `grep` and `awk` filtering to quickly get all the working directories you're interested in
+
 ## Building a pipeline with development data
 
 Most times it's much easier to build a pipeline with a subset of your data. Here are some tips for how I would structure your data for building a pipeline.
