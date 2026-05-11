@@ -3858,23 +3858,46 @@ curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/status"
 curl "https://wave.seqera.io/v1alpha1/builds/bd-ab2df51ab97aac6a_1/logs"
 ```
 
-### Wavelit (now Wave-CLI)
+### Wave CLI
 
-Wavelit is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
+Wave CLI (formerly Wavelit) is the CLI tool for working with Wave outside of Nextflow. It allows you to use all the Wave functionality straight from the terminal.
 
-You can find more information on Wavelit with the following resources:
+You can find more information on Wave CLI with the following resources:
 
-- [Wavelit Github Repository](https://github.com/seqeralabs/wave-cli)
-- [Wavelit Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068)
+- [Wave CLI Github Repository](https://github.com/seqeralabs/wave-cli)
+- [Wave CLI Video Demo](https://youtu.be/RANJkwlcjPg?feature=shared&t=2068)
 
 Examples:
 
+The Wave CLI uses the Docker CLI to push - credentials in Seqera Platform stay only there and the push doesn't go via platform. So in other words, you need your local Docker client to be authenticated for the docker commands to work (`docker login`).
+
+Wave can convert a docker image into a singularity image, you can provide either a singularity build file (not a Dockerfile), a list of conda packages, or providing an already-built docker image. Singularity itself can pull docker images and save them as singularity images.
+
+There is no need to have `--tower-token $TOWER_ACCESS_TOKEN` as the Wave CLI automatically looks for that environment variable. The CLI flag is only needed if you're providing it from somewhere else
+
 ```bash
+# Set env vars
+export TOWER_ACCESS_TOKEN="yourtokenhere"
+export TOWER_WORKSPACE_ID="40230138858677"
+
 # Build Docker image from Dockerfile
-wave -f Dockerfile --context . --platform linux/amd64 --freeze --build-repo docker.io/mpampuch/gfastar_v0.1 --await --log-level "DEBUG"
+wave \
+    -f Dockerfile \
+    --context . \
+    --platform linux/amd64 \
+    --freeze --build-repo \
+    docker.io/mpampuch/gfastar_v0.1 \
+    --await \
+    --log-level "DEBUG"
 
 # Build Singularity image from Docker image
-wave -i docker.io/mpampuch/gfastar_v0.1:5c20eb567bc6a6d8 --singularity --freeze --build-repo docker.io/mpampuch/gfastar_v0.1_singularity --await --log-level="DEBUG"
+wave \
+    -i docker.io/mpampuch/gfastar_v0.1:5c20eb567bc6a6d8 \
+    --singularity \
+    --freeze \
+    --build-repo docker.io/mpampuch/gfastar_v0.1_singularity \
+    --await \
+    --log-level="DEBUG"
 ```
 
 ## Seqera Containers
