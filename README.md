@@ -3900,6 +3900,17 @@ wave \
     --log-level="DEBUG"
 ```
 
+> [!NOTE]
+> I've had trouble pulling singularity containers that I've converted from docker images this way. From my understanding, there's a problem with the transport system. `docker://` expects a standard OCI/Docker image, but I think these singularity containers are native SIF layer artifacts. The fix was to use the OCI Registry As Storage client, `oras://`, instead (as well as `apptainer >= v1.3.6`. This might work with singularity as well but I haven't investigated much)
+> ```bash
+> # This fails
+> apptainer pull kmerord.sif docker://mpampuch/kmerord_664818d_singularity:4dba50e70b2a3849
+> 
+> # This works
+> apptainer pull kmerord.sif docker://mpampuch/kmerord_664818d_singularity:4dba50e70b2a3849
+> 
+> ```
+
 ## Seqera Containers
 
 Seqera Containers take the experience of Wave one step further. Instead of browsing available images as you would with a traditional container registry, you just type in the names of the tools you want to use into the following link https://seqera.io/containers/. Clicking “Get container” returns a container URI instantly, which you can use for anything - Nextflow pipeline or not. The key difference with Seqera Containers is that the image is also stored in an image cache, with infrastructure provided by AWS. Subsequent requests for the same package set will return the same image, ensuring reproducibility across runs. The cache has no expiry date, so those images will still be there if you need to rerun your analysis in the future (for at least 5 years after creation).
