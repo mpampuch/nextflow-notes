@@ -3911,6 +3911,16 @@ wave \
 > 
 > ```
 
+### Viewing Wave CLI builds
+
+These are hard to find sometimes. Wave CLI builds in the clouds can be found at these URLS:
+
+```
+https://wave.seqera.io/view/builds/<BUILD_ID>
+```
+
+Where `BUILD_ID` is something like: `bd-aec1db4dd80ad679_1`
+
 ## Seqera Containers
 
 Seqera Containers take the experience of Wave one step further. Instead of browsing available images as you would with a traditional container registry, you just type in the names of the tools you want to use into the following link https://seqera.io/containers/. Clicking “Get container” returns a container URI instantly, which you can use for anything - Nextflow pipeline or not. The key difference with Seqera Containers is that the image is also stored in an image cache, with infrastructure provided by AWS. Subsequent requests for the same package set will return the same image, ensuring reproducibility across runs. The cache has no expiry date, so those images will still be there if you need to rerun your analysis in the future (for at least 5 years after creation).
