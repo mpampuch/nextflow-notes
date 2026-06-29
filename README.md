@@ -3929,6 +3929,11 @@ wave.strategy = 'conda'
 
 Any processes in your pipeline specifying Conda packages will have Docker or Singularity images created on the fly (depending on whether `singularity.enabled` is set or not) and cached for immediate access in subsequent runs. These images will be publicly available. You can view all container image names with the nextflow inspect command.
 
+### Seqera Containers Base Definition Files
+
+In situations where you need custom containers that can't be built using the Seqera Containers platform, it's good to build them using your own custom container definiton files using Wave CLI. It's good to use the same base definition that Seqera Containers uses to make their Conda and Pip derived packages work. 
+
+I've added these base definition files for different architectures here: `seqera-containers-definition-files`
 
 ## Important functions for file attributes and paths
 
