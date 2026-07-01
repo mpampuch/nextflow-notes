@@ -8298,6 +8298,22 @@ process.class.declaredMethods*.name.sort().each { println it }
 //  viewChannels
 ```
 
+### Finding your output directories in Seqera platform
+
+How I usually find my Seqera platform runs is by going to a run on the platform, clicking inputs, and inside my input parameters I should find the `output` parameter where I listed my run
+
+Newer versions of nextflow now have a built-in `-output-dir` parameter (or `outputDir` in the config), which defaults to `results`.
+
+I'm not sure if using this new built-in one will make it appear in the Seqera Platform input parameters sheet. So to get around this, I add this in my `nextflow.config`
+
+```groovy
+// Below the params {} block
+outputDir = params.outdir 
+// And if using output workflow directive make sure you have 
+  // workflow.output.mode = 'copy'
+// set
+```
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
