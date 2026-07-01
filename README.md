@@ -8314,6 +8314,141 @@ outputDir = params.outdir
 // set
 ```
 
+## Find lineage outputs
+
+> ![TODO]
+> Make proper notes on this because this is useful. I'm just dumping it here for now
+
+In `nextflow.config`
+
+```groovy
+lineage.enabled = true
+```
+
+```bash
+nextflow lineage list
+# Output
+# 2026-07-01 10:46:23 AST	sleepy_church       	da4875b0-60cd-4a18-a507-ee58473186aa	id://5b75da190d16ee012453531c5050c0b9
+
+nextflow lineage view lid://5b75da190d16ee012453531c5050c0b9#output
+```
+
+Output:
+
+```json
+[
+  {
+    "type": "Collection",
+    "name": "versions",
+    "value": []
+  },
+  {
+    "type": "Collection",
+    "name": "asmstats",
+    "value": [
+      [
+        {
+          "id": "KAUST068",
+          "_hap": "hap1"
+        },
+        "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/asmstats/KAUST068.purged.filtered.fa.stats"
+      ],
+      [
+        {
+          "id": "KAUST071",
+          "_hap": "hap1"
+        },
+        "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/asmstats/KAUST071.20260628.purged.filtered.fa.stats"
+      ]
+    ]
+  },
+  {
+    "type": "Collection",
+    "name": "gfastats",
+    "value": [
+      [
+        {
+          "id": "KAUST068",
+          "_hap": "hap1"
+        },
+        "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/gfastats/KAUST068.assembly_summary"
+      ],
+      [
+        {
+          "id": "KAUST071",
+          "_hap": "hap1"
+        },
+        "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/gfastats/KAUST071.assembly_summary"
+      ]
+    ]
+  },
+  {
+    "type": "Collection",
+    "name": "merqury",
+    "value": [
+      [
+        {
+          "id": "KAUST068"
+        },
+        [
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.KAUST068.purged.filtered.spectra-cn.fl.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.KAUST068.purged.filtered.spectra-cn.ln.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.KAUST068.purged.filtered.spectra-cn.st.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.completeness.stats",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.qv",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.spectra-asm.fl.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.spectra-asm.ln.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/merquryfk/KAUST068.spectra-asm.st.png"
+        ]
+      ],
+      [
+        {
+          "id": "KAUST071"
+        },
+        [
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.KAUST071.20260628.purged.filtered.spectra-cn.fl.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.KAUST071.20260628.purged.filtered.spectra-cn.ln.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.KAUST071.20260628.purged.filtered.spectra-cn.st.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.completeness.stats",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.qv",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.spectra-asm.fl.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.spectra-asm.ln.png",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/merquryfk/KAUST071.spectra-asm.st.png"
+        ]
+      ]
+    ]
+  },
+  {
+    "type": "Collection",
+    "name": "busco",
+    "value": [
+      [
+        {
+          "id": "KAUST068"
+        },
+        [
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/busco/KAUST068-bacillariophyta_odb12-busco.batch_summary.txt",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/busco/KAUST068-bacillariophyta_odb12-busco.log",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/busco/short_summary.specific.bacillariophyta_odb12.KAUST068.purged.filtered.fa.json",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST068/busco/short_summary.specific.bacillariophyta_odb12.KAUST068.purged.filtered.fa.txt"
+        ]
+      ],
+      [
+        {
+          "id": "KAUST071"
+        },
+        [
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/busco/KAUST071-chlorophyceae_odb12-busco.batch_summary.txt",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/busco/KAUST071-chlorophyceae_odb12-busco.log",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/busco/short_summary.specific.chlorophyceae_odb12.KAUST071.20260628.purged.filtered.fa.json",
+          "lid://5b75da190d16ee012453531c5050c0b9/KAUST071/busco/short_summary.specific.chlorophyceae_odb12.KAUST071.20260628.purged.filtered.fa.txt"
+        ]
+      ]
+    ]
+  }
+]
+```
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
