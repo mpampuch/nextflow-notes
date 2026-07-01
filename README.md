@@ -8319,11 +8319,13 @@ outputDir = params.outdir
 > [!WARNING]
 > Make proper notes on this because this is useful. I'm just dumping it here for now
 
-In `nextflow.config`
+In `nextflow.config`:
 
 ```groovy
 lineage.enabled = true
 ```
+
+Run:
 
 ```bash
 nextflow lineage list
