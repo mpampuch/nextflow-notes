@@ -3885,8 +3885,8 @@ wave \
     -f Dockerfile \
     --context . \
     --platform linux/amd64 \
-    --freeze --build-repo \
-    docker.io/mpampuch/gfastar_v0.1 \
+    --freeze \
+    --build-repo docker.io/mpampuch/gfastar_v0.1 \
     --await \
     --log-level "DEBUG"
 
