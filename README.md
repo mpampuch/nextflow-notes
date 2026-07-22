@@ -8314,6 +8314,15 @@ outputDir = params.outdir
 // set
 ```
 
+## Before running a workflow check the resolved config
+
+> [!WARNING]
+> Make proper notes on this because this is useful. I'm just dumping it here for now
+
+```bash
+nextflow config -profile kaust | bat -l groovy
+```
+
 ## Find lineage outputs
 
 > [!WARNING]
