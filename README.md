@@ -8460,6 +8460,165 @@ Output:
 ]
 ```
 
+### Inspecting lineage outputs:
+
+The output files of a workflow run can be accessed as `lid://<WORKFLOW_RUN_HASH>/<PATH>, where <PATH>` is the file path relative to the workflow output directory.
+
+Files must be published to the workflow output directory as defined by the `outputDir` config option (or `-output-dir` command line option) in order to be recorded as workflow outputs in the lineage store.
+
+Example: Here is my `outputDir` for a run:
+
+`OUTPUTS/20260825_215100`
+
+And inside I have this file:
+
+`OUTPUTS/20260825_215100/cmc-103-14_C.merolae/integration-results/combined/extracted_hits/hits/1_FCU1_ptg000012l_441991-542741.fa`
+
+So to get information on this file I do this:
+
+```bash
+nextflow lineage view lid://df5de83d580acf0c0e31bf856770d10f/cmc-103-14_C.merolae/integration-results/combined/extracted_hits/hits/1_FCU1_ptg000012l_441991-542741.fa
+```
+
+with the lineage ID minus the `outputDir` path, just the relative filepath afterwards.
+
+It will output something like this:
+
+```json
+{
+  "version": "lineage/v1beta1",
+  "kind": "FileOutput",
+  "spec": {
+    "path": "/ibex/project/c2303/20260726_NEXTFLOW_INTEGRATION_SITE_ANALYSIS/OUTPUTS/20260825_215100/cmc-103-14_C.merolae/integration-results/combined/extracted_hits/hits/1_FCU1_ptg000012l_441991-542741.fa",
+    "checksum": {
+      "value": "c3183d477934e12ff16693926c5be66a",
+      "algorithm": "nextflow",
+      "mode": "standard"
+    },
+    "source": "lid://e0beae9b20229e98be161f67c2f593f2/hits/1_FCU1_ptg000012l_441991-542741.fa",
+    "workflowRun": "lid://df5de83d580acf0c0e31bf856770d10f",
+    "taskRun": null,
+    "size": 66161,
+    "createdAt": "2026-08-25T23:39:14.604367340+03:00",
+    "modifiedAt": "2026-08-25T23:39:14.604367340+03:00",
+    "labels": null
+  }
+}
+```
+
+Every lineage record is stored in the same envelope: `version` is the version of the lineage data model, `kind` is the record type, and `spec` is the record itself.
+
+While the record type is serialized as `kind`, it is queried as `type` by the find subcommand and the `fromLineage` channel factory, e.g. `nextflow lineage find type=TaskRun`.
+
+Every output file is represented in the lineage store as a `FileOutput` record. It includes basic file information, such as the real path, checksum, file size and created/modified timestamps, as well as lineage information, such as the workflow run and task run that produced it.
+
+As this record is a workflow output, it is not linked directly to a task run. Instead, it is linked to the original task output.
+
+Any LID in a lineage record can be viewed, allowing you to traverse the lineage metadata interactively. **Use the value of `source` to view the original task output:**
+
+```bash
+nextflow lineage view lid://e0beae9b20229e98be161f67c2f593f2/hits/1_FCU1_ptg000012l_441991-542741.fa
+```
+
+```json
+{
+  "version": "lineage/v1beta1",
+  "kind": "FileOutput",
+  "spec": {
+    "path": "/ibex/scratch/projects/c2303/work/e0/beae9b20229e98be161f67c2f593f2/hits/1_FCU1_ptg000012l_441991-542741.fa",
+    "checksum": {
+      "value": "3c8ccb60767ca60ad558950aedf11037",
+      "algorithm": "nextflow",
+      "mode": "standard"
+    },
+    "source": "lid://e0beae9b20229e98be161f67c2f593f2",
+    "workflowRun": "lid://df5de83d580acf0c0e31bf856770d10f",
+    "taskRun": "lid://e0beae9b20229e98be161f67c2f593f2",
+    "size": 66161,
+    "createdAt": "2026-08-25T23:39:12.330141094+03:00",
+    "modifiedAt": "2026-08-25T23:39:12.330141094+03:00",
+    "labels": null
+  }
+}
+```
+
+This record is the task output for the same file -- it has a value for `taskRun` which is the same as its source.
+
+You can view the lineage record for the task that produced this file:
+
+```bash
+nextflow lineage view lid://862df53160e07cd823c0c3960545e747
+```
+
+```json
+nextflow lineage view lid://e0beae9b20229e98be161f67c2f593f2  | jq
+{
+  "version": "lineage/v1beta1",
+  "kind": "TaskRun",
+  "spec": {
+    "sessionId": "7d6456b8-4297-4f88-9188-564f81d1d429",
+    "name": "NFCORE_INTEGRATIONSITEANALYSIS:INTEGRATION_SITE_ANALYSIS:EXTRACT_SEQUENCES:BLAST_EXTRACT_HITS (cmc-103-14_C.merolae_combined)",
+    "codeChecksum": {
+      "value": "dd0c379dff6471c908ec95c2409b98c0",
+      "algorithm": "nextflow",
+      "mode": "standard"
+    },
+    "script": "\n    mkdir -p hits\n    : > cmc-103-14_C.merolae_combined.extracted.fa\n    count=0\n\n    # For every BLAST hit (outfmt 6), extract the subject region padded by\n    # +/- 50000 bp of flanking sequence around the alignment coordinates.\n    while read -r qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore; do\n        [ -z \"$qseqid\" ] && continue\n        count=$((count + 1))\n\n        if [ \"$sstart\" -lt \"$send\" ]; then\n            start=$sstart\n            end=$send\n        else\n            start=$send\n            end=$sstart\n        fi\n\n        ext_start=$((start - 50000))\n        [ \"$ext_start\" -lt 1 ] && ext_start=1\n        ext_end=$((end + 50000))\n\n        out=\"hits/${count}_${qseqid}_${sseqid}_${ext_start}-${ext_end}.fa\"\n        blastdbcmd \\\n            -db cmc-103-14_C.merolae_combined \\\n            -entry \"$sseqid\" \\\n            -range \"${ext_start}-${ext_end}\" \\\n            -outfmt \"%f\" \\\n            -out \"$out\" || { echo \"WARN: extraction failed for $sseqid\" >&2; continue; }\n        cat \"$out\" >> cmc-103-14_C.merolae_combined.extracted.fa\n    done < cmc-103-14_C.merolae_combined.blast_results.txt\n\n    # Drop empty outputs so downstream mapping is only triggered when hits exist.\n    [ -s cmc-103-14_C.merolae_combined.extracted.fa ] || rm -f cmc-103-14_C.merolae_combined.extracted.fa\n    rmdir hits 2>/dev/null || true\n    ",
+    "input": [
+      {
+        "type": "val",
+        "name": "meta",
+        "value": {
+          "id": "cmc-103-14_C.merolae",
+          "reference": "/ibex/scratch/projects/c2303/20260726_NEXTFLOW_INTEGRATION_SITE_ANALYSIS/TESTS/TEST_DATA/REFERENCE-ASSEMBLY/GCF_000091205.1_ASM9120v1_genomic.fna",
+          "blast_queries": "/ibex/scratch/projects/c2303/20260726_NEXTFLOW_INTEGRATION_SITE_ANALYSIS/BLAST-QUERIES",
+          "plasmid": "/ibex/project/c2303/20260726_NEXTFLOW_INTEGRATION_SITE_ANALYSIS/PLASMIDS/CmC_103.gb",
+          "purge": false,
+          "target_coverage": [],
+          "busco_lineage": [],
+          "db_type": "combined"
+        }
+      },
+      {
+        "type": "path",
+        "name": "db",
+        "value": [
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.ndb",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nhr",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nin",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.njs",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nog",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nos",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.not",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nsq",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.ntf",
+          "lid://b44c21fb27928ebccf46668fc0225b4c/cmc-103-14_C.merolae_combined.nto"
+        ]
+      },
+      {
+        "type": "path",
+        "name": "results",
+        "value": [
+          "lid://8d822181f7dfa25afe42022f556627ed/cmc-103-14_C.merolae_combined.blast_results.txt"
+        ]
+      }
+    ],
+    "container": "/ibex/user/pampum/.singularity/nf_images/depot.galaxyproject.org-singularity-blast-2.16.0--h66d330f_4.img",
+    "conda": null,
+    "spack": null,
+    "architecture": null,
+    "globalVars": {
+      "task.ext.prefix": null,
+      "params.flank_size": 50000.0
+    },
+    "binEntries": [],
+    "workflowRun": "lid://df5de83d580acf0c0e31bf856770d10f"
+  }
+}
+```
+
+Every task run is represented in the lineage store as a `TaskRun`, which includes information such as the name, script, inputs, and software dependencies. From here, you can continue traversing through the file inputs to view upstream tasks.
+
 ### Nextflow Cheatsheet
 
 A great Nextflow Cheatsheet can be found [here](https://github.com/danrlu/nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf) to help visualize the inputs and outputs for Nextflow operators.
