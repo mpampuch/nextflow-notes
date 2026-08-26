@@ -8547,11 +8547,10 @@ This record is the task output for the same file -- it has a value for `taskRun`
 You can view the lineage record for the task that produced this file:
 
 ```bash
-nextflow lineage view lid://862df53160e07cd823c0c3960545e747
+nextflow lineage view lid://e0beae9b20229e98be161f67c2f593f2 
 ```
 
 ```json
-nextflow lineage view lid://e0beae9b20229e98be161f67c2f593f2  | jq
 {
   "version": "lineage/v1beta1",
   "kind": "TaskRun",
@@ -8618,6 +8617,16 @@ nextflow lineage view lid://e0beae9b20229e98be161f67c2f593f2  | jq
 ```
 
 Every task run is represented in the lineage store as a `TaskRun`, which includes information such as the name, script, inputs, and software dependencies. From here, you can continue traversing through the file inputs to view upstream tasks.
+
+Unfortunately there doesn't seem to be a way to view outputs or working directories in `TaskRun` records (for now). A workaround for now is to use the `nextflow` log command and filter based on the `spec`:`name` record.
+
+```bash
+nextflow log ridiculous_williams -f name,workdir,status | rg cmc-103-14_C.merolae_combined | rg -i extract
+```
+
+#### Rendering the lineage path
+
+Another really useful thing you can do is to render that `TaskRun` and inspect the DAG. It's a little hard to in the browser sometimes but it gives you a useful way to see which `lid`'s might be of interest for you to inspect. This little trick has helped me find bugs I probably would have never found otherwise in my pipelines.
 
 ### Nextflow Cheatsheet
 
