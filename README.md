@@ -128,6 +128,46 @@ The mechanism works by assigning a unique ID to each task. This unique ID is use
 - Environment modules
 - Any executed scripts in the bin directory
 
+#### Resuming old runs
+
+Nextflow resumes from the previous run by default. If you want to resume from an earlier run, simply specify the session ID for that run with the `-resume` option:
+
+```bash
+nextflow run rnaseq-nf -resume 4dc656d2-c410-44c8-bc32-7dd0ea87bebf
+```
+
+By default, the nextflow cache will be in your execution directory under `.nextflow/cache`
+
+If you have a run you want to see if you can resume from, you can try to find it by it's name in the cache. Example to see if you can resume your nextflow run called `nice_dubinsky`, you can do:
+
+```bash
+fd -Ii nice_dubinsky
+```
+
+And if it exists you get something like:
+
+```
+32829ce6-1923-4a35-be61-c46c3d1c3613/index.nice_dubinsky
+```
+
+And this directory should have:
+
+```
+drwxr-sr-x    - pampum  4 Sep 21:18 32829ce6-1923-4a35-be61-c46c3d1c3613
+drwxr-sr-x    - pampum  4 Sep 21:18 ├── db
+.rw-r--r-- 602k pampum  4 Sep 20:20 │   ├── 000005.sst
+.rw-r--r-- 214k pampum  4 Sep 21:18 │   ├── 000008.sst
+.rw-r--r-- 305k pampum  4 Sep 21:53 │   ├── 000009.log
+.rw-r--r--   16 pampum  4 Sep 21:18 │   ├── CURRENT
+.rw-r--r--    0 pampum  3 Sep 08:13 │   ├── LOCK
+.rw-r--r--  163 pampum  4 Sep 21:53 │   └── MANIFEST-000007
+.rw-r--r-- 4.4k pampum  4 Sep 11:04 ├── index.nice_dubinsky
+.rw-r--r-- 2.0k pampum  4 Sep 21:52 ├── index.sad_turing
+.rw-r--r-- 1.4k pampum  4 Sep 20:30 └── index.scruffy_baekeland
+```
+
+If you have content in these files and you haven't deleted the `work` directory (where the file contents get cached from), the `-resume` function should work
+
 ## Nextflow overall structure
 
 An basic, overall professional Nextflow pipeline structure should look like this:
